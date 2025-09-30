@@ -1,0 +1,98 @@
+import { Request, Response, NextFunction } from 'express';
+import admin from 'firebase-admin';
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import path from 'path';
+import { UnauthorizedError } from '../errors';
+
+// Initialize Firebase Admin SDK
+if (!admin.apps.length) {
+  let serviceAccount = undefined;
+
+  try {
+    const serviceAccountPath = path.join(process.cwd(), 'service_account.json');
+    if (fs.existsSync(serviceAccountPath)) {
+      const serviceAccountFile = fs.readFileSync(serviceAccountPath, 'utf8');
+      serviceAccount = JSON.parse(serviceAccountFile);
+    }
+  } catch (error) {
+    console.warn('Error reading service_account.json:', error.message);
+  }
+
+  if (serviceAccount) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  } else {
+    console.warn('Firebase service account not configured. Only JWT tokens will work.');
+  }
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email?: string;
+    name?: string;
+    firebaseUid: string;
+  };
+}
+
+export const authenticateFirebase = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedError('No valid authorization header provided');
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    // Try to verify as Firebase token first
+    try {
+      if (admin.apps.length > 0) {
+        const decodedToken = await admin.auth().verifyIdToken(token);
+
+        req.user = {
+          id: decodedToken.uid,
+          email: decodedToken.email,
+          name: decodedToken.name,
+          firebaseUid: decodedToken.uid,
+        };
+
+        return next();
+      }
+    } catch (firebaseError) {
+      console.log('Firebase token verification failed, trying JWT:', firebaseError.message);
+    }
+
+    // If Firebase verification fails, try JWT
+    try {
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new UnauthorizedError('JWT secret not configured');
+      }
+
+      const decoded = jwt.verify(token, jwtSecret) as any;
+      req.user = decoded;
+
+      return next();
+    } catch (jwtError) {
+      throw new UnauthorizedError('Invalid token provided');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const generateJWT = (user: { id: string; email?: string; name?: string; firebaseUid: string }): string => {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT secret not configured');
+  }
+
+  return jwt.sign(user, jwtSecret, { expiresIn: '7d' });
+};
