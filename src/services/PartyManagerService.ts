@@ -1,13 +1,14 @@
 import { PrismaClient, Party, PartyPlayer, PartyStatus, PlayerRole } from '@db';
-import { Game, GamePlayer, GameState } from '../interfaces/Game';
+import { GamePlayer, GameState, ValidGameNames } from '../interfaces/Game';
 import { ValidationError, ConflictError, NotFoundError } from '../errors';
+import { Game } from '../games/Game';
 
 export class PartyManagerService {
   private gameStates: Map<string, GameState<any>> = new Map();
 
   constructor(private db: PrismaClient) {}
 
-  async createParty<T>(
+  async createParty<T extends ValidGameNames>(
     userId: string,
     partyName: string,
     game: Game<T>
@@ -31,7 +32,7 @@ export class PartyManagerService {
     return party;
   }
 
-  async startMatch<T>(
+  async startMatch<T extends ValidGameNames>(
     userId: string,
     game: Game<T>
   ): Promise<{ party: Party; gameState: GameState<T> }> {
@@ -46,7 +47,7 @@ export class PartyManagerService {
     return { party, gameState };
   }
 
-  async nextRound<T>(
+  async nextRound<T extends ValidGameNames>(
     userId: string,
     game: Game<T>
   ): Promise<GameState<T>> {
@@ -62,7 +63,7 @@ export class PartyManagerService {
     return newState;
   }
 
-  async finishRound<T>(
+  async finishRound<T extends ValidGameNames>(
     userId: string,
     game: Game<T>
   ): Promise<GameState<T>> {
@@ -78,7 +79,7 @@ export class PartyManagerService {
     return newState;
   }
 
-  async finishMatch<T>(
+  async finishMatch<T extends ValidGameNames>(
     userId: string,
     game: Game<T>
   ): Promise<GameState<T>> {
@@ -96,7 +97,7 @@ export class PartyManagerService {
     return finalState;
   }
 
-  getGameState<T>(userId: string): Promise<GameState<T> | undefined> {
+  getGameState<T extends ValidGameNames>(userId: string): Promise<GameState<T> | undefined> {
     return this.getActivePartyIdForUser(userId).then(partyId =>
       this.gameStates.get(partyId) as GameState<T>
     );

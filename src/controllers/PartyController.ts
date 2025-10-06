@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { PartyManagerService } from '../services/PartyManagerService';
-import { Game } from '../interfaces/Game';
 import { db } from '@db';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { ValidationError } from '../errors';
+import { GameFactory } from '../factories/GameFactory';
+import { validGameSchemas } from '../schemas/game';
 
 export class PartyController {
   private partyService: PartyManagerService;
@@ -83,12 +84,13 @@ export class PartyController {
         throw new ValidationError('User ID required');
       }
 
-      const { game } = req.body;
+      const { gameName } = req.body;
 
-      if (!game) {
-        throw new ValidationError('Game instance required');
+      if (!gameName || !validGameSchemas.safeParse(gameName).success) {
+        throw new ValidationError('Valid Game name required');
       }
 
+      const game = GameFactory.createGame(gameName);
       const result = await this.partyService.startMatch(req.user.id, game);
 
       res.json({

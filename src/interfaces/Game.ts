@@ -1,22 +1,23 @@
 import { User } from '@db';
-
+import { ImpostorCustomState } from './ImpostorGame';
+import { GAME_NAMES } from '../constants/game';
 export interface GamePlayer {
   user: User;
   isManager: boolean;
 }
 
-export interface GameState<T> {
+export interface CustomStates {
+  [GAME_NAMES.IMPOSTOR]: ImpostorCustomState;
+}
+
+export type ValidGameNames = keyof CustomStates;
+
+export type GameCustomState<T extends ValidGameNames> = CustomStates[T];
+
+export interface GameState<T extends ValidGameNames> {
   currentRound: number;
   isFinished: boolean;
   winner?: string;
   players: GamePlayer[];
-  customState: T;
-}
-
-export interface Game<T> {
-  getName(): string;
-  start(players: GamePlayer[]): Promise<GameState<T>>;
-  nextRound(gameState: GameState<T>): Promise<GameState<T>>;
-  finishRound(gameState: GameState<T>): Promise<GameState<T>>;
-  finishMatch(gameState: GameState<T>): Promise<GameState<T>>;
+  customState: GameCustomState<T>;
 }

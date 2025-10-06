@@ -1,25 +1,7 @@
-import { Game, GamePlayer, GameState } from '../interfaces/Game';
-
-interface RoundState {
-  impostorId: string;
-  currentWord: string;
-  votes: Map<string, string>; // voterId -> votedForId
-  roundStarted: boolean;
-  impostorWins?: boolean;
-}
-
-interface WinHistory {
-  roundNumber: number;
-  winnerId: string;
-  wasImpostor: boolean;
-}
-
-interface ImpostorCustomState {
-  currentRoundState: RoundState;
-  winHistory: WinHistory[];
-}
-
-export class ImpostorGame implements Game<ImpostorCustomState> {
+import { GamePlayer, GameState } from '../interfaces/Game';
+import { GAME_NAMES } from '../constants/game';
+import { Game } from './Game';
+export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
   private words = [
     'pizza',
     'ocean',
@@ -42,13 +24,13 @@ export class ImpostorGame implements Game<ImpostorCustomState> {
     'lighthouse',
     'volcano',
   ];
-  private gameState?: GameState<ImpostorCustomState>;
+  private gameState?: GameState<GAME_NAMES.IMPOSTOR>;
 
   getName(): string {
     return 'Impostor';
   }
 
-  async start(players: GamePlayer[]): Promise<GameState<ImpostorCustomState>> {
+  async start(players: GamePlayer[]): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
     if (players.length < 3) {
       throw new Error('Impostor game requires at least 3 players');
     }
@@ -76,8 +58,8 @@ export class ImpostorGame implements Game<ImpostorCustomState> {
   }
 
   async nextRound(
-    gameState: GameState<ImpostorCustomState>
-  ): Promise<GameState<ImpostorCustomState>> {
+    gameState: GameState<GAME_NAMES.IMPOSTOR>
+  ): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
     if (gameState.customState.currentRoundState.roundStarted) {
       throw new Error('Cannot start next round while current round is still active');
     }
@@ -105,8 +87,8 @@ export class ImpostorGame implements Game<ImpostorCustomState> {
   }
 
   async finishRound(
-    gameState: GameState<ImpostorCustomState>
-  ): Promise<GameState<ImpostorCustomState>> {
+    gameState: GameState<GAME_NAMES.IMPOSTOR>
+  ): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
     if (!gameState.customState.currentRoundState.roundStarted) {
       throw new Error('Cannot finish round that has not started or is already finished');
     }
@@ -165,8 +147,8 @@ export class ImpostorGame implements Game<ImpostorCustomState> {
   }
 
   async finishMatch(
-    gameState: GameState<ImpostorCustomState>
-  ): Promise<GameState<ImpostorCustomState>> {
+    gameState: GameState<GAME_NAMES.IMPOSTOR>
+  ): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
     if (gameState.customState.currentRoundState.roundStarted) {
       throw new Error('Cannot finish match while round is still active');
     }
