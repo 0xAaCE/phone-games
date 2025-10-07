@@ -140,6 +140,10 @@ vite.config.ts.timestamp-*
 
 # Prisma generated files
 generated/
+packages/db/src/generated/
 
 # Service account file
 service_account.json
+
+# Turbo
+.turbo
