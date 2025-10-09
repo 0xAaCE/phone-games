@@ -1,10 +1,14 @@
-import { app } from './app';
+import { ImpostorWebSocketParser, ImpostorWhatsAppParser, NotificationManager } from '@phone-games/notifications';
+import { initializeApp } from './app';
 import dotenv from 'dotenv';
+import { WebSocketManager } from './services/WebSocketManager';
 
 // Load environment variables
 dotenv.config();
 
 const PORT = process.env.PORT || 4000;
+const notificationService = new NotificationManager([new ImpostorWebSocketParser(), new ImpostorWhatsAppParser()]);
+const app = initializeApp(notificationService);
 
 // Start server
 const server = app.listen(PORT, () => {
@@ -29,5 +33,7 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
+
+new WebSocketManager(server, notificationService);
 
 export { server };

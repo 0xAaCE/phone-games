@@ -28,13 +28,31 @@ if (!admin.apps.length) {
   }
 }
 
+interface RequestUser {
+  id: string,
+  email?: string;
+  name?: string;
+  firebaseUid: string;
+}
+
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email?: string;
-    name?: string;
-    firebaseUid: string;
+  user?: RequestUser
+}
+
+export const firebaseVerification = async (token: string): Promise<RequestUser> => {
+  if (admin.apps.length === 0) {
+    throw Error("Non firebase app initiated")
+  }
+  const decodedToken = await admin.auth().verifyIdToken(token);
+
+  // Use Firebase UID directly as the user ID
+  return {
+    id: decodedToken.uid,
+    ...(decodedToken.email && { email: decodedToken.email }),
+    ...(decodedToken.name && { name: decodedToken.name }),
+    firebaseUid: decodedToken.uid,
   };
+
 }
 
 export const authenticateFirebase = async (
@@ -53,19 +71,9 @@ export const authenticateFirebase = async (
 
     // Try to verify as Firebase token first
     try {
-      if (admin.apps.length > 0) {
-        const decodedToken = await admin.auth().verifyIdToken(token);
+      req.user = await firebaseVerification(token);
 
-        // Use Firebase UID directly as the user ID
-        req.user = {
-          id: decodedToken.uid,
-          ...(decodedToken.email && { email: decodedToken.email }),
-          ...(decodedToken.name && { name: decodedToken.name }),
-          firebaseUid: decodedToken.uid,
-        };
-
-        return next();
-      }
+      return next();
     } catch (firebaseError) {
       console.log('Firebase token verification failed, trying JWT:', (firebaseError as Error).message);
     }

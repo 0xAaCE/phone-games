@@ -1,6 +1,7 @@
 import { PrismaClient, Party, PartyPlayer, PartyStatus, PlayerRole, Prisma } from '@phone-games/db';
 import { GamePlayer, GameState, ValidGameNames, Game, NextRoundParams, FinishRoundParams, FinishRoundResult, NextRoundResult, MiddleRoundActionResult, MiddleRoundActionParams } from '@phone-games/games';
 import { ValidationError, ConflictError, NotFoundError } from '../errors';
+import { NotificationService } from '@phone-games/notifications';
 
 type PartyPlayerWithUser = Prisma.PartyPlayerGetPayload<{
   include: { user: true };
@@ -9,7 +10,7 @@ type PartyPlayerWithUser = Prisma.PartyPlayerGetPayload<{
 export class PartyManagerService {
   private gameStates: Map<string, Game<ValidGameNames>> = new Map();
 
-  constructor(private db: PrismaClient) {}
+  constructor(private db: PrismaClient, private notificationService: NotificationService) {}
 
   async createParty<T extends ValidGameNames>(
     userId: string,
@@ -74,6 +75,10 @@ export class PartyManagerService {
 
     const party = await this.updatePartyStatus(partyId, PartyStatus.ACTIVE);
 
+    for (const gamePlayer of gamePlayers) {
+      await this.notificationService.notifyStartMatch(game.getName(), gamePlayer.user.id, gameState);
+    }
+
     return { party, gameState };
   }
 
@@ -92,7 +97,13 @@ export class PartyManagerService {
       throw new NotFoundError('Game state not found for party');
     }
 
+    const gamePlayers = await this.getGamePlayers(partyId);
+
     const newState = await game.nextRound(nextRoundParams);
+
+    for (const gamePlayer of gamePlayers) {
+      await this.notificationService.notifyNextRound(game.getName(), gamePlayer.user.id, newState);
+    }
 
     return newState;
   }
@@ -113,7 +124,10 @@ export class PartyManagerService {
       throw new NotFoundError('Game state not found for party');
     }
 
+
     const newState = await game.middleRoundAction(middleRoundActionParams);
+
+    await this.notificationService.notifyMiddleRoundAction(game.getName(), userId, newState);
 
     return newState;
   }
@@ -135,6 +149,12 @@ export class PartyManagerService {
 
     const newState = await game.finishRound(finishRoundParams);
 
+    const gamePlayers = await this.getGamePlayers(partyId);
+
+    for (const gamePlayer of gamePlayers) {
+      await this.notificationService.notifyFinishRound(game.getName(), gamePlayer.user.id, newState);
+    }
+
     return newState;
   }
 
@@ -154,7 +174,13 @@ export class PartyManagerService {
 
     const finalState = await game.finishMatch();
 
+    const gamePlayers = await this.getGamePlayers(partyId);
+
     await this.updatePartyStatus(partyId, PartyStatus.FINISHED);
+
+    for (const gamePlayer of gamePlayers) {
+      await this.notificationService.notifyFinishMatch(game.getName(), gamePlayer.user.id, finalState);
+    }
 
     return finalState;
   }

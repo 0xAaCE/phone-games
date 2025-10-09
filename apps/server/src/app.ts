@@ -1,43 +1,56 @@
-import express, { Express } from 'express';
+import express, { Express, Router } from 'express';
 import cors from 'cors';
-import { userRoutes } from './routes/userRoutes';
-import { partyRoutes } from './routes/partyRoutes';
+import { applyUserRoutes } from './routes/userRoutes';
+import { applyPartyRoutes } from './routes/partyRoutes';
 import { errorHandler } from './middleware/errorHandler';
+import { UserController } from './controllers/UserController';
+import { PartyController } from './controllers/PartyController';
+import { NotificationService } from '@phone-games/notifications';
 
-const app: Express = express();
+export const initializeApp = (notificationService: NotificationService) => {
+  const app: Express = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+  // Middleware
+  app.use(cors());
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/parties', partyRoutes);
+  const userController = new UserController();
+  const partyController = new PartyController(notificationService);
+  const userRouter = Router();
+  const partyRouter = Router(); 
 
-// Health check endpoint
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
+  applyUserRoutes(userRouter, userController);
+  applyPartyRoutes(partyRouter, partyController);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: {
-      message: 'Route not found',
-      status: 404,
+  // Routes
+  app.use('/api/users', userRouter);
+  app.use('/api/parties', partyRouter);
+
+  // Health check endpoint
+  app.get('/health', (_req, res) => {
+    res.json({
+      status: 'ok',
       timestamp: new Date().toISOString(),
-      path: req.originalUrl,
-    },
+      uptime: process.uptime(),
+    });
   });
-});
 
-// Error handling middleware (must be last)
-app.use(errorHandler);
+  // 404 handler
+  app.use((req, res) => {
+    res.status(404).json({
+      success: false,
+      error: {
+        message: 'Route not found',
+        status: 404,
+        timestamp: new Date().toISOString(),
+        path: req.originalUrl,
+      },
+    });
+  });
 
-export { app };
+  // Error handling middleware (must be last)
+  app.use(errorHandler);
+
+  return app;
+}

@@ -1,4 +1,4 @@
-import { GamePlayer, GameState, NextRoundParams, NextRoundResult } from '../interfaces/Game';
+import { GamePlayer, GameState, NextRoundParams, NextRoundResult, ValidGameNames } from '../interfaces/Game';
 import { GAME_NAMES } from '../constants/game';
 import { Game } from './Game';
 import { ImpostorFinishRoundParams, ImpostorFinishRoundResult, ImpostorMiddleRoundActionParams, ImpostorMiddleRoundActionResult } from '../interfaces/ImpostorGame';
@@ -48,7 +48,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
     this.currentWord = '';
   }
 
-  getName(): string {
+  getName(): ValidGameNames {
     return GAME_NAMES.IMPOSTOR;
   }
 

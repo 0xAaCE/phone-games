@@ -4,12 +4,13 @@ import { db } from '@phone-games/db';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { ValidationError } from '../errors';
 import { GameFactory, ValidGamesSchema } from '@phone-games/games';
+import { NotificationService } from '@phone-games/notifications';
 
 export class PartyController {
   private partyService: PartyManagerService;
 
-  constructor() {
-    this.partyService = new PartyManagerService(db);
+  constructor(notificationService: NotificationService) {
+    this.partyService = new PartyManagerService(db, notificationService);
   }
 
   // POST /api/parties

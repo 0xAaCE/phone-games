@@ -1,5 +1,5 @@
 {
-  "name": "@phone-games/party",
+  "name": "@phone-games/notifications",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,10 +18,10 @@
   "dependencies": {
     "@phone-games/db": "workspace:*",
     "@phone-games/games": "workspace:*",
-    "@phone-games/notifications": "workspace:*",
-    "zod": "^4.1.12"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.1",
     "typescript": "^5.9.2"
   }
 }
