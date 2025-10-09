@@ -23,6 +23,9 @@ importers:
       '@phone-games/games':
         specifier: workspace:*
         version: link:../../packages/games
+      '@phone-games/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       firebase:
         specifier: ^10.13.0
         version: 10.14.1

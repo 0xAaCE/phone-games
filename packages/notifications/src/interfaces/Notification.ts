@@ -1,27 +1,30 @@
-import { FinishRoundResult, GameState, MiddleRoundActionResult, NextRoundResult, ValidGameNames } from "@phone-games/games";
+import { GameState, ValidGameNames } from "@phone-games/games";
 
-export interface StartMatchDataType extends GameState<ValidGameNames> {
-    action: "start_match";
-}
-export interface NextRoundDataType extends NextRoundResult<ValidGameNames> {
-    action: "next_round";
-}
-export interface MiddleRoundActionDataType extends MiddleRoundActionResult<ValidGameNames> {
-    action: "middle_round_action";
-}
-export interface FinishRoundDataType extends FinishRoundResult<ValidGameNames> {
-    action: "finish_round";
-}
-export interface FinishMatchDataType extends GameState<ValidGameNames> {
-    action: "finish_match";
+export enum ValidGameActions {
+    START_MATCH = "start_match",
+    NEXT_ROUND = "next_round",
+    MIDDLE_ROUND_ACTION = "middle_round_action",
+    FINISH_ROUND = "finish_round",
+    FINISH_MATCH = "finish_match",
 }
 
-export type NotificationDataType = StartMatchDataType | NextRoundDataType | MiddleRoundActionDataType | FinishRoundDataType | FinishMatchDataType;
+export enum ValidPartyActions {
+    PLAYER_JOINED = "player_joined",
+    PLAYER_LEFT = "player_left",
+}
 
-export interface Notification {
+export type ValidActions = ValidGameActions | ValidPartyActions;
+
+export type Notification = {
     title: string;
     body: string;
-    data: NotificationDataType;
+    action: ValidGameActions
+    data: GameState<ValidGameNames>;
+} | {
+    title: string;
+    body: string;
+    action: ValidPartyActions;
+    data?: never;
 }
 
 export enum NOTIFICATION_METHODS {

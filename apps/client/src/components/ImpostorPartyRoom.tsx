@@ -2,9 +2,18 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { auth } from '../config/firebase';
 import { GAME_NAMES, type GameState } from '@phone-games/games';
+import { websocketService, type WebSocketNotification } from '../services/websocket';
+import Toast from './Toast';
+import { ValidGameActions } from '@phone-games/notifications';
 
 interface ImpostorPartyRoomProps {
   onLeave: () => void;
+}
+
+interface ToastNotification {
+  id: number;
+  title: string;
+  body: string;
 }
 
 export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
@@ -13,25 +22,89 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   const currentUserId = auth.currentUser?.uid;
 
   useEffect(() => {
-    loadPartyAndGameState();
-    const interval = setInterval(loadPartyAndGameState, 2000);
-    return () => clearInterval(interval);
+    // Initial load
+    loadPartyState();
+
+    // Connect to WebSocket
+    websocketService.connect().catch(err => {
+      console.error('Failed to connect to WebSocket:', err);
+      setError('Failed to connect to real-time updates');
+    });
+
+    // Subscribe to WebSocket notifications
+    const unsubscribe = websocketService.subscribe(handleWebSocketNotification);
+
+    // Cleanup
+    return () => {
+      unsubscribe();
+      websocketService.disconnect();
+    };
   }, []);
 
-  const loadPartyAndGameState = async () => {
+  const handleWebSocketNotification = (notification: WebSocketNotification<typeof GAME_NAMES.IMPOSTOR>) => {
+    console.log('Received notification:', notification);
+
+    // Show toast if title and body are present
+    if (notification.title && notification.body) {
+      const newToast: ToastNotification = {
+        id: Date.now(),
+        title: notification.title,
+        body: notification.body,
+      };
+      setToasts(prev => [...prev, newToast]);
+    }
+
+    // Get action and data from notification
+    const data = notification.data;
+    const action = notification.action;
+
+    switch (action) {
+      case ValidGameActions.START_MATCH:
+        // Full game state provided - use it directly
+        setGameState(data);
+        // Update party status to ACTIVE
+        loadPartyState();
+        break;
+
+      case ValidGameActions.NEXT_ROUND:
+      case ValidGameActions.MIDDLE_ROUND_ACTION:
+      case ValidGameActions.FINISH_ROUND:
+        // All game actions now send full GameState - use it directly
+        setGameState(data);
+        loadPartyState();
+        break;
+
+      case ValidGameActions.FINISH_MATCH:
+        // Full game state provided - use it directly
+        setGameState(data);
+        // Update party status to FINISHED
+        loadPartyState();
+        break;
+
+      default:
+        // Handle other notification types
+        if (notification.type === 'PARTY_UPDATE') {
+          loadPartyState();
+        } else if (notification.type === 'PLAYER_JOINED' || notification.type === 'PLAYER_LEFT') {
+          // Reload party data only for player list changes
+            loadPartyState();
+        }
+    }
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const loadPartyState = async () => {
     try {
       const partyData = await api.getMyParty();
       setParty(partyData);
-
-      // Only fetch game state if party is ACTIVE
-      if (partyData.status === 'ACTIVE') {
-        const gameStateData = await api.getGameState<typeof GAME_NAMES.IMPOSTOR>();
-        setGameState(gameStateData);
-      }
 
       setError('');
     } catch (err) {
@@ -45,9 +118,7 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
     if (!party) return;
     setActionLoading(true);
     try {
-      const result = await api.startMatch<typeof GAME_NAMES.IMPOSTOR>();
-      setParty(result.party);
-      setGameState(result.gameState);
+      await api.startMatch<typeof GAME_NAMES.IMPOSTOR>();
       setError('');
     } catch (err) {
       setError((err as Error).message);
@@ -60,9 +131,8 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
     if (!currentUserId) return;
     setActionLoading(true);
     try {
-      const result = await api.nextRound<typeof GAME_NAMES.IMPOSTOR>({ userId: currentUserId });
-      console.log('Next round result:', result);
-      await loadPartyAndGameState();
+      api.nextRound<typeof GAME_NAMES.IMPOSTOR>({ userId: currentUserId });
+      // WebSocket will update state automatically
       setError('');
     } catch (err) {
       setError((err as Error).message);
@@ -78,9 +148,8 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
       const votes = new Map<string, string>();
       votes.set(currentUserId, votedForId);
 
-      const result = await api.middleRoundAction<typeof GAME_NAMES.IMPOSTOR>({ votes: Object.fromEntries(votes.entries()) });
-      console.log('Vote result:', result);
-      await loadPartyAndGameState();
+      await api.middleRoundAction<typeof GAME_NAMES.IMPOSTOR>({ votes: Object.fromEntries(votes.entries()) });
+      // WebSocket will update state automatically
       setError('');
     } catch (err) {
       setError((err as Error).message);
@@ -94,7 +163,7 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
     try {
       const result = await api.finishRound<typeof GAME_NAMES.IMPOSTOR>({});
       console.log('Finish round result:', result);
-      await loadPartyAndGameState();
+      // WebSocket will update state automatically
       setError('');
     } catch (err) {
       setError((err as Error).message);
@@ -106,9 +175,8 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
   const handleFinishMatch = async () => {
     setActionLoading(true);
     try {
-      const finalState = await api.finishMatch<typeof GAME_NAMES.IMPOSTOR>();
-      setGameState(finalState);
-      await loadPartyAndGameState();
+      await api.finishMatch<typeof GAME_NAMES.IMPOSTOR>();
+      // WebSocket will update party state automatically
       setError('');
     } catch (err) {
       setError((err as Error).message);
@@ -156,9 +224,23 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
   const isManager = currentPlayer?.role === 'MANAGER';
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>{party.partyName} - Impostor Game</h1>
+    <>
+      {/* Toast Notifications */}
+      <div style={styles.toastContainer}>
+        {toasts.map((toast, index) => (
+          <div key={toast.id} style={{ marginBottom: index < toasts.length - 1 ? '10px' : '0' }}>
+            <Toast
+              title={toast.title}
+              body={toast.body}
+              onClose={() => removeToast(toast.id)}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h1 style={styles.title}>{party.partyName} - Impostor Game</h1>
 
         {error && <div style={styles.error}>{error}</div>}
 
@@ -253,7 +335,7 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
             )}
 
             {/* Round ended - show results */}
-            {gameState.customState.currentRoundState.roundEnded && (() => {
+            {gameState.customState.currentRoundState.roundEnded && gameState.currentRound !== 0 && (() => {
               const isImpostor = gameState.customState.currentRoundState.word === 'IMPOSTOR';
               const impostorWins = gameState.customState.currentRoundState.impostorWins;
               const userWins = (isImpostor && impostorWins) || (!isImpostor && !impostorWins);
@@ -336,6 +418,7 @@ export default function ImpostorPartyRoom({ onLeave }: ImpostorPartyRoomProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -498,5 +581,11 @@ const styles = {
     fontWeight: 'bold' as const,
     textAlign: 'center' as const,
     padding: '10px',
+  },
+  toastContainer: {
+    position: 'fixed' as const,
+    top: '20px',
+    right: '20px',
+    zIndex: 10000,
   },
 };

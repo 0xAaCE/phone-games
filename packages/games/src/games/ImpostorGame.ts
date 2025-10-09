@@ -171,7 +171,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
 
   async finishMatch(
   ): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
-    if (this.gameState.customState.currentRoundState.roundEnded) {
+    if (!this.gameState.customState.currentRoundState.roundEnded) {
       throw new Error('Cannot finish match while round is still active');
     }
 

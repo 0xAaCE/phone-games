@@ -1,65 +1,74 @@
-import { GAME_NAMES, ValidGameNames } from "@phone-games/games";
+import { GAME_NAMES, GameState, ValidGameNames } from "@phone-games/games";
 import { Parser } from "../interfaces/Parser";
-import { FinishMatchDataType, FinishRoundDataType, MiddleRoundActionDataType, NextRoundDataType, Notification, NOTIFICATION_METHODS, NotificationDataType, StartMatchDataType, ValidNotificationMethods } from "../interfaces/Notification";
+import { Notification, NOTIFICATION_METHODS, ValidActions, ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/Notification";
 
 export class ImpostorWebSocketParser extends Parser {
     constructor() {
         super();
     }
 
-    async parse(notification: NotificationDataType): Promise<Notification> {
-        switch (notification.action) {
-            case "start_match":
+    async parse<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<GAME_NAMES.IMPOSTOR> : never): Promise<Notification> {
+        switch (action) {
+            case ValidGameActions.START_MATCH:
                 return this.parseStartMatch(notification);
-            case "next_round":
+            case ValidGameActions.NEXT_ROUND:
                 return this.parseNextRound(notification);
-            case "middle_round_action":
+            case ValidGameActions.MIDDLE_ROUND_ACTION:
                 return this.parseMiddleRoundAction(notification);
-            case "finish_round":
+            case ValidGameActions.FINISH_ROUND:
                 return this.parseFinishRound(notification);
-            case "finish_match":
+            case ValidGameActions.FINISH_MATCH:
                 return this.parseFinishMatch(notification);
+            case ValidPartyActions.PLAYER_JOINED:
+                return this.parsePlayerJoined();
+            case ValidPartyActions.PLAYER_LEFT:
+                return this.parsePlayerLeft();
             default:
                 throw new Error("Invalid action");
         }
     }
 
-    private async parseStartMatch(notification: StartMatchDataType): Promise<Notification> {
+    private async parseStartMatch(notification: GameState<GAME_NAMES.IMPOSTOR>): Promise<Notification> {
         return {
             title: "Impostor",
             body: "The game has started and players are: \n\n" + notification.players.map(player => player.user.username).join("\n"),
+            action: ValidGameActions.START_MATCH,
             data: notification,
         };
     }
 
-    private async parseNextRound(notification: NextRoundDataType): Promise<Notification> {
+    private async parseNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Promise<Notification> {
         return {
             title: "Impostor",
-            body: "The next round has started and your word is: \n\n" + notification.word,
+            body: "The next round has started and your word is: \n\n" + notification.customState.currentRoundState.word,
+            action: ValidGameActions.NEXT_ROUND,
             data: notification,
         };
     }
 
-    private async parseMiddleRoundAction(notification: MiddleRoundActionDataType): Promise<Notification> {
+    private async parseMiddleRoundAction(notification: GameState<GAME_NAMES.IMPOSTOR>): Promise<Notification> {
         return {
             title: "Impostor",
             body: "Your vote has been counted",
+            action: ValidGameActions.MIDDLE_ROUND_ACTION,
             data: notification,
         };
     }
 
-    private async parseFinishRound(notification: FinishRoundDataType): Promise<Notification> {
+    private async parseFinishRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Promise<Notification> {
         return {
             title: "Impostor",
-            body: "The round has finished and the impostor has been: \n\n" + notification.impostorWins ? "won" : "lost",
+            body: "The round has finished and the impostor has " + notification.customState.currentRoundState.impostorWins ? "won" : "lost",
+            action: ValidGameActions.FINISH_ROUND,
             data: notification,
         };
     }
 
-    private async parseFinishMatch(notification: FinishMatchDataType): Promise<Notification> {
+    private async parseFinishMatch(notification: GameState<GAME_NAMES.IMPOSTOR>): Promise<Notification> {
         return {
             title: "Impostor",
             body: "The match has finished",
+            action: ValidGameActions.FINISH_MATCH,
             data: notification,
         };
     }

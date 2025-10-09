@@ -2,7 +2,6 @@ import { Server } from 'http';
 import { VerifyClientCallbackAsync, WebSocket, WebSocketServer } from 'ws';
 import { NotificationService, WebSocketNotificationProvider } from '@phone-games/notifications';
 import { AuthenticatedRequest, firebaseVerification } from '../middleware/auth';
-import { UnauthorizedError } from '../errors';
 
 type VerifyClientInfo = Parameters<VerifyClientCallbackAsync>[0]
 type VerifyClientCallback = Parameters<VerifyClientCallbackAsync>[1]
@@ -25,25 +24,51 @@ export class WebSocketManager {
             const wsProvider = new WebSocketNotificationProvider(ws);
             this.notificationService.registerUser(request.user?.id, wsProvider);
         });
+
+        this.wss.on('error', (error) => {
+            console.error('WebSocket error:', error);
+        });
+
+        this.wss.on('close', (request: AuthenticatedRequest) => {
+            if (!request.user?.id) {
+                return
+            }
+
+            this.notificationService.unregisterUser(request.user?.id);
+            console.log('WebSocket closed');
+        });
     }
 
     private async verifyClient(info: VerifyClientInfo, callback: VerifyClientCallback){
-        const authHeader = info.req.headers.authorization;
+        // Try to get token from Authorization header first
+        let token = info.req.headers.authorization?.replace('Bearer ', '');
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            throw new UnauthorizedError('No valid authorization header provided');
+        // If not in header, check query params (for browser WebSocket clients)
+        if (!token && info.req.url) {
+            const url = new URL(info.req.url, `http://${info.req.headers.host}`);
+            token = url.searchParams.get('token') || undefined;
         }
-      
-        const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+        if (!token) {
+            callback(false, 401, 'No token provided');
+            return;
+        }
 
         try {
             (info.req as AuthenticatedRequest).user = await firebaseVerification(token);
-            callback(true)
-
+            callback(true);
         } catch (error) {
-            console.error(error);
-            callback(false, 401, 'Invalid token')
+            console.error('WebSocket auth error:', error);
+            callback(false, 401, 'Invalid token');
         }
+    }
+
+    closeAllConnections() {
+        this.wss.clients.forEach((client) => {
+            client.close();
+        });
+
+        this.wss.close();
     }
 
 

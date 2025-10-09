@@ -1,8 +1,8 @@
-import { FinishRoundResult, GameState, MiddleRoundActionResult, NextRoundResult, ValidGameNames } from "@phone-games/games";
+import { GameState, ValidGameNames } from "@phone-games/games";
 import { NotificationService } from "../interfaces/NotificationService";
 import { NotificationProvider } from "../interfaces/NotificationProvider";
 import { Parser } from "../interfaces/Parser";
-import { ValidNotificationMethods } from "../interfaces/Notification";
+import { ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/Notification";
 
 type ParserKey = `${ValidGameNames}-${ValidNotificationMethods}`;
 
@@ -42,52 +42,54 @@ export class NotificationManager implements NotificationService {
     async notifyStartMatch(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void> {
         const { provider, parser } = this.getProviderAndParser(userId, gameName);
 
-        const notification = await parser.parse({
-            action: "start_match",
-            ...gameState,
-        });
+        const notification = await parser.parse(ValidGameActions.START_MATCH, gameState);
 
-        provider.sendNotification(notification);
+        await provider.sendNotification(notification);
     }
 
-    async notifyNextRound(gameName: ValidGameNames, userId: string, nextRoundResult: NextRoundResult<ValidGameNames>): Promise<void> {
+    async notifyNextRound(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void> {
         const { provider, parser } = this.getProviderAndParser(userId, gameName);
 
-        const notification = await parser.parse({
-            action: "next_round",
-            ...nextRoundResult,
-        });
+        const notification = await parser.parse(ValidGameActions.NEXT_ROUND, gameState);
 
-        provider.sendNotification(notification);
+        await provider.sendNotification(notification);
     }
-    async notifyMiddleRoundAction(gameName: ValidGameNames, userId: string, middleRoundActionResult: MiddleRoundActionResult<ValidGameNames>): Promise<void> {
+    async notifyMiddleRoundAction(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void> {
         const { provider, parser } = this.getProviderAndParser(userId, gameName);
 
-        const notification = await parser.parse({
-            action: "middle_round_action",
-            ...middleRoundActionResult,
-        });
+        const notification = await parser.parse(ValidGameActions.MIDDLE_ROUND_ACTION, gameState);
 
-        provider.sendNotification(notification);
+        await provider.sendNotification(notification);
     }
-    async notifyFinishRound(gameName: ValidGameNames, userId: string, finishRoundResult: FinishRoundResult<ValidGameNames>): Promise<void> {
+    async notifyFinishRound(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void> {
         const { provider, parser } = this.getProviderAndParser(userId, gameName);
 
-        const notification = await parser.parse({
-            action: "finish_round",
-            ...finishRoundResult,
-        });
+        const notification = await parser.parse(ValidGameActions.FINISH_ROUND, gameState);
 
-        provider.sendNotification(notification);
+        await provider.sendNotification(notification);
     }
     async notifyFinishMatch(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void> {
         const { provider, parser } = this.getProviderAndParser(userId, gameName);
 
-        const notification = await parser.parse({
-            action: "finish_match",
-            ...gameState,
-        });
+        const notification = await parser.parse(ValidGameActions.FINISH_MATCH, gameState);
         
-        provider.sendNotification(notification);
+        await provider.sendNotification(notification);
     }   
+    async notifyPlayerJoined(gameName: ValidGameNames, userId: string): Promise<void> {
+        const { provider, parser } = this.getProviderAndParser(userId, gameName);
+
+        const dummy: never = null as never;
+        const notification = await parser.parse(ValidPartyActions.PLAYER_JOINED, dummy);
+
+        console.log("Sending Join notification", notification);
+        await provider.sendNotification(notification);
+    }
+    async notifyPlayerLeft(gameName: ValidGameNames, userId: string): Promise<void> {
+        const { provider, parser } = this.getProviderAndParser(userId, gameName);
+
+        const dummy: never = null as never;
+        const notification = await parser.parse(ValidPartyActions.PLAYER_LEFT, dummy);
+
+        await provider.sendNotification(notification);
+    }
 }

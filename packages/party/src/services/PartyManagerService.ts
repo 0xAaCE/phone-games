@@ -71,15 +71,16 @@ export class PartyManagerService {
       throw new NotFoundError('Game state not found for party');
     }
 
-    const gameState = await game.start(gamePlayers);
+    const result = await game.start(gamePlayers);
 
     const party = await this.updatePartyStatus(partyId, PartyStatus.ACTIVE);
 
     for (const gamePlayer of gamePlayers) {
-      await this.notificationService.notifyStartMatch(game.getName(), gamePlayer.user.id, gameState);
+      const newState = game.getGameState(gamePlayer.user.id);
+      await this.notificationService.notifyStartMatch(game.getName(), gamePlayer.user.id, newState);
     }
 
-    return { party, gameState };
+    return { party, gameState: result };
   }
 
   async nextRound(
@@ -99,13 +100,14 @@ export class PartyManagerService {
 
     const gamePlayers = await this.getGamePlayers(partyId);
 
-    const newState = await game.nextRound(nextRoundParams);
+    const result = await game.nextRound(nextRoundParams);
 
     for (const gamePlayer of gamePlayers) {
+      const newState = game.getGameState(gamePlayer.user.id);
       await this.notificationService.notifyNextRound(game.getName(), gamePlayer.user.id, newState);
     }
 
-    return newState;
+    return result;
   }
 
   async middleRoundAction(
@@ -125,11 +127,12 @@ export class PartyManagerService {
     }
 
 
-    const newState = await game.middleRoundAction(middleRoundActionParams);
+    const result = await game.middleRoundAction(middleRoundActionParams);
+    const newState = game.getGameState(userId);
 
     await this.notificationService.notifyMiddleRoundAction(game.getName(), userId, newState);
 
-    return newState;
+    return result;
   }
 
   async finishRound(
@@ -147,15 +150,18 @@ export class PartyManagerService {
       throw new NotFoundError('Game state not found for party');
     }
 
-    const newState = await game.finishRound(finishRoundParams);
+    const result = await game.finishRound(finishRoundParams);
+
 
     const gamePlayers = await this.getGamePlayers(partyId);
 
     for (const gamePlayer of gamePlayers) {
+      const newState = game.getGameState(gamePlayer.user.id);
+
       await this.notificationService.notifyFinishRound(game.getName(), gamePlayer.user.id, newState);
     }
 
-    return newState;
+    return result;
   }
 
   async finishMatch(
@@ -172,17 +178,18 @@ export class PartyManagerService {
       throw new NotFoundError('Game state not found for party');
     }
 
-    const finalState = await game.finishMatch();
+    const result = await game.finishMatch();
 
     const gamePlayers = await this.getGamePlayers(partyId);
 
     await this.updatePartyStatus(partyId, PartyStatus.FINISHED);
 
     for (const gamePlayer of gamePlayers) {
-      await this.notificationService.notifyFinishMatch(game.getName(), gamePlayer.user.id, finalState);
+      const newState = game.getGameState(gamePlayer.user.id);
+      await this.notificationService.notifyFinishMatch(game.getName(), gamePlayer.user.id, newState);
     }
 
-    return finalState;
+    return result;
   }
 
   async getParty(partyId: string): Promise<Party | null> {
@@ -253,7 +260,15 @@ export class PartyManagerService {
 
     const existingPlayer = await this.isUserInParty(userId, partyId);
     if (existingPlayer) {
+     
       throw new ConflictError('User is already in this party');
+    }
+
+    for (const gamePlayer of await this.getGamePlayers(partyId)) {
+      if (gamePlayer.user.id === userId) {
+        continue;
+      }
+      await this.notificationService.notifyPlayerJoined(party.gameName as ValidGameNames, gamePlayer.user.id);
     }
 
     return this.db.partyPlayer.create({
@@ -285,8 +300,20 @@ export class PartyManagerService {
       where: { partyId },
     });
 
+    const party = await this.getParty(partyId);
+    if (!party) {
+      throw new NotFoundError('Party not found');
+    }
+
     if (remainingPlayers === 0) {
       await this.deleteParty(partyId);
+    }
+
+    for (const gamePlayer of await this.getGamePlayers(partyId)) {
+      if (gamePlayer.user.id === userId) {
+        continue;
+      }
+      await this.notificationService.notifyPlayerLeft(party.gameName as ValidGameNames, gamePlayer.user.id);
     }
   }
 
