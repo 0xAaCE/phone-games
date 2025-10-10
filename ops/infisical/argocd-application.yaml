@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infisical
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/0xAaCE/phone_games.git
+    targetRevision: main
+    path: ops/infisical
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infisical
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
