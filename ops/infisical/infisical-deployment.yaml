@@ -43,9 +43,11 @@ spec:
               name: infisical-secrets
               key: REDIS_URL
         - name: SITE_URL
-          value: "http://localhost:8080"  # Change to your actual domain
+          value: "https://secrets.0xaace.xyz"
         - name: TELEMETRY_ENABLED
           value: "false"
+        - name: NODE_ENV
+          value: "production"
         resources:
           requests:
             memory: "512Mi"
@@ -57,11 +59,15 @@ spec:
           httpGet:
             path: /api/status
             port: 8080
-          initialDelaySeconds: 30
+          initialDelaySeconds: 60
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
         readinessProbe:
           httpGet:
             path: /api/status
             port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6

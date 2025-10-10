@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/0xAaCE/phone_games.git  # Replace with your repo URL
+    repoURL: git@github.com:0xAaCE/phone_games.git
     targetRevision: main
     path: ops/k8s/base
 
