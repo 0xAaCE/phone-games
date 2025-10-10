@@ -28,8 +28,8 @@ COPY turbo.json ./turbo.json
 # Generate Prisma client
 RUN pnpm --filter @phone-games/db run db:generate
 
-# Build the server and its dependencies
-RUN pnpm --filter @phone-games/server run build
+# Build everything
+RUN pnpm build
 
 # Production stage
 FROM node:20-alpine AS runner
