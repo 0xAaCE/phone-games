@@ -1,5 +1,5 @@
 import { GameState, ValidGameNames } from "@phone-games/games";
-import { Notification, ValidPartyActions, ValidNotificationMethods, ValidActions, ValidGameActions } from "./Notification";
+import { Notification, ValidPartyActions, ValidNotificationMethods, ValidActions, ValidGameActions } from "./Notification.js";
 
 export abstract class Parser {
     abstract parse<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<ValidGameNames> : never): Promise<Notification>;

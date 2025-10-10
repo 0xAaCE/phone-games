@@ -1,6 +1,6 @@
 import { type Router as RouterType } from 'express';
-import { PartyController } from '../controllers/PartyController';
-import { authenticateFirebase } from '../middleware/auth';
+import { PartyController } from '../controllers/PartyController.js';
+import { authenticateFirebase } from '../middleware/auth.js';
 
 export const applyPartyRoutes = (router: RouterType, partyController: PartyController) => {
     // All party routes require authentication

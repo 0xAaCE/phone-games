@@ -3,7 +3,7 @@ import admin from 'firebase-admin';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
-import { UnauthorizedError } from '../errors';
+import { UnauthorizedError } from '../errors/index.js';
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {

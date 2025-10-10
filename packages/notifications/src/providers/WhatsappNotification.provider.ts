@@ -1,6 +1,6 @@
 import { User } from "@phone-games/db";
-import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/Notification";
-import { NotificationProvider } from "../interfaces/NotificationProvider";
+import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/Notification.js";
+import { NotificationProvider } from "../interfaces/NotificationProvider.js";
 
 export class WhatsappNotificationProvider extends NotificationProvider {
     private apiUrl: string;

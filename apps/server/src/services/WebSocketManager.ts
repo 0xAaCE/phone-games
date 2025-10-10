@@ -1,7 +1,7 @@
 import { Server } from 'http';
 import { VerifyClientCallbackAsync, WebSocket, WebSocketServer } from 'ws';
 import { NotificationService, WebSocketNotificationProvider } from '@phone-games/notifications';
-import { AuthenticatedRequest, firebaseVerification } from '../middleware/auth';
+import { AuthenticatedRequest, firebaseVerification } from '../middleware/auth.js';
 
 type VerifyClientInfo = Parameters<VerifyClientCallbackAsync>[0]
 type VerifyClientCallback = Parameters<VerifyClientCallbackAsync>[1]

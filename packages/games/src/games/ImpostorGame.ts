@@ -1,7 +1,7 @@
-import { GamePlayer, GameState, NextRoundParams, NextRoundResult, ValidGameNames } from '../interfaces/Game';
-import { GAME_NAMES } from '../constants/game';
-import { Game } from './Game';
-import { ImpostorFinishRoundParams, ImpostorFinishRoundResult, ImpostorMiddleRoundActionParams, ImpostorMiddleRoundActionResult } from '../interfaces/ImpostorGame';
+import { GamePlayer, GameState, NextRoundParams, NextRoundResult, ValidGameNames } from '../interfaces/Game.js';
+import { GAME_NAMES } from '../constants/game.js';
+import { Game } from './Game.js';
+import { ImpostorFinishRoundParams, ImpostorFinishRoundResult, ImpostorMiddleRoundActionParams, ImpostorMiddleRoundActionResult } from '../interfaces/ImpostorGame.js';
 export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
   private words = [
     'pizza',

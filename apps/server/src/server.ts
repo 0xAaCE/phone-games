@@ -1,7 +1,7 @@
 import { ImpostorWebSocketParser, ImpostorWhatsAppParser, NotificationManager } from '@phone-games/notifications';
-import { initializeApp } from './app';
+import { initializeApp } from './app.js';
 import dotenv from 'dotenv';
-import { WebSocketManager } from './services/WebSocketManager';
+import { WebSocketManager } from './services/WebSocketManager.js';
 
 // Load environment variables
 dotenv.config();

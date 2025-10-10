@@ -1,8 +1,8 @@
 import { GameState, ValidGameNames } from "@phone-games/games";
-import { NotificationService } from "../interfaces/NotificationService";
-import { NotificationProvider } from "../interfaces/NotificationProvider";
-import { Parser } from "../interfaces/Parser";
-import { ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/Notification";
+import { NotificationService } from "../interfaces/NotificationService.js";
+import { NotificationProvider } from "../interfaces/NotificationProvider.js";
+import { Parser } from "../interfaces/Parser.js";
+import { ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/Notification.js";
 
 type ParserKey = `${ValidGameNames}-${ValidNotificationMethods}`;
 

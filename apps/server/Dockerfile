@@ -28,8 +28,13 @@ COPY turbo.json ./turbo.json
 # Generate Prisma client
 RUN pnpm --filter @phone-games/db run db:generate
 
-# Build everything
-RUN pnpm build
+# Build packages in order (to handle TypeScript composite references)
+RUN pnpm --filter @phone-games/db run build && \
+    pnpm --filter @phone-games/games run build && \
+    pnpm --filter @phone-games/user run build && \
+    pnpm --filter @phone-games/notifications run build && \
+    pnpm --filter @phone-games/party run build && \
+    pnpm --filter @phone-games/server run build
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -53,15 +58,15 @@ COPY packages/notifications/package.json ./packages/notifications/package.json
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
-# Copy built files from builder
-COPY --from=builder /app/apps/server/dist ./apps/server/dist
+# Copy built packages from builder
 COPY --from=builder /app/packages/db/dist ./packages/db/dist
-COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
-COPY --from=builder /app/packages/db/node_modules/.prisma ./packages/db/node_modules/.prisma
 COPY --from=builder /app/packages/games/dist ./packages/games/dist
 COPY --from=builder /app/packages/party/dist ./packages/party/dist
 COPY --from=builder /app/packages/user/dist ./packages/user/dist
 COPY --from=builder /app/packages/notifications/dist ./packages/notifications/dist
+
+# Copy built server
+COPY --from=builder /app/apps/server/dist ./apps/server/dist
 
 # Set environment to production
 ENV NODE_ENV=production

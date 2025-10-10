@@ -1,1 +1,1 @@
-export * from './GameFactory';
+export * from './GameFactory.js';

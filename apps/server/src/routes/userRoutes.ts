@@ -1,6 +1,6 @@
 import { type Router as RouterType } from 'express';
-import { UserController } from '../controllers/UserController';
-import { authenticateFirebase } from '../middleware/auth';
+import { UserController } from '../controllers/UserController.js';
+import { authenticateFirebase } from '../middleware/auth.js';
 
 export const applyUserRoutes = (router: RouterType, userController: UserController) => {
     // Public routes

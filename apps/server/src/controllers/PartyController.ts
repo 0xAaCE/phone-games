@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { PartyManagerService } from '@phone-games/party';
 import { db } from '@phone-games/db';
-import { AuthenticatedRequest } from '../middleware/auth';
-import { ValidationError } from '../errors';
+import { AuthenticatedRequest } from '../middleware/auth.js';
+import { ValidationError } from '../errors/index.js';
 import { GameFactory, ValidGamesSchema } from '@phone-games/games';
 import { NotificationService } from '@phone-games/notifications';
 

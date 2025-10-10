@@ -1,10 +1,10 @@
 import express, { Express, Router } from 'express';
 import cors from 'cors';
-import { applyUserRoutes } from './routes/userRoutes';
-import { applyPartyRoutes } from './routes/partyRoutes';
-import { errorHandler } from './middleware/errorHandler';
-import { UserController } from './controllers/UserController';
-import { PartyController } from './controllers/PartyController';
+import { applyUserRoutes } from './routes/userRoutes.js';
+import { applyPartyRoutes } from './routes/partyRoutes.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { UserController } from './controllers/UserController.js';
+import { PartyController } from './controllers/PartyController.js';
 import { NotificationService } from '@phone-games/notifications';
 
 export const initializeApp = (notificationService: NotificationService) => {

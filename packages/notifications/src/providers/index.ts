@@ -1,2 +1,2 @@
-export * from './WhatsappNotification.provider';
-export * from './WebSocketNotification.provider';
+export * from './WhatsappNotification.provider.js';
+export * from './WebSocketNotification.provider.js';

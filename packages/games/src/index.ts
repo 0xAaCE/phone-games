@@ -1,14 +1,14 @@
 // Interfaces
-export * from './interfaces';
+export * from './interfaces/index.js';
 
 // Games
-export * from './games';
+export * from './games/index.js';
 
 // Factories
-export * from './factories';
+export * from './factories/index.js';
 
 // Constants
-export * from './constants';
+export * from './constants/index.js';
 
 // Schemas
-export * from './schemas';
+export * from './schemas/index.js';

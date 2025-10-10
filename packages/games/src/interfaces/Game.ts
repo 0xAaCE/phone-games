@@ -1,6 +1,6 @@
 import { User } from '@phone-games/db';
-import { ImpostorCustomState, ImpostorFinishRoundParams, ImpostorFinishRoundResult, ImpostorMiddleRoundActionParams, ImpostorMiddleRoundActionResult, ImpostorNextRoundParams, ImpostorNextRoundResult } from './ImpostorGame';
-import { GAME_NAMES } from '../constants/game'; 
+import { ImpostorCustomState, ImpostorFinishRoundParams, ImpostorFinishRoundResult, ImpostorMiddleRoundActionParams, ImpostorMiddleRoundActionResult, ImpostorNextRoundParams, ImpostorNextRoundResult } from './ImpostorGame.js';
+import { GAME_NAMES } from '../constants/game.js'; 
 export interface GamePlayer {
   user: User;
   isManager: boolean;
