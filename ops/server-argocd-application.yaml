@@ -26,7 +26,7 @@ spec:
   ignoreDifferences:
   - group: ""
     kind: Secret
-    name: infisical-service-token
+    name: infisical-auth
     namespace: phone-games
     retry:
       limit: 5
