@@ -58,6 +58,9 @@ COPY packages/notifications/package.json ./packages/notifications/package.json
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
+# Install Prisma CLI for migrations (add to db package only)
+RUN cd packages/db && pnpm add prisma@6.16.2
+
 # Copy Prisma schema for migrations
 COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
 

@@ -17,14 +17,9 @@ spec:
         command: ["sh", "-c"]
         args:
           - |
-            echo "Installing Prisma CLI locally..."
-            cd /app/packages/db
-            pnpm add prisma --save-dev
-
             echo "Running database migrations..."
-            cd prisma
-            npx prisma migrate deploy
-
+            cd /app/packages/db
+            npx prisma migrate deploy --schema=./prisma/schema.prisma
             echo "Migrations completed successfully!"
         env:
         - name: DATABASE_URL
