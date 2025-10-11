@@ -17,12 +17,13 @@ spec:
         command: ["sh", "-c"]
         args:
           - |
-            echo "Installing Prisma CLI..."
-            pnpm add -g prisma
+            echo "Installing Prisma CLI locally..."
+            cd /app/packages/db
+            pnpm add prisma --save-dev
 
             echo "Running database migrations..."
-            cd /app/packages/db/prisma
-            prisma migrate deploy
+            cd prisma
+            npx prisma migrate deploy
 
             echo "Migrations completed successfully!"
         env:
