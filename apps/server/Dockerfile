@@ -58,6 +58,9 @@ COPY packages/notifications/package.json ./packages/notifications/package.json
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
+# Copy Prisma schema for migrations
+COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
+
 # Copy built packages from builder
 COPY --from=builder /app/packages/db/dist ./packages/db/dist
 COPY --from=builder /app/packages/games/dist ./packages/games/dist

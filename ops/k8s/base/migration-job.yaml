@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: phone-games-migration
+  namespace: phone-games
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: migration
+        image: xaace/phone-games-server:latest
+        command: ["sh", "-c"]
+        args:
+          - |
+            echo "Installing Prisma CLI..."
+            pnpm add -g prisma
+
+            echo "Running database migrations..."
+            cd /app/packages/db/prisma
+            prisma migrate deploy
+
+            echo "Migrations completed successfully!"
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: DATABASE_URL
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
