@@ -6,6 +6,8 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { UserController } from './controllers/UserController.js';
 import { PartyController } from './controllers/PartyController.js';
 import { NotificationService } from '@phone-games/notifications';
+import { WhatsAppController } from './controllers/WhatsAppController.js';
+import { applyWhatsAppRoutes } from './routes/whatsAppRoutes.js';
 
 export const initializeApp = (notificationService: NotificationService) => {
   const app: Express = express();
@@ -17,16 +19,20 @@ export const initializeApp = (notificationService: NotificationService) => {
 
   const userController = new UserController();
   const partyController = new PartyController(notificationService);
+  const whatsAppController = new WhatsAppController();
   const userRouter = Router();
   const partyRouter = Router(); 
+  const whatsAppRouter = Router();
 
   applyUserRoutes(userRouter, userController);
   applyPartyRoutes(partyRouter, partyController);
+  applyWhatsAppRoutes(whatsAppRouter, whatsAppController);
 
   // Routes
   app.use('/api/users', userRouter);
   app.use('/api/parties', partyRouter);
-
+  app.use('/api/whatsapp', whatsAppRouter);
+  
   // Health check endpoint
   app.get('/health', (_req, res) => {
     res.json({
