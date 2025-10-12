@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: server
-        image: xaace/phone-games-server:latest
+        image: xaace/phone-games-server:latest  # This will be updated by CI/CD with git SHA
+        imagePullPolicy: Always
         ports:
         - containerPort: 4000
           name: http

@@ -14,12 +14,18 @@ if (!admin.apps.length) {
     if (fs.existsSync(serviceAccountPath)) {
       const serviceAccountFile = fs.readFileSync(serviceAccountPath, 'utf8');
       serviceAccount = JSON.parse(serviceAccountFile);
+    } else {
+      serviceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      }
     }
   } catch (error) {
     console.warn('Error reading service_account.json:', (error as Error).message);
   }
 
-  if (serviceAccount) {
+  if (serviceAccount && serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
