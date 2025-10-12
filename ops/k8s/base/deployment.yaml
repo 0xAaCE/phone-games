@@ -53,6 +53,16 @@ spec:
             secretKeyRef:
               name: firebase-credentials
               key: FIREBASE_CLIENT_EMAIL
+        - name: WHATSAPP_WEBHOOK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: external-credentials
+              key: WHATSAPP_WEBHOOK_TOKEN
+        - name: WHATSAPP_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: external-credentials
+              key: WHATSAPP_API_TOKEN
         resources:
           requests:
             memory: "256Mi"
