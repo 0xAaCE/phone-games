@@ -39,8 +39,9 @@ RUN pnpm --filter @phone-games/db run build && \
 # Production stage
 FROM node:20-alpine AS runner
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.5.0 --activate
+# Install pnpm and Prisma CLI globally
+RUN corepack enable && corepack prepare pnpm@10.5.0 --activate && \
+    npm install -g prisma@6.16.2
 
 WORKDIR /app
 
@@ -57,9 +58,6 @@ COPY packages/notifications/package.json ./packages/notifications/package.json
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
-
-# Install Prisma CLI for migrations (add to db package only)
-RUN cd packages/db && pnpm add prisma@6.16.2
 
 # Copy Prisma schema for migrations
 COPY --from=builder /app/packages/db/prisma ./packages/db/prisma

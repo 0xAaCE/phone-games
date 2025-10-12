@@ -18,8 +18,8 @@ spec:
         args:
           - |
             echo "Running database migrations..."
-            cd /app/packages/db
-            npx prisma migrate deploy --schema=./prisma/schema.prisma
+            cd /app/packages/db/prisma
+            prisma migrate deploy
             echo "Migrations completed successfully!"
         env:
         - name: DATABASE_URL
