@@ -9,8 +9,11 @@ export class WhatsAppController {
     const { challenge, mode, token } = req.query;
 
     if (mode === 'subscribe' && token === process.env.WHATSAPP_WEBHOOK_TOKEN) {
-      res.status(200).send(challenge);
+      return res.status(200).send(challenge);
     }
+
+    return res.status(403).json({ error: 'Forbidden' });
+
   }
 
   handleWebhook = async (req: Request, res: Response) => {
@@ -18,6 +21,6 @@ export class WhatsAppController {
 
     console.log(JSON.stringify(body, null, 2));
 
-    res.status(200).send('OK');
+    return res.status(200).send('OK');
   }
 }
