@@ -6,7 +6,7 @@ export class WhatsAppController {
   }
 
   verifyWebhook = async (req: Request, res: Response) => {
-    const { challenge, mode, token } = req.query;
+    const { "hub.challenge": challenge, "hub.mode": mode, "hub.verify_token": token } = req.query;
 
     if (mode === 'subscribe' && token === process.env.WHATSAPP_WEBHOOK_TOKEN) {
       return res.status(200).send(challenge);
