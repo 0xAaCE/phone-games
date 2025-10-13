@@ -83,6 +83,12 @@ export class UserService {
     return userByPhone;
   }
 
+  async getUserByUsername(username: string): Promise<User | null> {
+    return this.db.user.findFirst({
+      where: { username },
+    });
+  }
+
   async updateUser(id: string, userData: Partial<CreateUserData>): Promise<User> {
     // Get current user data
     const currentUser = await this.getUserById(id);

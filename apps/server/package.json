@@ -17,6 +17,7 @@
     "@phone-games/party": "workspace:*",
     "@phone-games/user": "workspace:*",
     "@phone-games/notifications": "workspace:*",
+    "@phone-games/messaging": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",

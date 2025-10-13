@@ -16,6 +16,10 @@ export class NotificationManager implements NotificationService {
         });
     }
 
+    hasUser(userId: string): boolean {
+        return this.notificationProviders.has(userId);
+    }
+
     private getParserKey(parser: Parser): ParserKey {
         return `${parser.getGameName()}-${parser.getNotificationMethod()}`;
     }

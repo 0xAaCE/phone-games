@@ -8,7 +8,10 @@ import { PartyController } from './controllers/PartyController.js';
 import { NotificationService } from '@phone-games/notifications';
 import { WhatsAppController } from './controllers/WhatsAppController.js';
 import { applyWhatsAppRoutes } from './routes/whatsAppRoutes.js';
-
+import { db } from '@phone-games/db';
+import { PartyManagerService } from '@phone-games/party';
+import { MessageHandlerService, WhatsAppParser } from '@phone-games/messaging';
+import { UserService } from '@phone-games/user';
 export const initializeApp = (notificationService: NotificationService) => {
   const app: Express = express();
 
@@ -17,9 +20,12 @@ export const initializeApp = (notificationService: NotificationService) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  const userController = new UserController();
-  const partyController = new PartyController(notificationService);
-  const whatsAppController = new WhatsAppController();
+  const partyManagerService = new PartyManagerService(db, notificationService);
+  const userService = new UserService(db);
+  const userController = new UserController(userService);
+  const partyController = new PartyController(partyManagerService);
+  const messageHandlerService = new MessageHandlerService(notificationService, partyManagerService, userService, [new WhatsAppParser(userService)]);
+  const whatsAppController = new WhatsAppController(messageHandlerService);
   const userRouter = Router();
   const partyRouter = Router(); 
   const whatsAppRouter = Router();

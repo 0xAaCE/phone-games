@@ -1,0 +1,32 @@
+{
+  "name": "@phone-games/messaging",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@phone-games/games": "workspace:*",
+    "@phone-games/db": "workspace:*",
+    "@phone-games/party": "workspace:*",
+    "@phone-games/notifications": "workspace:*",
+    "@phone-games/user": "workspace:*",
+    "axios": "^1.6.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^10.0.0"
+  }
+}

@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService, CreateUserData } from '@phone-games/user';
-import { db } from '@phone-games/db';
 import { AuthenticatedRequest, generateJWT } from '../middleware/auth.js';
 
 export class UserController {
   private userService: UserService;
 
-  constructor() {
-    this.userService = new UserService(db);
+  constructor(userService: UserService) {
+    this.userService = userService;
   }
 
   // POST /api/users
