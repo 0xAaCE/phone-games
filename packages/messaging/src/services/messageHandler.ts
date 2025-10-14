@@ -26,6 +26,13 @@ export class MessageHandlerService implements MessageHandler {
   }
 
   async handle(messagePlatform: MessagePlatform, message: IncomingMessage<MessagePlatform>): Promise<void> {
+    const field = message.entry[0].changes[0].field;
+    if (field !== "messages") {
+      console.log("Field is not messages", field);
+      return;
+    }
+    console.log("Message Received\n", JSON.stringify(message, null, 2));
+
     const parser = this.parsers.get(messagePlatform);
     if (!parser) {
       throw new Error(`Parser not found for message platform: ${messagePlatform}`);
