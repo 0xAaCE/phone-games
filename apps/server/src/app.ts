@@ -7,10 +7,12 @@ import { UserController } from './controllers/UserController.js';
 import { PartyController } from './controllers/PartyController.js';
 import { NotificationService } from '@phone-games/notifications';
 import { WhatsAppController } from './controllers/WhatsAppController.js';
+import { TwilioController } from './controllers/TwilioController.js';
 import { applyWhatsAppRoutes } from './routes/whatsAppRoutes.js';
+import { applyTwilioRoutes } from './routes/twilioRoutes.js';
 import { db } from '@phone-games/db';
 import { PartyManagerService } from '@phone-games/party';
-import { MessageHandlerService, WhatsAppParser } from '@phone-games/messaging';
+import { MessageHandlerService, WhatsAppParser, TwilioParser } from '@phone-games/messaging';
 import { UserService } from '@phone-games/user';
 export const initializeApp = (notificationService: NotificationService) => {
   const app: Express = express();
@@ -24,20 +26,24 @@ export const initializeApp = (notificationService: NotificationService) => {
   const userService = new UserService(db);
   const userController = new UserController(userService);
   const partyController = new PartyController(partyManagerService);
-  const messageHandlerService = new MessageHandlerService(notificationService, partyManagerService, userService, [new WhatsAppParser(userService)]);
+  const messageHandlerService = new MessageHandlerService(notificationService, partyManagerService, userService, [new WhatsAppParser(userService), new TwilioParser(userService)]);
   const whatsAppController = new WhatsAppController(messageHandlerService);
+  const twilioController = new TwilioController(messageHandlerService);
   const userRouter = Router();
-  const partyRouter = Router(); 
+  const partyRouter = Router();
   const whatsAppRouter = Router();
+  const twilioRouter = Router();
 
   applyUserRoutes(userRouter, userController);
   applyPartyRoutes(partyRouter, partyController);
   applyWhatsAppRoutes(whatsAppRouter, whatsAppController);
+  applyTwilioRoutes(twilioRouter, twilioController);
 
   // Routes
   app.use('/api/users', userRouter);
   app.use('/api/parties', partyRouter);
   app.use('/api/whatsapp', whatsAppRouter);
+  app.use('/api/twilio', twilioRouter);
   
   // Health check endpoint
   app.get('/health', (_req, res) => {

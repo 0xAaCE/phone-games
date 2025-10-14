@@ -73,6 +73,21 @@ spec:
             secretKeyRef:
               name: external-credentials
               key: WHATSAPP_API_TOKEN
+        - name: TWILIO_ACCOUNT_SID
+          valueFrom:
+            secretKeyRef:
+              name: external-credentials
+              key: TWILIO_ACCOUNT_SID
+        - name: TWILIO_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: external-credentials
+              key: TWILIO_AUTH_TOKEN
+        - name: TWILIO_WHATSAPP_FROM
+          valueFrom:
+            secretKeyRef:
+              name: external-credentials
+              key: TWILIO_WHATSAPP_FROM
         resources:
           requests:
             memory: "256Mi"

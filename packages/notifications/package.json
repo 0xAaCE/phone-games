@@ -18,6 +18,7 @@
   "dependencies": {
     "@phone-games/db": "workspace:*",
     "@phone-games/games": "workspace:*",
+    "twilio": "^5.10.3",
     "ws": "^8.18.3"
   },
   "devDependencies": {

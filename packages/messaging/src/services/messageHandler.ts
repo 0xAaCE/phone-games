@@ -1,11 +1,12 @@
 import { PrismaClient, User } from "@phone-games/db";
 import { MessageHandler } from "../interfaces/messageHandler";
-import { NotificationProvider, NotificationService, WhatsappNotificationProvider } from "@phone-games/notifications";
+import { NotificationProvider, NotificationService, WhatsappNotificationProvider, TwilioWhatsAppNotificationProvider } from "@phone-games/notifications";
 import { PartyManagerService } from "@phone-games/party";
 import { UserService } from "@phone-games/user";
 import { FinishRoundParams, GameFactory, MiddleRoundActionParams, NextRoundParams, ValidGameNames } from "@phone-games/games";
 
 import { CreatePartyParams, IncomingMessage, IncomingMessageParser, JoinPartyParams, MessagePlatform, Output, ValidActions } from "../interfaces/parsers/index.js";
+import { WhatsAppIncomingMessage } from "../interfaces/parsers/whatsapp.js";
 
 
 export class MessageHandlerService implements MessageHandler {
@@ -22,21 +23,26 @@ export class MessageHandlerService implements MessageHandler {
   }
 
   canHandle(messagePlatform: MessagePlatform, message: IncomingMessage<MessagePlatform>): boolean {
-    return this.parsers.has(messagePlatform);
+    switch (messagePlatform) {
+      case MessagePlatform.WHATSAPP:
+        const isMessageField = (message as WhatsAppIncomingMessage).entry[0].changes[0].field === "messages";
+        return isMessageField;
+      case MessagePlatform.TWILIO:
+        return this.parsers.has(MessagePlatform.TWILIO);
+      default:
+        return false;
+    }
   }
 
   async handle(messagePlatform: MessagePlatform, message: IncomingMessage<MessagePlatform>): Promise<void> {
-    const field = message.entry[0].changes[0].field;
-    if (field !== "messages") {
-      console.log("Field is not messages", field);
-      return;
-    }
     console.log("Message Received\n", JSON.stringify(message, null, 2));
 
     const parser = this.parsers.get(messagePlatform);
+
     if (!parser) {
       throw new Error(`Parser not found for message platform: ${messagePlatform}`);
     }
+
     const output = await parser.parse(message);
 
     await this.handleUser(messagePlatform, output);
@@ -94,6 +100,8 @@ export class MessageHandlerService implements MessageHandler {
     switch (messagePlatform) {
       case MessagePlatform.WHATSAPP:
         return new WhatsappNotificationProvider(process.env.WHATSAPP_API_URL!, process.env.WHATSAPP_PHONE_NUMBER_ID!, process.env.WHATSAPP_API_TOKEN!, user);
+      case MessagePlatform.TWILIO:
+        return new TwilioWhatsAppNotificationProvider(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!, process.env.TWILIO_WHATSAPP_FROM!, user);
       default:
         throw new Error(`Message platform not supported: ${messagePlatform}`);
     }

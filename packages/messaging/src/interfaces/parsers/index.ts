@@ -1,9 +1,11 @@
 import { FinishRoundParams, MiddleRoundActionParams, ValidGameNames } from "@phone-games/games";
 import { NextRoundParams } from "@phone-games/games";
 import { WhatsAppIncomingMessage } from "./whatsapp";
+import { TwilioIncomingMessage } from "./twilio";
 
 export enum MessagePlatform {
     WHATSAPP = 'whatsapp',
+    TWILIO = 'twilio',
   }
 
 export enum ValidActions {
@@ -18,6 +20,7 @@ export enum ValidActions {
 }
 export type IncomingMessage<T extends MessagePlatform> = {
   [MessagePlatform.WHATSAPP]: WhatsAppIncomingMessage;
+  [MessagePlatform.TWILIO]: TwilioIncomingMessage;
 }[T];
 
 export type CreatePartyParams = {

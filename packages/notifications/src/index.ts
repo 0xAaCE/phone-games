@@ -2,6 +2,7 @@ export * from './interfaces/NotificationService.js';
 export * from './interfaces/NotificationProvider.js';
 export * from './interfaces/Notification.js';
 export * from './providers/WhatsappNotification.provider.js';
+export * from './providers/TwilioWhatsAppNotification.provider.js';
 export * from './providers/WebSocketNotification.provider.js';
 export * from './services/NotificationManager.js';
 export * from './interfaces/Parser.js';
