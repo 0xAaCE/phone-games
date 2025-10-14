@@ -31,6 +31,7 @@ export class WhatsappNotificationProvider extends NotificationProvider {
                     'Authorization': `Bearer ${this.apiToken}`,
                 },
                 body: JSON.stringify({
+                    messaging_product: 'whatsapp',
                     to: this.recipientPhoneNumber,
                     type: 'text',
                     text: {
