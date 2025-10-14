@@ -26,7 +26,7 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
             const result = await this.client.messages.create({
                 body: message,
                 from: `whatsapp:${this.fromPhoneNumber}`,
-                to: `whatsapp: +${this.recipientPhoneNumber}`
+                to: `whatsapp:+${this.recipientPhoneNumber}`
             });
 
             console.log('Twilio WhatsApp message sent:', result.sid);
