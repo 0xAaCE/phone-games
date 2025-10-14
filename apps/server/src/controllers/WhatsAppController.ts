@@ -22,6 +22,7 @@ export class WhatsAppController {
 
   handleWebhook = async (req: Request, res: Response) => {
     const { body } = req;
+    console.log("WhatsApp Webhook Received\n");
 
     await this.messageHandlerService.handle(MessagePlatform.WHATSAPP, body);
 
