@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: xaace/phone-games-server:main-4aa510a
+        image: xaace/phone-games-server:main-9de6f10
         imagePullPolicy: Always
         ports:
         - containerPort: 4000
