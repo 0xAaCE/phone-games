@@ -33,6 +33,16 @@ spec:
             configMapKeyRef:
               name: phone-games-config
               key: PORT
+        - name: WHATSAPP_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: phone-games-config
+              key: WHATSAPP_API_URL
+        - name: WHATSAPP_PHONE_NUMBER_ID
+          valueFrom:
+            configMapKeyRef:
+              name: phone-games-config
+              key: WHATSAPP_PHONE_NUMBER_ID
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:

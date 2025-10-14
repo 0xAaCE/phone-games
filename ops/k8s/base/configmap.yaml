@@ -6,4 +6,7 @@ metadata:
 data:
   NODE_ENV: "production"
   PORT: "4000"
+  # WhatsApp Configuration
+  WHATSAPP_API_URL: "https://graph.facebook.com/v22.0"
+  WHATSAPP_PHONE_NUMBER_ID: "745990838608160"
   # Add other non-sensitive config here

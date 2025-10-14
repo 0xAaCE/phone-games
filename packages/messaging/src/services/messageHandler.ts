@@ -93,7 +93,7 @@ export class MessageHandlerService implements MessageHandler {
   private getMessageProvider(messagePlatform: MessagePlatform, user: User): NotificationProvider {
     switch (messagePlatform) {
       case MessagePlatform.WHATSAPP:
-        return new WhatsappNotificationProvider(process.env.WHATSAPP_API_URL!, process.env.WHATSAPP_API_TOKEN!, user);
+        return new WhatsappNotificationProvider(process.env.WHATSAPP_API_URL!, process.env.WHATSAPP_PHONE_NUMBER_ID!, process.env.WHATSAPP_API_TOKEN!, user);
       default:
         throw new Error(`Message platform not supported: ${messagePlatform}`);
     }

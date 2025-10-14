@@ -5,9 +5,10 @@ import { NotificationProvider } from "../interfaces/NotificationProvider.js";
 export class WhatsappNotificationProvider extends NotificationProvider {
     private apiUrl: string;
     private apiToken: string;
+    private sourcePhoneNumberId: string;
     private recipientPhoneNumber: string;
 
-    constructor(apiUrl: string, apiToken: string, to: User) {
+    constructor(apiUrl: string, sourcePhoneNumberId: string, apiToken: string, to: User) {
         if (!to.phoneNumber) {
             throw new Error('User does not have a phone number');
         }
@@ -15,6 +16,7 @@ export class WhatsappNotificationProvider extends NotificationProvider {
         super();
         this.apiUrl = apiUrl;
         this.apiToken = apiToken;
+        this.sourcePhoneNumberId = sourcePhoneNumberId;
         this.recipientPhoneNumber = to.phoneNumber;
     }
 
@@ -22,7 +24,7 @@ export class WhatsappNotificationProvider extends NotificationProvider {
         const message = this.formatMessage(notification);
 
         try {
-            const response = await fetch(`${this.apiUrl}/messages`, {
+            const response = await fetch(`${this.apiUrl}/${this.sourcePhoneNumberId}/messages`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
