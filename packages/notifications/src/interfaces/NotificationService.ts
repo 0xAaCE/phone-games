@@ -10,6 +10,7 @@ export abstract class NotificationService {
     abstract notifyMiddleRoundAction(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void>;
     abstract notifyFinishRound(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void>;
     abstract notifyFinishMatch(gameName: ValidGameNames, userId: string, gameState: GameState<ValidGameNames>): Promise<void>;
-    abstract notifyPlayerJoined(gameName: ValidGameNames, userId: string): Promise<void>;
-    abstract notifyPlayerLeft(gameName: ValidGameNames, userId: string): Promise<void>;
+    abstract notifyCreateParty(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void>;
+    abstract notifyPlayerJoined(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void>;
+    abstract notifyPlayerLeft(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void>;
 }

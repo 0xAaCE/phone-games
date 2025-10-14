@@ -1,5 +1,5 @@
 import { GAME_NAMES, GameState, ValidGameNames } from "@phone-games/games";
-import { Parser } from "../interfaces/Parser.js";
+import { Parser, PartyParams } from "../interfaces/Parser.js";
 import { Notification, NOTIFICATION_METHODS, ValidActions, ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/Notification.js";
 
 export class ImpostorWebSocketParser extends Parser {
@@ -7,22 +7,24 @@ export class ImpostorWebSocketParser extends Parser {
         super();
     }
 
-    async parse<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<GAME_NAMES.IMPOSTOR> : never): Promise<Notification> {
+    async parse<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<GAME_NAMES.IMPOSTOR> : PartyParams): Promise<Notification> {
         switch (action) {
             case ValidGameActions.START_MATCH:
-                return this.parseStartMatch(notification);
+                return this.parseStartMatch(notification as GameState<GAME_NAMES.IMPOSTOR>);
             case ValidGameActions.NEXT_ROUND:
-                return this.parseNextRound(notification);
+                return this.parseNextRound(notification as GameState<GAME_NAMES.IMPOSTOR>);
             case ValidGameActions.MIDDLE_ROUND_ACTION:
-                return this.parseMiddleRoundAction(notification);
+                return this.parseMiddleRoundAction(notification as GameState<GAME_NAMES.IMPOSTOR>);
             case ValidGameActions.FINISH_ROUND:
-                return this.parseFinishRound(notification);
+                return this.parseFinishRound(notification as GameState<GAME_NAMES.IMPOSTOR>);
             case ValidGameActions.FINISH_MATCH:
-                return this.parseFinishMatch(notification);
+                return this.parseFinishMatch(notification as GameState<GAME_NAMES.IMPOSTOR>);
             case ValidPartyActions.PLAYER_JOINED:
-                return this.parsePlayerJoined();
+                return this.parsePlayerJoined(notification as PartyParams);
             case ValidPartyActions.PLAYER_LEFT:
-                return this.parsePlayerLeft();
+                return this.parsePlayerLeft(notification as PartyParams);
+            case ValidPartyActions.CREATE_PARTY:
+                return this.parseCreateParty(notification as PartyParams);
             default:
                 throw new Error("Invalid action");
         }

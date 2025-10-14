@@ -79,20 +79,25 @@ export class NotificationManager implements NotificationService {
         
         await provider.sendNotification(notification);
     }   
-    async notifyPlayerJoined(gameName: ValidGameNames, userId: string): Promise<void> {
+    async notifyCreateParty(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void> {
         const { provider, parser } = this.getProviderAndParser(userId, gameName);
 
-        const dummy: never = null as never;
-        const notification = await parser.parse(ValidPartyActions.PLAYER_JOINED, dummy);
+        const notification = await parser.parse(ValidPartyActions.CREATE_PARTY, { partyName, partyId, gameName });
+
+        await provider.sendNotification(notification);
+    }
+    async notifyPlayerJoined(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void> {
+        const { provider, parser } = this.getProviderAndParser(userId, gameName);
+
+        const notification = await parser.parse(ValidPartyActions.PLAYER_JOINED, { partyName, partyId, gameName });
 
         console.log("Sending Join notification", notification);
         await provider.sendNotification(notification);
     }
-    async notifyPlayerLeft(gameName: ValidGameNames, userId: string): Promise<void> {
+    async notifyPlayerLeft(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void> {
         const { provider, parser } = this.getProviderAndParser(userId, gameName);
 
-        const dummy: never = null as never;
-        const notification = await parser.parse(ValidPartyActions.PLAYER_LEFT, dummy);
+        const notification = await parser.parse(ValidPartyActions.PLAYER_LEFT, { partyName, partyId, gameName });
 
         await provider.sendNotification(notification);
     }

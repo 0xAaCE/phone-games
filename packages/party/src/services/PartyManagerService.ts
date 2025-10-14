@@ -53,6 +53,8 @@ export class PartyManagerService {
 
     this.gameStates.set(party.id, game);
 
+    await this.notificationService.notifyCreateParty(party.partyName, party.gameName as ValidGameNames, party.id, userId);
+
     return party;
   }
 
@@ -268,7 +270,7 @@ export class PartyManagerService {
       if (gamePlayer.user.id === userId) {
         continue;
       }
-      await this.notificationService.notifyPlayerJoined(party.gameName as ValidGameNames, gamePlayer.user.id);
+      await this.notificationService.notifyPlayerJoined(party.partyName, party.gameName as ValidGameNames, partyId, gamePlayer.user.id);
     }
 
     return this.db.partyPlayer.create({
@@ -313,7 +315,7 @@ export class PartyManagerService {
       if (gamePlayer.user.id === userId) {
         continue;
       }
-      await this.notificationService.notifyPlayerLeft(party.gameName as ValidGameNames, gamePlayer.user.id);
+      await this.notificationService.notifyPlayerLeft(party.partyName, party.gameName as ValidGameNames, partyId, gamePlayer.user.id);
     }
   }
 

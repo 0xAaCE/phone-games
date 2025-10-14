@@ -9,6 +9,7 @@ export enum ValidGameActions {
 }
 
 export enum ValidPartyActions {
+    CREATE_PARTY = "create_party",
     PLAYER_JOINED = "player_joined",
     PLAYER_LEFT = "player_left",
 }

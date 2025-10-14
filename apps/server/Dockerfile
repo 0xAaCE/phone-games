@@ -16,6 +16,7 @@ COPY packages/games/package.json ./packages/games/package.json
 COPY packages/party/package.json ./packages/party/package.json
 COPY packages/user/package.json ./packages/user/package.json
 COPY packages/notifications/package.json ./packages/notifications/package.json
+COPY packages/messaging/package.json ./packages/messaging/package.json
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -34,6 +35,7 @@ RUN pnpm --filter @phone-games/db run build && \
     pnpm --filter @phone-games/user run build && \
     pnpm --filter @phone-games/notifications run build && \
     pnpm --filter @phone-games/party run build && \
+    pnpm --filter @phone-games/messaging run build && \
     pnpm --filter @phone-games/server run build
 
 # Production stage
@@ -55,6 +57,7 @@ COPY packages/games/package.json ./packages/games/package.json
 COPY packages/party/package.json ./packages/party/package.json
 COPY packages/user/package.json ./packages/user/package.json
 COPY packages/notifications/package.json ./packages/notifications/package.json
+COPY packages/messaging/package.json ./packages/messaging/package.json
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
@@ -68,6 +71,7 @@ COPY --from=builder /app/packages/games/dist ./packages/games/dist
 COPY --from=builder /app/packages/party/dist ./packages/party/dist
 COPY --from=builder /app/packages/user/dist ./packages/user/dist
 COPY --from=builder /app/packages/notifications/dist ./packages/notifications/dist
+COPY --from=builder /app/packages/messaging/dist ./packages/messaging/dist
 
 # Copy built server
 COPY --from=builder /app/apps/server/dist ./apps/server/dist
