@@ -1,5 +1,5 @@
 import { type Router as RouterType } from 'express';
-import { PartyController } from '../controllers/PartyController.js';
+import { PartyController } from '../controllers/partyController.js';
 import { authenticateFirebase } from '../middleware/auth.js';
 
 export const applyPartyRoutes = (router: RouterType, partyController: PartyController) => {

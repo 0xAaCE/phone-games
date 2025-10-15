@@ -1,3 +1,3 @@
-export * from './WhatsappNotification.provider.js';
-export * from './TwilioWhatsAppNotification.provider.js';
-export * from './WebSocketNotification.provider.js';
+export * from './whatsappNotification.provider.js';
+export * from './twilioWhatsAppNotification.provider.js';
+export * from './webSocketNotification.provider.js';

@@ -1,3 +1,2 @@
-export * from './services/index.js';
-export * from './interfaces/index.js';
-export * from './parsers/index.js';
+// Main entry point - re-exports public API
+export * from './external.js';

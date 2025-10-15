@@ -1,6 +1,6 @@
 import { GAME_NAMES, GameState, ValidGameNames } from "@phone-games/games";
-import { Parser, PartyParams } from "../interfaces/Parser.js";
-import { Notification, NOTIFICATION_METHODS, ValidActions, ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/Notification.js";
+import { Parser, PartyParams } from "../interfaces/parser.js";
+import { Notification, NOTIFICATION_METHODS, ValidActions, ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/notification.js";
 
 export class ImpostorWebSocketParser extends Parser {
     constructor() {

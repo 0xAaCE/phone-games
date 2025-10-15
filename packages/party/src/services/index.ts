@@ -1,1 +1,1 @@
-export * from './PartyManagerService.js';
+export * from './partyManagerService.js';

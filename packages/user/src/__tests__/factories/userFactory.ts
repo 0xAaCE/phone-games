@@ -1,5 +1,5 @@
 import { User } from '@phone-games/db';
-import { CreateUserData } from '../../services/UserService.js';
+import { CreateUserData } from '../../services/userService.js';
 
 export class UserTestFactory {
   static createUser(overrides?: Partial<User>): User {

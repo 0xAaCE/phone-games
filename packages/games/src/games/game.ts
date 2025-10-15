@@ -1,4 +1,4 @@
-import { FinishRoundParams, FinishRoundResult, GamePlayer, GameState, MiddleRoundActionParams, MiddleRoundActionResult, NextRoundParams, NextRoundResult, ValidGameNames } from "../interfaces/Game.js";
+import { FinishRoundParams, FinishRoundResult, GamePlayer, GameState, MiddleRoundActionParams, MiddleRoundActionResult, NextRoundParams, NextRoundResult, ValidGameNames } from "../internal.js";
 
 export abstract class Game<T extends ValidGameNames> {
     abstract getName(): ValidGameNames;

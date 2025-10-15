@@ -1,5 +1,4 @@
-import { Notification } from '../../interfaces/Notification.js';
-import { ValidGameActions, ValidPartyActions } from '../../interfaces/Notification.js';
+import { Notification, ValidGameActions, ValidPartyActions } from '../../internal.js';
 
 export class NotificationTestFactory {
   static createNotification(overrides?: Partial<Notification>): Notification {

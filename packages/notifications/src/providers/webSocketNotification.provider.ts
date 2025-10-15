@@ -1,7 +1,7 @@
 import { WebSocket } from "ws";
 
-import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/Notification.js";
-import { NotificationProvider } from "../interfaces/NotificationProvider.js";
+import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/notification.js";
+import { NotificationProvider } from "../interfaces/notificationProvider.js";
 
 export class WebSocketNotificationProvider extends NotificationProvider {
     private connection: WebSocket;

@@ -1,7 +1,4 @@
-import { ValidGameNames } from '../interfaces/Game.js';
-import { ImpostorGame } from '../games/ImpostorGame.js';
-import { GAME_NAMES } from '../constants/game.js';
-import { Game } from '../games/Game.js';
+import { ValidGameNames, ImpostorGame, GAME_NAMES, Game } from '../internal.js';
 
 export class ValidationError extends Error {
   constructor(message: string) {

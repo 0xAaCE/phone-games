@@ -1,5 +1,2 @@
-import { PrismaClient } from './generated/index.js';
-
-export * from './generated/index.js';
-
-export const db = new PrismaClient();
+// Main entry point - re-exports public API
+export * from './external.js';

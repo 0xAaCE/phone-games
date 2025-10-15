@@ -1,4 +1,4 @@
-import { Notification, ValidNotificationMethods } from "./Notification.js";
+import { Notification, ValidNotificationMethods } from "./notification.js";
 
 
 export abstract class NotificationProvider {

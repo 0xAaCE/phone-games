@@ -1,2 +1,2 @@
-export * from './Game.js';
-export * from './ImpostorGame.js';
+export * from './game.js';
+export * from './impostorGame.js';

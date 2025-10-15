@@ -1,5 +1,5 @@
-import { NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/Notification.js";
-import { ImpostorWebSocketParser } from "./ImpostorWebSocketParser.js";
+import { NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/notification.js";
+import { ImpostorWebSocketParser } from "./impostorWebSocketParser.js";
 
 export class ImpostorWhatsAppParser extends ImpostorWebSocketParser {
     constructor() {

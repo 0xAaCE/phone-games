@@ -1,5 +1,5 @@
 import { GameState, ValidGameNames } from "@phone-games/games";
-import { NotificationProvider } from "./NotificationProvider.js";
+import { NotificationProvider } from "./notificationProvider.js";
 
 export abstract class NotificationService {
     abstract hasUser(userId: string): boolean;

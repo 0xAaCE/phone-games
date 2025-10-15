@@ -1,5 +1,5 @@
 import { GameState, ValidGameNames } from "@phone-games/games";
-import { Notification, ValidPartyActions, ValidNotificationMethods, ValidActions, ValidGameActions } from "./Notification.js";
+import { Notification, ValidPartyActions, ValidNotificationMethods, ValidActions, ValidGameActions } from "./notification.js";
 
 export type PartyParams = {
     partyName: string;

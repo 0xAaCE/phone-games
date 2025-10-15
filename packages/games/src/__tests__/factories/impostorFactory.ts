@@ -1,5 +1,4 @@
-import { GameState, GamePlayer } from '../../interfaces/Game.js';
-import { GAME_NAMES } from '../../constants/game.js';
+import { GameState, GamePlayer, GAME_NAMES } from '../../internal.js';
 import { User } from '@phone-games/db';
 
 export class ImpostorTestFactory {

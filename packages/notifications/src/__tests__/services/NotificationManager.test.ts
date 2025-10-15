@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { NotificationManager } from '../../services/NotificationManager.js';
+import { NotificationManager, ValidGameActions, ValidPartyActions } from '../../internal.js';
 import { MockNotificationProvider, MockParser } from '../mocks/providers.js';
 import { GAME_NAMES } from '@phone-games/games';
-import { ValidGameActions, ValidPartyActions } from '../../interfaces/Notification.js';
 
 // Helper to create test game state
 const createTestGameState = (overrides = {}) => ({

@@ -1,8 +1,6 @@
 import { vi } from 'vitest';
-import { NotificationProvider } from '../../interfaces/NotificationProvider.js';
-import { Parser } from '../../interfaces/Parser.js';
+import { NotificationProvider, Parser, ValidNotificationMethods } from '../../internal.js';
 import { ValidGameNames, GAME_NAMES } from '@phone-games/games';
-import { ValidNotificationMethods } from '../../interfaces/Notification.js';
 
 export class MockNotificationProvider {
   static create(method: ValidNotificationMethods = 'whatsapp'): NotificationProvider {
