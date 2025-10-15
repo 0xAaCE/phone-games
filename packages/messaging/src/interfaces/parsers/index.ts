@@ -34,12 +34,12 @@ export type JoinPartyParams = {
 export type DataOutput = {
   [ValidActions.CREATE_PARTY]: CreatePartyParams,
   [ValidActions.JOIN_PARTY]: JoinPartyParams,
-  [ValidActions.LEAVE_PARTY]: {},
-  [ValidActions.START_MATCH]: {},
+  [ValidActions.LEAVE_PARTY]: Record<string, never>,
+  [ValidActions.START_MATCH]: Record<string, never>,
   [ValidActions.NEXT_ROUND]: NextRoundParams<ValidGameNames>,
   [ValidActions.MIDDLE_ROUND_ACTION]: MiddleRoundActionParams<ValidGameNames>,
   [ValidActions.FINISH_ROUND]: FinishRoundParams<ValidGameNames>,
-  [ValidActions.FINISH_MATCH]: {},
+  [ValidActions.FINISH_MATCH]: Record<string, never>,
 }
 
 export type Output<T extends ValidActions> = {

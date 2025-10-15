@@ -9,7 +9,9 @@
     "dev:watch": "nodemon --exec tsx src/server.ts",
     "start": "node dist/server.js",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@phone-games/db": "workspace:*",

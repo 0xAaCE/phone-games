@@ -31,9 +31,7 @@ export class PartyTestFactory {
         username: 'Player1',
         email: 'player1@test.com',
         phoneNumber: '1234567890',
-        firebaseUid: null,
         createdAt: new Date(),
-        updatedAt: new Date(),
       },
       isManager: false,
       ...overrides,
@@ -48,9 +46,7 @@ export class PartyTestFactory {
           username: `Player${i + 1}`,
           email: `player${i + 1}@test.com`,
           phoneNumber: `${i + 1}234567890`,
-          firebaseUid: null,
           createdAt: new Date(),
-          updatedAt: new Date(),
         },
         isManager: i === 0, // First player is manager
       })

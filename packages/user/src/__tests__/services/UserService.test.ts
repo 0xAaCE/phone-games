@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { UserService } from '../../services/UserService.js';
 import { ValidationError, ConflictError, NotFoundError } from '../../errors/index.js';
 import { UserTestFactory } from '../factories/userFactory.js';
@@ -16,7 +16,7 @@ describe('UserService', () => {
 
   describe('createUser', () => {
     it('should create a user with email', async () => {
-      const userData = UserTestFactory.createUserData({ email: 'test@example.com', phoneNumber: undefined });
+      const { phoneNumber: _phoneNumber, ...userData } = UserTestFactory.createUserData({ email: 'test@example.com' });
       const expectedUser = UserTestFactory.createUser(userData);
 
       MockPrismaClient.mockUserFindUnique(mockPrisma, null); // email doesn't exist
@@ -29,7 +29,7 @@ describe('UserService', () => {
     });
 
     it('should create a user with phone number', async () => {
-      const userData = UserTestFactory.createUserData({ email: undefined, phoneNumber: '1234567890' });
+      const { email: _email, ...userData } = UserTestFactory.createUserData({ phoneNumber: '1234567890' });
       const expectedUser = UserTestFactory.createUser(userData);
 
       MockPrismaClient.mockUserFindUnique(mockPrisma, null); // phone doesn't exist
@@ -53,7 +53,7 @@ describe('UserService', () => {
     });
 
     it('should throw ValidationError if neither email nor phone provided', async () => {
-      const userData = UserTestFactory.createUserData({ email: undefined, phoneNumber: undefined });
+      const { email: _email, phoneNumber: _phoneNumber, ...userData } = UserTestFactory.createUserData();
 
       await expect(userService.createUser(userData)).rejects.toThrow(ValidationError);
       await expect(userService.createUser(userData)).rejects.toThrow(
@@ -72,7 +72,7 @@ describe('UserService', () => {
     });
 
     it('should throw ConflictError if phone already exists', async () => {
-      const userData = UserTestFactory.createUserData({ email: undefined, phoneNumber: '1234567890' });
+      const { email: _email, ...userData } = UserTestFactory.createUserData({ phoneNumber: '1234567890' });
       const existingUser = UserTestFactory.createUser({ phoneNumber: '1234567890' });
 
       MockPrismaClient.mockUserFindUnique(mockPrisma, existingUser);
@@ -229,7 +229,7 @@ describe('UserService', () => {
       MockPrismaClient.mockUserFindUnique(mockPrisma, existingUser);
 
       await expect(
-        userService.updateUser(existingUser.id, { email: null, phoneNumber: null })
+        userService.updateUser(existingUser.id, { email: null as any, phoneNumber: null as any })
       ).rejects.toThrow(ValidationError);
     });
 

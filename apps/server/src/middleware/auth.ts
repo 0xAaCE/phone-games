@@ -86,19 +86,15 @@ export const authenticateFirebase = async (
     }
 
     // If Firebase verification fails, try JWT
-    try {
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        throw new UnauthorizedError('JWT secret not configured');
-      }
-
-      const decoded = jwt.verify(token, jwtSecret) as any;
-      req.user = decoded;
-
-      return next();
-    } catch (jwtError) {
-      throw new UnauthorizedError('Invalid token provided');
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new UnauthorizedError('JWT secret not configured');
     }
+
+    const decoded = jwt.verify(token, jwtSecret) as RequestUser;
+    req.user = decoded;
+
+    return next();
   } catch (error) {
     next(error);
   }

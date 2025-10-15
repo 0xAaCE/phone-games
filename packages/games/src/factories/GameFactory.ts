@@ -17,6 +17,7 @@ export class GameFactory {
   // General signature for when game name is not known at compile time
   static createGame<T extends ValidGameNames>(gameName: T): Game<T>;
   // Implementation
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static createGame(gameName: ValidGameNames): Game<any> {
     switch (gameName) {
       case GAME_NAMES.IMPOSTOR:

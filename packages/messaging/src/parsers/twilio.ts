@@ -93,11 +93,11 @@ export class TwilioParser implements IncomingMessageParser<MessagePlatform.TWILI
         return { partyId };
     }
 
-    private async parseLeavePartyParams(message: TwilioIncomingMessage): Promise<{}> {
+    private async parseLeavePartyParams(_message: TwilioIncomingMessage): Promise<Record<string, never>> {
         return {};
     }
 
-    private async parseStartMatchParams(message: TwilioIncomingMessage): Promise<{}> {
+    private async parseStartMatchParams(_message: TwilioIncomingMessage): Promise<Record<string, never>> {
         return {};
     }
 
@@ -123,11 +123,11 @@ export class TwilioParser implements IncomingMessageParser<MessagePlatform.TWILI
         return { votes: { [userId]: user.id } };
     }
 
-    private async parseFinishRoundParams(message: TwilioIncomingMessage): Promise<FinishRoundParams<ValidGameNames>> {
+    private async parseFinishRoundParams(_message: TwilioIncomingMessage): Promise<FinishRoundParams<ValidGameNames>> {
         return {};
     }
 
-    private async parseFinishMatchParams(message: TwilioIncomingMessage): Promise<{}> {
+    private async parseFinishMatchParams(_message: TwilioIncomingMessage): Promise<Record<string, never>> {
         return {};
     }
 }

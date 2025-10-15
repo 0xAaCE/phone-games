@@ -41,7 +41,7 @@ export const errorHandler = (
 
   // Handle Prisma errors
   if (error.name === 'PrismaClientKnownRequestError') {
-    const prismaError = error as any;
+    const prismaError = error as unknown as { code: string };
 
     switch (prismaError.code) {
       case 'P2002':

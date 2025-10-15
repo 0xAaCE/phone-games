@@ -14,13 +14,9 @@ export class TestDataBuilder {
       WaId: '1234567890',
       SmsMessageSid: 'SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
       NumMedia: '0',
-      MessageType: 'text',
       SmsSid: 'SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
       SmsStatus: 'received',
-      NumSegments: '1',
-      ReferralNumMedia: '0',
       ApiVersion: '2010-04-01',
-      ChannelMetadata: '{}',
       ...overrides,
     };
   }
@@ -73,6 +69,7 @@ export class TestDataBuilder {
       id: 'test-user-id',
       username: 'testuser',
       phoneNumber: '1234567890',
+      email: null,
       firebaseUid: null,
       createdAt: new Date(),
       updatedAt: new Date(),

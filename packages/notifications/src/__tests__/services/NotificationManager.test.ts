@@ -4,6 +4,15 @@ import { MockNotificationProvider, MockParser } from '../mocks/providers.js';
 import { GAME_NAMES } from '@phone-games/games';
 import { ValidGameActions, ValidPartyActions } from '../../interfaces/Notification.js';
 
+// Helper to create test game state
+const createTestGameState = (overrides = {}) => ({
+  currentRound: 1,
+  isFinished: false,
+  players: [],
+  customState: { currentRoundState: { votes: {}, roundEnded: false, word: 'test' }, winHistory: [] },
+  ...overrides,
+} as any);
+
 describe('NotificationManager', () => {
   let notificationManager: NotificationManager;
   let mockProvider: ReturnType<typeof MockNotificationProvider.create>;
@@ -69,12 +78,7 @@ describe('NotificationManager', () => {
   describe('notifyStartMatch', () => {
     it('should send start match notification', async () => {
       const userId = 'user-1';
-      const gameState = {
-        currentRound: 1,
-        isFinished: false,
-        players: [],
-        customState: {},
-      };
+      const gameState = createTestGameState();
 
       await notificationManager.registerUser(userId, mockProvider);
 
@@ -86,12 +90,7 @@ describe('NotificationManager', () => {
 
     it('should throw error if user not registered', async () => {
       const userId = 'unregistered-user';
-      const gameState = {
-        currentRound: 1,
-        isFinished: false,
-        players: [],
-        customState: {},
-      };
+      const gameState = createTestGameState();
 
       await expect(
         notificationManager.notifyStartMatch(GAME_NAMES.IMPOSTOR, userId, gameState)
@@ -102,12 +101,7 @@ describe('NotificationManager', () => {
   describe('notifyNextRound', () => {
     it('should send next round notification', async () => {
       const userId = 'user-1';
-      const gameState = {
-        currentRound: 2,
-        isFinished: false,
-        players: [],
-        customState: {},
-      };
+      const gameState = createTestGameState({ currentRound: 2 });
 
       await notificationManager.registerUser(userId, mockProvider);
 
@@ -121,12 +115,7 @@ describe('NotificationManager', () => {
   describe('notifyMiddleRoundAction', () => {
     it('should send middle round action notification', async () => {
       const userId = 'user-1';
-      const gameState = {
-        currentRound: 2,
-        isFinished: false,
-        players: [],
-        customState: {},
-      };
+      const gameState = createTestGameState({ currentRound: 2 });
 
       await notificationManager.registerUser(userId, mockProvider);
 
@@ -140,12 +129,7 @@ describe('NotificationManager', () => {
   describe('notifyFinishRound', () => {
     it('should send finish round notification', async () => {
       const userId = 'user-1';
-      const gameState = {
-        currentRound: 2,
-        isFinished: false,
-        players: [],
-        customState: {},
-      };
+      const gameState = createTestGameState({ currentRound: 2 });
 
       await notificationManager.registerUser(userId, mockProvider);
 
@@ -159,12 +143,7 @@ describe('NotificationManager', () => {
   describe('notifyFinishMatch', () => {
     it('should send finish match notification', async () => {
       const userId = 'user-1';
-      const gameState = {
-        currentRound: 3,
-        isFinished: true,
-        players: [],
-        customState: {},
-      };
+      const gameState = createTestGameState({ currentRound: 3, isFinished: true });
 
       await notificationManager.registerUser(userId, mockProvider);
 
@@ -235,15 +214,10 @@ describe('NotificationManager', () => {
   describe('parser matching', () => {
     it('should throw error if no parser found for game and method combination', async () => {
       const userId = 'user-1';
-      const differentMethodProvider = MockNotificationProvider.create('twilio');
-      const gameState = {
-        currentRound: 1,
-        isFinished: false,
-        players: [],
-        customState: {},
-      };
+      const differentMethodProvider = MockNotificationProvider.create('web_socket');
+      const gameState = createTestGameState();
 
-      // Register with twilio provider but only whatsapp parser is available
+      // Register with web_socket provider but only whatsapp parser is available
       await notificationManager.registerUser(userId, differentMethodProvider);
 
       await expect(
@@ -253,22 +227,17 @@ describe('NotificationManager', () => {
 
     it('should use correct parser for provider method', async () => {
       const userId = 'user-1';
-      const twilioParser = MockParser.create(GAME_NAMES.IMPOSTOR, 'twilio');
-      const twilioProvider = MockNotificationProvider.create('twilio');
-      const notificationManagerWithTwilio = new NotificationManager([mockParser, twilioParser]);
-      const gameState = {
-        currentRound: 1,
-        isFinished: false,
-        players: [],
-        customState: {},
-      };
+      const webSocketParser = MockParser.create(GAME_NAMES.IMPOSTOR, 'web_socket');
+      const webSocketProvider = MockNotificationProvider.create('web_socket');
+      const notificationManagerWithWebSocket = new NotificationManager([mockParser, webSocketParser]);
+      const gameState = createTestGameState();
 
-      await notificationManagerWithTwilio.registerUser(userId, twilioProvider);
+      await notificationManagerWithWebSocket.registerUser(userId, webSocketProvider);
 
-      await notificationManagerWithTwilio.notifyStartMatch(GAME_NAMES.IMPOSTOR, userId, gameState);
+      await notificationManagerWithWebSocket.notifyStartMatch(GAME_NAMES.IMPOSTOR, userId, gameState);
 
-      expect(twilioParser.parse).toHaveBeenCalled();
-      expect(twilioProvider.sendNotification).toHaveBeenCalled();
+      expect(webSocketParser.parse).toHaveBeenCalled();
+      expect(webSocketProvider.sendNotification).toHaveBeenCalled();
       expect(mockParser.parse).not.toHaveBeenCalled();
     });
   });

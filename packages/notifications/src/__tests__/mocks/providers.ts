@@ -2,7 +2,7 @@ import { vi } from 'vitest';
 import { NotificationProvider } from '../../interfaces/NotificationProvider.js';
 import { Parser } from '../../interfaces/Parser.js';
 import { ValidGameNames, GAME_NAMES } from '@phone-games/games';
-import { ValidNotificationMethods, Notification } from '../../interfaces/Notification.js';
+import { ValidNotificationMethods } from '../../interfaces/Notification.js';
 
 export class MockNotificationProvider {
   static create(method: ValidNotificationMethods = 'whatsapp'): NotificationProvider {
@@ -25,8 +25,13 @@ export class MockParser {
         title: 'Test Title',
         body: 'Test Body',
         action: 'START_MATCH',
-        data: {},
-      } as Notification),
+        data: {
+          currentRound: 1,
+          isFinished: false,
+          players: [],
+          customState: { currentRoundState: { votes: {}, roundEnded: false, word: 'test' }, winHistory: [] },
+        },
+      } as any),
     } as unknown as Parser;
   }
 }

@@ -1,4 +1,3 @@
-import { PrismaClient } from "@phone-games/db";
 import { CreatePartyParams, DataOutput, IncomingMessage, IncomingMessageParser, JoinPartyParams, MessagePlatform, Output, ValidActions } from "../interfaces/parsers";
 import { WhatsAppIncomingMessage } from "../interfaces/parsers/whatsapp";
 import { FinishRoundParams, MiddleRoundActionParams, NextRoundParams, ValidGameNames } from "@phone-games/games";
@@ -92,15 +91,11 @@ export class WhatsAppParser implements IncomingMessageParser<MessagePlatform.WHA
         return { partyId };
     }
 
-    private async parseLeavePartyParams(message: WhatsAppIncomingMessage): Promise<{}> {
-        const text = message.entry[0].changes[0].value.messages[0].text.body;
-        const [_action] = text.split(' ');
+    private async parseLeavePartyParams(_message: WhatsAppIncomingMessage): Promise<Record<string, never>> {
         return {};
     }
 
-    private async parseStartMatchParams(message: WhatsAppIncomingMessage): Promise<{}> {
-        const text = message.entry[0].changes[0].value.messages[0].text.body;
-        const [_action] = text.split(' ');
+    private async parseStartMatchParams(_message: WhatsAppIncomingMessage): Promise<Record<string, never>> {
         return {};
     }
 
@@ -124,11 +119,11 @@ export class WhatsAppParser implements IncomingMessageParser<MessagePlatform.WHA
         return { votes: { [userId]: user.id } };
     }
 
-    private async parseFinishRoundParams(message: WhatsAppIncomingMessage): Promise<FinishRoundParams<ValidGameNames>> {
+    private async parseFinishRoundParams(_message: WhatsAppIncomingMessage): Promise<FinishRoundParams<ValidGameNames>> {
         return {};
     }
 
-    private async parseFinishMatchParams(message: WhatsAppIncomingMessage): Promise<{}> {
+    private async parseFinishMatchParams(_message: WhatsAppIncomingMessage): Promise<Record<string, never>> {
         return {};
     }
 }

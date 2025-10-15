@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { PrismaClient, Party, PartyPlayer } from '@phone-games/db';
 import { NotificationService } from '@phone-games/notifications';
-import { Game, GameState, ValidGameNames } from '@phone-games/games';
+import { Game, ValidGameNames } from '@phone-games/games';
 
 export class MockPrismaClient {
   static create(): PrismaClient {
@@ -71,29 +71,24 @@ export class MockNotificationService {
 
 export class MockGame {
   static create<T extends ValidGameNames>(gameName: T): Game<T> {
+    const mockGameState = {
+      currentRound: 1,
+      isFinished: false,
+      players: [],
+      customState: { currentRoundState: { votes: {}, roundEnded: false, word: 'test' }, winHistory: [] },
+    };
+
     return {
       getName: vi.fn().mockReturnValue(gameName),
-      start: vi.fn().mockResolvedValue({
-        currentRound: 1,
-        isFinished: false,
-        players: [],
-        customState: {},
-      } as GameState<T>),
+      start: vi.fn().mockResolvedValue(mockGameState as any),
       nextRound: vi.fn().mockResolvedValue({ word: 'test-word' }),
       middleRoundAction: vi.fn().mockResolvedValue({ votes: {} }),
       finishRound: vi.fn().mockResolvedValue({ roundFinished: true }),
       finishMatch: vi.fn().mockResolvedValue({
-        currentRound: 1,
+        ...mockGameState,
         isFinished: true,
-        players: [],
-        customState: {},
-      } as GameState<T>),
-      getGameState: vi.fn().mockReturnValue({
-        currentRound: 1,
-        isFinished: false,
-        players: [],
-        customState: {},
-      } as GameState<T>),
+      } as any),
+      getGameState: vi.fn().mockReturnValue(mockGameState as any),
     } as unknown as Game<T>;
   }
 }

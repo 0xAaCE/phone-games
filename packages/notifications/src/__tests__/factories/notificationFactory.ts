@@ -8,12 +8,13 @@ export class NotificationTestFactory {
       body: 'This is a test notification',
       action: ValidGameActions.START_MATCH,
       data: {
-        partyName: 'Test Party',
-        partyId: 'test-party-id',
-        gameName: 'impostor',
-      },
+        currentRound: 1,
+        isFinished: false,
+        players: [],
+        customState: { currentRoundState: { votes: {}, roundEnded: false, word: 'test' }, winHistory: [] },
+      } as any,
       ...overrides,
-    };
+    } as Notification;
   }
 
   static createGameNotification(action: ValidGameActions): Notification {

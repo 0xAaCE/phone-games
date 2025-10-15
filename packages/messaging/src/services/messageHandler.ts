@@ -1,4 +1,4 @@
-import { PrismaClient, User } from "@phone-games/db";
+import { User } from "@phone-games/db";
 import { MessageHandler } from "../interfaces/messageHandler";
 import { NotificationProvider, NotificationService, WhatsappNotificationProvider, TwilioWhatsAppNotificationProvider } from "@phone-games/notifications";
 import { PartyManagerService } from "@phone-games/party";
@@ -24,9 +24,10 @@ export class MessageHandlerService implements MessageHandler {
 
   canHandle(messagePlatform: MessagePlatform, message: IncomingMessage<MessagePlatform>): boolean {
     switch (messagePlatform) {
-      case MessagePlatform.WHATSAPP:
+      case MessagePlatform.WHATSAPP: {
         const isMessageField = (message as WhatsAppIncomingMessage).entry[0].changes[0].field === "messages";
         return isMessageField;
+      }
       case MessagePlatform.TWILIO:
         return this.parsers.has(MessagePlatform.TWILIO);
       default:
@@ -48,32 +49,37 @@ export class MessageHandlerService implements MessageHandler {
     await this.handleUser(messagePlatform, output);
 
     switch (output.action) {
-      case ValidActions.CREATE_PARTY:
+      case ValidActions.CREATE_PARTY: {
         const createPartyParams = output.dataOutput as CreatePartyParams;
         await this.partyManagerService.createParty(output.user.id, createPartyParams.partyName, GameFactory.createGame(createPartyParams.gameName));
         break;
-      case ValidActions.JOIN_PARTY:
+      }
+      case ValidActions.JOIN_PARTY: {
         const joinPartyParams = output.dataOutput as JoinPartyParams;
         await this.partyManagerService.joinParty(output.user.id, joinPartyParams.partyId);
         break;
+      }
       case ValidActions.LEAVE_PARTY:
         await this.partyManagerService.leaveParty(output.user.id);
         break;
       case ValidActions.START_MATCH:
         await this.partyManagerService.startMatch(output.user.id);
         break;
-      case ValidActions.NEXT_ROUND:
+      case ValidActions.NEXT_ROUND: {
         const nextRoundParams = output.dataOutput as NextRoundParams<ValidGameNames>;
         await this.partyManagerService.nextRound(output.user.id, nextRoundParams);
         break;
-      case ValidActions.MIDDLE_ROUND_ACTION:
+      }
+      case ValidActions.MIDDLE_ROUND_ACTION: {
         const middleRoundActionParams = output.dataOutput as MiddleRoundActionParams<ValidGameNames>;
         await this.partyManagerService.middleRoundAction(output.user.id, middleRoundActionParams);
         break;
-      case ValidActions.FINISH_ROUND:
+      }
+      case ValidActions.FINISH_ROUND: {
         const finishRoundParams = output.dataOutput as FinishRoundParams<ValidGameNames>;
         await this.partyManagerService.finishRound(output.user.id, finishRoundParams);
         break;
+      }
       case ValidActions.FINISH_MATCH:
         await this.partyManagerService.finishMatch(output.user.id);
         break;
@@ -98,10 +104,24 @@ export class MessageHandlerService implements MessageHandler {
 
   private getMessageProvider(messagePlatform: MessagePlatform, user: User): NotificationProvider {
     switch (messagePlatform) {
-      case MessagePlatform.WHATSAPP:
-        return new WhatsappNotificationProvider(process.env.WHATSAPP_API_URL!, process.env.WHATSAPP_PHONE_NUMBER_ID!, process.env.WHATSAPP_API_TOKEN!, user);
-      case MessagePlatform.TWILIO:
-        return new TwilioWhatsAppNotificationProvider(process.env.TWILIO_ACCOUNT_SID!, process.env.TWILIO_AUTH_TOKEN!, process.env.TWILIO_WHATSAPP_FROM!, user);
+      case MessagePlatform.WHATSAPP: {
+        const apiUrl = process.env.WHATSAPP_API_URL;
+        const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+        const apiToken = process.env.WHATSAPP_API_TOKEN;
+        if (!apiUrl || !phoneNumberId || !apiToken) {
+          throw new Error('Missing required WhatsApp environment variables');
+        }
+        return new WhatsappNotificationProvider(apiUrl, phoneNumberId, apiToken, user);
+      }
+      case MessagePlatform.TWILIO: {
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken = process.env.TWILIO_AUTH_TOKEN;
+        const whatsappFrom = process.env.TWILIO_WHATSAPP_FROM;
+        if (!accountSid || !authToken || !whatsappFrom) {
+          throw new Error('Missing required Twilio environment variables');
+        }
+        return new TwilioWhatsAppNotificationProvider(accountSid, authToken, whatsappFrom, user);
+      }
       default:
         throw new Error(`Message platform not supported: ${messagePlatform}`);
     }
