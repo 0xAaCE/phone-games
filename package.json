@@ -7,6 +7,10 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean",
     "db:generate": "turbo run db:generate",
@@ -14,8 +18,10 @@
     "db:migrate": "turbo run db:migrate"
   },
   "devDependencies": {
+    "@vitest/ui": "^3.2.4",
     "turbo": "^2.3.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   },
   "workspaces": [
     "apps/*",
