@@ -10,3 +10,4 @@ data:
   WHATSAPP_API_URL: "https://graph.facebook.com/v22.0"
   WHATSAPP_PHONE_NUMBER_ID: "745990838608160"
   # Add other non-sensitive config here
+  TWILIO_WHATSAPP_FROM: "14155238886"
