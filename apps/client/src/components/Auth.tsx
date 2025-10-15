@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { auth } from '../config/firebase';
+import { auth } from '../config/firebase.js';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { api } from '../services/api';
+import { api } from '../services/api.js';
 
 interface AuthProps {
   onAuthSuccess: () => void;

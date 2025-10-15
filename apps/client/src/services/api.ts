@@ -1,4 +1,4 @@
-import { auth } from '../config/firebase';
+import { auth } from '../config/firebase.js';
 import type { User, Party } from '@phone-games/db';
 import type {
   ValidGameNames,

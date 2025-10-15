@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './config/firebase';
-import Auth from './components/Auth';
-import Home from './components/Home';
+import { auth } from './config/firebase.js';
+import Auth from './components/Auth.js';
+import Home from './components/Home.js';
 
 export default function App() {
   const [user, setUser] = useState<unknown>(null);

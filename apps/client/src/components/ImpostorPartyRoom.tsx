@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import { auth } from '../config/firebase';
+import { api } from '../services/api.js';
+import { auth } from '../config/firebase.js';
 import { GAME_NAMES, type GameState } from '@phone-games/games';
-import { websocketService, type WebSocketNotification } from '../services/websocket';
-import Toast from './Toast';
+import { websocketService, type WebSocketNotification } from '../services/websocket.js';
+import Toast from './Toast.js';
 import { ValidGameActions } from '@phone-games/notifications';
 
 interface ImpostorPartyRoomProps {

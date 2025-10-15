@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { api } from '../services/api';
+import { api } from '../services/api.js';
 import { GAME_NAMES } from '@phone-games/games';
 
 interface CreatePartyProps {

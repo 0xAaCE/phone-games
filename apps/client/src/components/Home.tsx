@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { auth } from '../config/firebase';
-import CreateParty from './CreateParty';
-import JoinParty from './JoinParty';
-import PartyRoom from './PartyRoom';
+import { auth } from '../config/firebase.js';
+import CreateParty from './CreateParty.js';
+import JoinParty from './JoinParty.js';
+import PartyRoom from './PartyRoom.js';
 
 export default function Home() {
   const [view, setView] = useState<'menu' | 'create' | 'join' | 'party'>('menu');

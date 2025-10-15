@@ -1,5 +1,5 @@
 import { GameState, ValidGameNames } from '@phone-games/games';
-import { auth } from '../config/firebase';
+import { auth } from '../config/firebase.js';
 import { ValidActions, ValidGameActions, ValidPartyActions } from '@phone-games/notifications';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:4000';
