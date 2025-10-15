@@ -50,7 +50,7 @@ export class TwilioParser implements IncomingMessageParser<MessagePlatform.TWILI
 
     private async parseUser(message: TwilioIncomingMessage): Promise<{ id: string, username: string, phoneNumber: string }> {
         // Extract phone number from "whatsapp:+1234567890" format
-        const from = message.From.replace('whatsapp: +', '');
+        const from = message.From.replace('whatsapp:+', '');
         const waId = message.WaId || from;
         const id = waIdToUserId(waId); // Convert wa_id to deterministic UUID
         const username = message.ProfileName || from;
@@ -102,7 +102,7 @@ export class TwilioParser implements IncomingMessageParser<MessagePlatform.TWILI
     }
 
     private async parseNextRoundParams(message: TwilioIncomingMessage): Promise<NextRoundParams<ValidGameNames>> {
-        const from = message.From.replace('whatsapp:', '');
+        const from = message.From.replace('whatsapp:+', '');
         const waId = message.WaId || from;
         const userId = waIdToUserId(waId);
         return { userId };
@@ -111,7 +111,7 @@ export class TwilioParser implements IncomingMessageParser<MessagePlatform.TWILI
     private async parseMiddleRoundActionParams(message: TwilioIncomingMessage): Promise<MiddleRoundActionParams<ValidGameNames>> {
         const text = message.Body;
         const [_action, vote] = text.split(' ');
-        const from = message.From.replace('whatsapp:', '');
+        const from = message.From.replace('whatsapp:+', '');
         const waId = message.WaId || from;
         const userId = waIdToUserId(waId);
 
