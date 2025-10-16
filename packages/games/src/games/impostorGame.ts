@@ -1,5 +1,6 @@
 import { GamePlayer, GameState, NextRoundParams, NextRoundResult, ValidGameNames, GAME_NAMES, ImpostorFinishRoundParams, ImpostorFinishRoundResult, ImpostorMiddleRoundActionParams, ImpostorMiddleRoundActionResult } from '../internal.js';
 import { Game } from './game.js';
+import { GameError } from '@phone-games/errors';
 export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
   private words = [
     'pizza',
@@ -52,7 +53,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
 
   async start(players: GamePlayer[]): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
     if (players.length < 3) {
-      throw new Error('Impostor game requires at least 3 players');
+      throw new GameError('Impostor game requires at least 3 players');
     }
 
     this.updateState({
@@ -66,7 +67,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
       nextRoundParams: NextRoundParams<GAME_NAMES.IMPOSTOR>
   ): Promise<NextRoundResult<GAME_NAMES.IMPOSTOR>> {
     if (!this.gameState?.customState.currentRoundState.roundEnded) {
-      throw new Error('Cannot start next round while current round is still active');
+      throw new GameError('Cannot start next round while current round is still active');
     }
 
     // Select new impostor and word
@@ -96,7 +97,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
   ): Promise<ImpostorMiddleRoundActionResult> {
 
     if (this.gameState.customState.currentRoundState.roundEnded) {
-      throw new Error('Cannot vote after round has ended');
+      throw new GameError('Cannot vote after round has ended');
     }
 
     this.computeVotes(middleRoundActionParams.votes);
@@ -110,7 +111,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
     _finishRoundParams: ImpostorFinishRoundParams
   ): Promise<ImpostorFinishRoundResult> {
     if (this.gameState.customState.currentRoundState.roundEnded) {
-      throw new Error('Cannot finish round that has already ended');
+      throw new GameError('Cannot finish round that has already ended');
     }
 
     const { votes } = this.gameState.customState.currentRoundState;
@@ -170,7 +171,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
   async finishMatch(
   ): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
     if (!this.gameState.customState.currentRoundState.roundEnded) {
-      throw new Error('Cannot finish match while round is still active');
+      throw new GameError('Cannot finish match while round is still active');
     }
 
     this.gameState = {

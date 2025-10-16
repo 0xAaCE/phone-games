@@ -20,10 +20,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@phone-games/games": "workspace:*",
     "@phone-games/db": "workspace:*",
-    "@phone-games/party": "workspace:*",
+    "@phone-games/errors": "workspace:*",
+    "@phone-games/games": "workspace:*",
     "@phone-games/notifications": "workspace:*",
+    "@phone-games/party": "workspace:*",
     "@phone-games/user": "workspace:*",
     "axios": "^1.6.2",
     "uuid": "^10.0.0"

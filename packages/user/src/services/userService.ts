@@ -1,5 +1,5 @@
 import { PrismaClient, User } from '@phone-games/db';
-import { ValidationError, ConflictError, NotFoundError } from '../errors/index.js';
+import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
 
 export interface CreateUserData {
   id: string;

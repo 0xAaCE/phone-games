@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { BaseError } from '../errors/index.js';
+import { BaseError } from '@phone-games/errors';
 
 export interface ErrorResponse {
   error: {

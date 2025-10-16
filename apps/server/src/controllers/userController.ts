@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService, CreateUserData } from '@phone-games/user';
 import { AuthenticatedRequest, generateJWT } from '../middleware/auth.js';
+import { UnauthorizedError, InternalServerError } from '@phone-games/errors';
 
 export class UserController {
   private userService: UserService;
@@ -28,7 +29,7 @@ export class UserController {
   authenticateWithFirebase = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.user) {
-        return next(new Error('User not authenticated'));
+        return next(new UnauthorizedError('User not authenticated'));
       }
 
       // Check if user exists in our database by Firebase UID
@@ -45,7 +46,7 @@ export class UserController {
       }
 
       if (!user) {
-        return next(new Error('Failed to create or find user'));
+        return next(new InternalServerError('Failed to create or find user'));
       }
 
       // Generate JWT token (optional - can be removed if only using Firebase tokens)

@@ -20,7 +20,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@phone-games/db": "workspace:*"
+    "@phone-games/db": "workspace:*",
+    "@phone-games/errors": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.2"

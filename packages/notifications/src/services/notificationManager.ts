@@ -3,6 +3,7 @@ import { NotificationService } from "../interfaces/notificationService.js";
 import { NotificationProvider } from "../interfaces/notificationProvider.js";
 import { Parser } from "../interfaces/parser.js";
 import { ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/notification.js";
+import { NotificationError } from "@phone-games/errors";
 
 type ParserKey = `${ValidGameNames}-${ValidNotificationMethods}`;
 
@@ -27,11 +28,11 @@ export class NotificationManager implements NotificationService {
     private getProviderAndParser(userId: string, gameName: ValidGameNames): { provider: NotificationProvider, parser: Parser } {
         const provider = this.notificationProviders.get(userId);
         if (!provider) {
-            throw new Error(`Notification provider not found for user ${userId}`);
+            throw new NotificationError(`Notification provider not found for user ${userId}`);
         }
         const parser = this.parsers.get(`${gameName}-${provider.getNotificationMethod()}`);
         if (!parser) {
-            throw new Error("Parser not found");
+            throw new NotificationError("Parser not found");
         }
         return { provider, parser };
     }

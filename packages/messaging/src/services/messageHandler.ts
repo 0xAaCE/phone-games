@@ -7,6 +7,7 @@ import { FinishRoundParams, GameFactory, MiddleRoundActionParams, NextRoundParam
 
 import { CreatePartyParams, IncomingMessage, IncomingMessageParser, JoinPartyParams, MessagePlatform, Output, ValidActions } from "../interfaces/parsers/index.js";
 import { WhatsAppIncomingMessage } from "../interfaces/parsers/whatsapp.js";
+import { MessageParsingError, ExternalServiceError } from "@phone-games/errors";
 
 
 export class MessageHandlerService implements MessageHandler {
@@ -41,7 +42,7 @@ export class MessageHandlerService implements MessageHandler {
     const parser = this.parsers.get(messagePlatform);
 
     if (!parser) {
-      throw new Error(`Parser not found for message platform: ${messagePlatform}`);
+      throw new MessageParsingError(`Parser not found for message platform: ${messagePlatform}`);
     }
 
     const output = await parser.parse(message);
@@ -109,7 +110,7 @@ export class MessageHandlerService implements MessageHandler {
         const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
         const apiToken = process.env.WHATSAPP_API_TOKEN;
         if (!apiUrl || !phoneNumberId || !apiToken) {
-          throw new Error('Missing required WhatsApp environment variables');
+          throw new ExternalServiceError('Missing required WhatsApp environment variables');
         }
         return new WhatsappNotificationProvider(apiUrl, phoneNumberId, apiToken, user);
       }
@@ -118,12 +119,12 @@ export class MessageHandlerService implements MessageHandler {
         const authToken = process.env.TWILIO_AUTH_TOKEN;
         const whatsappFrom = process.env.TWILIO_WHATSAPP_FROM;
         if (!accountSid || !authToken || !whatsappFrom) {
-          throw new Error('Missing required Twilio environment variables');
+          throw new ExternalServiceError('Missing required Twilio environment variables');
         }
         return new TwilioWhatsAppNotificationProvider(accountSid, authToken, whatsappFrom, user);
       }
       default:
-        throw new Error(`Message platform not supported: ${messagePlatform}`);
+        throw new MessageParsingError(`Message platform not supported: ${messagePlatform}`);
     }
   }
 }

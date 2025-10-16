@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { PartyManagerService } from '@phone-games/party';
 import { AuthenticatedRequest } from '../middleware/auth.js';
-import { ValidationError } from '../errors/index.js';
+import { ValidationError } from '@phone-games/errors';
 import { GameFactory, ValidGamesSchema } from '@phone-games/games';
 
 export class PartyController {

@@ -1,5 +1,5 @@
 {
-  "name": "@phone-games/party",
+  "name": "@phone-games/errors",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,13 +18,6 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest"
-  },
-  "dependencies": {
-    "@phone-games/db": "workspace:*",
-    "@phone-games/errors": "workspace:*",
-    "@phone-games/games": "workspace:*",
-    "@phone-games/notifications": "workspace:*",
-    "zod": "^4.1.12"
   },
   "devDependencies": {
     "typescript": "^5.9.2"

@@ -3,7 +3,7 @@ import admin from 'firebase-admin';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
-import { UnauthorizedError } from '../errors/index.js';
+import { UnauthorizedError, InternalServerError } from '@phone-games/errors';
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
@@ -103,7 +103,7 @@ export const authenticateFirebase = async (
 export const generateJWT = (user: { id: string; email?: string; name?: string; firebaseUid: string }): string => {
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
-    throw new Error('JWT secret not configured');
+    throw new InternalServerError('JWT secret not configured');
   }
 
   return jwt.sign(user, jwtSecret, { expiresIn: '7d' });

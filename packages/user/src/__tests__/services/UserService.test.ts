@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { UserService } from '../../services/userService.js';
-import { ValidationError, ConflictError, NotFoundError } from '../../errors/index.js';
+import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
 import { UserTestFactory } from '../factories/userFactory.js';
 import { MockPrismaClient } from '../mocks/prisma.js';
 import { PrismaClient } from '@phone-games/db';

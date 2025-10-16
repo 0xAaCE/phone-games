@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@phone-games/db": "workspace:*",
+    "@phone-games/errors": "workspace:*",
     "@phone-games/games": "workspace:*",
     "@phone-games/party": "workspace:*",
     "@phone-games/user": "workspace:*",

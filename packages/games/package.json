@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@phone-games/db": "workspace:*",
+    "@phone-games/errors": "workspace:*",
     "zod": "^4.1.12"
   },
   "devDependencies": {

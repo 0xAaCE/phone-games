@@ -1,12 +1,5 @@
 import { ValidGameNames, ImpostorGame, GAME_NAMES, Game } from '../internal.js';
-
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
-
+import { GameError } from '@phone-games/errors';
 
 export class GameFactory {
   // Overload signatures for specific game types
@@ -20,7 +13,7 @@ export class GameFactory {
       case GAME_NAMES.IMPOSTOR:
         return new ImpostorGame();
       default:
-        throw new ValidationError(`Game "${gameName}" not found. Available games: ${Object.values(GAME_NAMES).join(', ')}`);
+        throw new GameError(`Game "${gameName}" not found. Available games: ${Object.values(GAME_NAMES).join(', ')}`);
     }
   }
 

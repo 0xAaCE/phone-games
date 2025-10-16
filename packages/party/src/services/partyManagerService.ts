@@ -1,6 +1,6 @@
 import { PrismaClient, Party, PartyPlayer, PartyStatus, PlayerRole, Prisma } from '@phone-games/db';
 import { GamePlayer, GameState, ValidGameNames, Game, NextRoundParams, FinishRoundParams, FinishRoundResult, NextRoundResult, MiddleRoundActionResult, MiddleRoundActionParams } from '@phone-games/games';
-import { ValidationError, ConflictError, NotFoundError } from '../errors/index.js';
+import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
 import { NotificationService } from '@phone-games/notifications';
 
 type PartyPlayerWithUser = Prisma.PartyPlayerGetPayload<{

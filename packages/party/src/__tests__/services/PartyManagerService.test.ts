@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PartyManagerService } from '../../services/partyManagerService.js';
-import { NotFoundError, ConflictError, ValidationError } from '../../errors/index.js';
+import { NotFoundError, ConflictError, ValidationError } from '@phone-games/errors';
 import { PartyTestFactory } from '../factories/partyFactory.js';
 import { MockPrismaClient, MockNotificationService, MockGame } from '../mocks/dependencies.js';
 import { PrismaClient, PartyStatus, PlayerRole } from '@phone-games/db';
