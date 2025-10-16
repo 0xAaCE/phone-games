@@ -30,13 +30,7 @@ COPY turbo.json ./turbo.json
 RUN pnpm --filter @phone-games/db run db:generate
 
 # Build packages in order (to handle TypeScript composite references)
-RUN pnpm --filter @phone-games/db run build && \
-    pnpm --filter @phone-games/games run build && \
-    pnpm --filter @phone-games/user run build && \
-    pnpm --filter @phone-games/notifications run build && \
-    pnpm --filter @phone-games/party run build && \
-    pnpm --filter @phone-games/messaging run build && \
-    pnpm --filter @phone-games/server run build
+RUN pnpm build
 
 # Production stage
 FROM node:20-alpine AS runner
