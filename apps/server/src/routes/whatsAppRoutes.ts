@@ -1,8 +1,14 @@
-import { type Router as RouterType } from 'express';
+import { Router } from 'express';
 import { WhatsAppController } from '../controllers/whatsAppController.js';
+import { MessageHandlerService } from '@phone-games/messaging';
 
-export const applyWhatsAppRoutes = (router: RouterType, whatsAppController: WhatsAppController) => {
+export function createWhatsAppRouter(messageHandlerService: MessageHandlerService): Router {
+    const router = Router();
+    const whatsAppController = new WhatsAppController(messageHandlerService);
+
     // Public routes
     router.get('/', whatsAppController.verifyWebhook);
     router.post('/', whatsAppController.handleWebhook);
+
+    return router;
 }

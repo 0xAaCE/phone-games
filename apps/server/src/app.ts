@@ -1,22 +1,13 @@
-import express, { Express, Router } from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
-import { applyUserRoutes } from './routes/userRoutes.js';
-import { applyPartyRoutes } from './routes/partyRoutes.js';
+import { createUserRouter } from './routes/userRoutes.js';
+import { createPartyRouter } from './routes/partyRoutes.js';
+import { createWhatsAppRouter } from './routes/whatsAppRoutes.js';
+import { createTwilioRouter } from './routes/twilioRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { UserController } from './controllers/userController.js';
-import { PartyController } from './controllers/partyController.js';
-import { NotificationService } from '@phone-games/notifications';
-import { WhatsAppController } from './controllers/whatsAppController.js';
-import { TwilioController } from './controllers/twilioController.js';
-import { applyWhatsAppRoutes } from './routes/whatsAppRoutes.js';
-import { applyTwilioRoutes } from './routes/twilioRoutes.js';
-import { db } from '@phone-games/db';
-import { PartyManagerService } from '@phone-games/party';
-import { MessageHandlerService, WhatsAppParser, TwilioParser } from '@phone-games/messaging';
-import { UserService } from '@phone-games/user';
-import { ILogger } from '@phone-games/logger';
+import { Services } from './factories/serviceFactory.js';
 
-export const initializeApp = (notificationService: NotificationService, logger: ILogger) => {
+export const initializeApp = (services: Services) => {
   const app: Express = express();
 
   // Middleware
@@ -24,35 +15,12 @@ export const initializeApp = (notificationService: NotificationService, logger: 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  const partyManagerService = new PartyManagerService(db, notificationService, logger);
-  const userService = new UserService(db);
-  const userController = new UserController(userService);
-  const partyController = new PartyController(partyManagerService);
-  const messageHandlerService = new MessageHandlerService(
-    notificationService,
-    partyManagerService,
-    userService,
-    [new WhatsAppParser(userService), new TwilioParser(userService)],
-    logger
-  );
-  const whatsAppController = new WhatsAppController(messageHandlerService);
-  const twilioController = new TwilioController(messageHandlerService);
-  const userRouter = Router();
-  const partyRouter = Router();
-  const whatsAppRouter = Router();
-  const twilioRouter = Router();
+  // Mount routers
+  app.use('/api/users', createUserRouter(services.userService));
+  app.use('/api/parties', createPartyRouter(services.partyManagerService));
+  app.use('/api/whatsapp', createWhatsAppRouter(services.messageHandlerService));
+  app.use('/api/twilio', createTwilioRouter(services.messageHandlerService));
 
-  applyUserRoutes(userRouter, userController);
-  applyPartyRoutes(partyRouter, partyController);
-  applyWhatsAppRoutes(whatsAppRouter, whatsAppController);
-  applyTwilioRoutes(twilioRouter, twilioController);
-
-  // Routes
-  app.use('/api/users', userRouter);
-  app.use('/api/parties', partyRouter);
-  app.use('/api/whatsapp', whatsAppRouter);
-  app.use('/api/twilio', twilioRouter);
-  
   // Health check endpoint
   app.get('/health', (_req, res) => {
     res.json({

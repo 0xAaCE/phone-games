@@ -1,8 +1,10 @@
 import { ImpostorWebSocketParser, ImpostorWhatsAppParser, NotificationManager } from '@phone-games/notifications';
 import { initializeApp } from './app.js';
+import { createServices } from './factories/serviceFactory.js';
 import dotenv from 'dotenv';
 import { WebSocketManager } from './services/webSocketManager.js';
 import { Logger, LogLevel } from '@phone-games/logger';
+import { db } from '@phone-games/db';
 
 // Load environment variables
 dotenv.config();
@@ -18,11 +20,20 @@ const logger = new Logger({
 
 logger.info('Initializing server', { port: PORT });
 
+// Initialize notification service (manages WebSocket connections)
 const notificationService = new NotificationManager(
   [new ImpostorWebSocketParser(), new ImpostorWhatsAppParser()],
   logger
 );
-const app = initializeApp(notificationService, logger);
+
+// Create all services using the factory
+const services = createServices({
+  db,
+  logger,
+  notificationService,
+});
+
+const app = initializeApp(services);
 
 // Start server
 const server = app.listen(PORT, () => {

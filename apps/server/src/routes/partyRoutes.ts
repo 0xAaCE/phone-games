@@ -1,8 +1,12 @@
-import { type Router as RouterType } from 'express';
+import { Router } from 'express';
 import { PartyController } from '../controllers/partyController.js';
 import { authenticateFirebase } from '../middleware/auth.js';
+import { PartyManagerService } from '@phone-games/party';
 
-export const applyPartyRoutes = (router: RouterType, partyController: PartyController) => {
+export function createPartyRouter(partyService: PartyManagerService): Router {
+    const router = Router();
+    const partyController = new PartyController(partyService);
+
     // All party routes require authentication
     router.use(authenticateFirebase);
 
@@ -24,4 +28,6 @@ export const applyPartyRoutes = (router: RouterType, partyController: PartyContr
     router.post('/game/finish-round', partyController.finishRound);
     router.post('/game/finish-match', partyController.finishMatch);
     router.get('/game/state', partyController.getGameState);
+
+    return router;
 }
