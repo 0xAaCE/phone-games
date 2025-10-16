@@ -4,17 +4,20 @@ import { NotificationProvider } from "../interfaces/notificationProvider.js";
 import { Parser } from "../interfaces/parser.js";
 import { ValidGameActions, ValidNotificationMethods, ValidPartyActions } from "../interfaces/notification.js";
 import { NotificationError } from "@phone-games/errors";
+import { ILogger } from "@phone-games/logger";
 
 type ParserKey = `${ValidGameNames}-${ValidNotificationMethods}`;
 
 export class NotificationManager implements NotificationService {
     private notificationProviders: Map<string, NotificationProvider> = new Map();
     private parsers: Map<ParserKey, Parser> = new Map();
-    
-    constructor(parsers: Parser[]) {
+    private logger: ILogger;
+
+    constructor(parsers: Parser[], logger: ILogger) {
         parsers.forEach(parser => {
             this.parsers.set(this.getParserKey(parser), parser);
         });
+        this.logger = logger.child({ service: 'NotificationManager' });
     }
 
     hasUser(userId: string): boolean {
@@ -92,7 +95,7 @@ export class NotificationManager implements NotificationService {
 
         const notification = await parser.parse(ValidPartyActions.PLAYER_JOINED, { partyName, partyId, gameName });
 
-        console.log("Sending Join notification", notification);
+        this.logger.debug('Sending player joined notification', { partyName, partyId, userId });
         await provider.sendNotification(notification);
     }
     async notifyPlayerLeft(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void> {

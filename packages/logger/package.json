@@ -1,5 +1,5 @@
 {
-  "name": "@phone-games/notifications",
+  "name": "@phone-games/logger",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,17 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "dependencies": {
-    "@phone-games/db": "workspace:*",
-    "@phone-games/errors": "workspace:*",
-    "@phone-games/games": "workspace:*",
-    "@phone-games/logger": "workspace:*",
-    "twilio": "^5.10.3",
-    "ws": "^8.18.3"
-  },
   "devDependencies": {
-    "@types/ws": "^8.18.1",
+    "@types/node": "^22.10.2",
     "typescript": "^5.9.2"
-  },
-  "type": "module"
+  }
 }

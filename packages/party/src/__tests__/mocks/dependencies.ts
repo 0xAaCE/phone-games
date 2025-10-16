@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import { PrismaClient, Party, PartyPlayer } from '@phone-games/db';
 import { NotificationService } from '@phone-games/notifications';
 import { Game, ValidGameNames } from '@phone-games/games';
+import { ILogger } from '@phone-games/logger';
 
 export class MockPrismaClient {
   static create(): PrismaClient {
@@ -90,5 +91,18 @@ export class MockGame {
       } as any),
       getGameState: vi.fn().mockReturnValue(mockGameState as any),
     } as unknown as Game<T>;
+  }
+}
+
+export class MockLogger {
+  static create(): ILogger {
+    return {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      setLevel: vi.fn(),
+      child: vi.fn().mockReturnThis(),
+    } as unknown as ILogger;
   }
 }

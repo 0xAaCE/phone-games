@@ -81,6 +81,9 @@ importers:
       '@phone-games/games':
         specifier: workspace:*
         version: link:../../packages/games
+      '@phone-games/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
       '@phone-games/messaging':
         specifier: workspace:*
         version: link:../../packages/messaging
@@ -172,6 +175,15 @@ importers:
         specifier: ^5.9.2
         version: 5.9.2
 
+  packages/logger:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.18.6
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.2
+
   packages/messaging:
     dependencies:
       '@phone-games/db':
@@ -183,6 +195,9 @@ importers:
       '@phone-games/games':
         specifier: workspace:*
         version: link:../games
+      '@phone-games/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@phone-games/notifications':
         specifier: workspace:*
         version: link:../notifications
@@ -220,6 +235,9 @@ importers:
       '@phone-games/games':
         specifier: workspace:*
         version: link:../games
+      '@phone-games/logger':
+        specifier: workspace:*
+        version: link:../logger
       twilio:
         specifier: ^5.10.3
         version: 5.10.3
@@ -245,6 +263,9 @@ importers:
       '@phone-games/games':
         specifier: workspace:*
         version: link:../games
+      '@phone-games/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@phone-games/notifications':
         specifier: workspace:*
         version: link:../notifications

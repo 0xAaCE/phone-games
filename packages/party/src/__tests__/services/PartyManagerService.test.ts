@@ -2,20 +2,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PartyManagerService } from '../../services/partyManagerService.js';
 import { NotFoundError, ConflictError, ValidationError } from '@phone-games/errors';
 import { PartyTestFactory } from '../factories/partyFactory.js';
-import { MockPrismaClient, MockNotificationService, MockGame } from '../mocks/dependencies.js';
+import { MockPrismaClient, MockNotificationService, MockGame, MockLogger } from '../mocks/dependencies.js';
 import { PrismaClient, PartyStatus, PlayerRole } from '@phone-games/db';
 import { NotificationService } from '@phone-games/notifications';
 import { GAME_NAMES } from '@phone-games/games';
+import { ILogger } from '@phone-games/logger';
 
 describe('PartyManagerService', () => {
   let partyManagerService: PartyManagerService;
   let mockPrisma: PrismaClient;
   let mockNotificationService: NotificationService;
+  let mockLogger: ILogger;
 
   beforeEach(() => {
     mockPrisma = MockPrismaClient.create();
     mockNotificationService = MockNotificationService.create();
-    partyManagerService = new PartyManagerService(mockPrisma, mockNotificationService);
+    mockLogger = MockLogger.create();
+    partyManagerService = new PartyManagerService(mockPrisma, mockNotificationService, mockLogger);
   });
 
   describe('createParty', () => {

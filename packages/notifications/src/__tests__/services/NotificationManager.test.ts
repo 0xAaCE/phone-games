@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NotificationManager, ValidGameActions, ValidPartyActions } from '../../internal.js';
 import { MockNotificationProvider, MockParser } from '../mocks/providers.js';
 import { GAME_NAMES } from '@phone-games/games';
@@ -16,10 +16,19 @@ describe('NotificationManager', () => {
   let notificationManager: NotificationManager;
   let mockProvider: ReturnType<typeof MockNotificationProvider.create>;
   let mockParser: ReturnType<typeof MockParser.create>;
+  let mockLogger: any;
 
   beforeEach(() => {
     mockParser = MockParser.create(GAME_NAMES.IMPOSTOR, 'whatsapp');
-    notificationManager = new NotificationManager([mockParser]);
+    mockLogger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      setLevel: vi.fn(),
+      child: vi.fn().mockReturnThis(),
+    };
+    notificationManager = new NotificationManager([mockParser], mockLogger);
     mockProvider = MockNotificationProvider.create('whatsapp');
   });
 
@@ -228,7 +237,7 @@ describe('NotificationManager', () => {
       const userId = 'user-1';
       const webSocketParser = MockParser.create(GAME_NAMES.IMPOSTOR, 'web_socket');
       const webSocketProvider = MockNotificationProvider.create('web_socket');
-      const notificationManagerWithWebSocket = new NotificationManager([mockParser, webSocketParser]);
+      const notificationManagerWithWebSocket = new NotificationManager([mockParser, webSocketParser], mockLogger);
       const gameState = createTestGameState();
 
       await notificationManagerWithWebSocket.registerUser(userId, webSocketProvider);

@@ -4,6 +4,7 @@ import { NotificationProvider, NotificationService, WhatsappNotificationProvider
 import { PartyManagerService } from "@phone-games/party";
 import { UserService } from "@phone-games/user";
 import { FinishRoundParams, GameFactory, MiddleRoundActionParams, NextRoundParams, ValidGameNames } from "@phone-games/games";
+import { ILogger } from "@phone-games/logger";
 
 import { CreatePartyParams, IncomingMessage, IncomingMessageParser, JoinPartyParams, MessagePlatform, Output, ValidActions } from "../interfaces/parsers/index.js";
 import { WhatsAppIncomingMessage } from "../interfaces/parsers/whatsapp.js";
@@ -15,12 +16,20 @@ export class MessageHandlerService implements MessageHandler {
   private userService: UserService;
   private parsers: Map<MessagePlatform, IncomingMessageParser>;
   private notificationService: NotificationService;
+  private logger: ILogger;
 
-  constructor(notificationService: NotificationService, partyManagerService: PartyManagerService, userService: UserService, parsers: IncomingMessageParser[]) {
+  constructor(
+    notificationService: NotificationService,
+    partyManagerService: PartyManagerService,
+    userService: UserService,
+    parsers: IncomingMessageParser[],
+    logger: ILogger
+  ) {
     this.notificationService = notificationService;
     this.partyManagerService = partyManagerService;
     this.userService = userService;
     this.parsers = new Map(parsers.map(parser => [parser.getMessagePlatform(), parser]));
+    this.logger = logger.child({ service: 'MessageHandlerService' });
   }
 
   canHandle(messagePlatform: MessagePlatform, message: IncomingMessage<MessagePlatform>): boolean {
@@ -37,15 +46,17 @@ export class MessageHandlerService implements MessageHandler {
   }
 
   async handle(messagePlatform: MessagePlatform, message: IncomingMessage<MessagePlatform>): Promise<void> {
-    console.log("Message Received\n", JSON.stringify(message, null, 2));
+    this.logger.debug('Message received', { messagePlatform, message });
 
     const parser = this.parsers.get(messagePlatform);
 
     if (!parser) {
+      this.logger.error('Parser not found for message platform', undefined, { messagePlatform });
       throw new MessageParsingError(`Parser not found for message platform: ${messagePlatform}`);
     }
 
     const output = await parser.parse(message);
+    this.logger.info('Message parsed successfully', { action: output.action, userId: output.user.id });
 
     await this.handleUser(messagePlatform, output);
 

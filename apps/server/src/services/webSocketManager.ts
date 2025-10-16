@@ -2,6 +2,7 @@ import { Server } from 'http';
 import { VerifyClientCallbackAsync, WebSocket, WebSocketServer } from 'ws';
 import { NotificationService, WebSocketNotificationProvider } from '@phone-games/notifications';
 import { AuthenticatedRequest, firebaseVerification } from '../middleware/auth.js';
+import { ILogger } from '@phone-games/logger';
 
 type VerifyClientInfo = Parameters<VerifyClientCallbackAsync>[0]
 type VerifyClientCallback = Parameters<VerifyClientCallbackAsync>[1]
@@ -9,24 +10,28 @@ type VerifyClientCallback = Parameters<VerifyClientCallbackAsync>[1]
 export class WebSocketManager {
     private wss: WebSocketServer;
     private notificationService: NotificationService;
+    private logger: ILogger;
 
-    public constructor(server: Server, notificationService: NotificationService) {
+    public constructor(server: Server, notificationService: NotificationService, logger: ILogger) {
         this.wss = new WebSocketServer({ server, path: '/ws', verifyClient: this.verifyClient.bind(this)});
         this.notificationService = notificationService;
+        this.logger = logger.child({ service: 'WebSocketManager' });
         this.setupWebSocket();
     }
 
     private setupWebSocket() {
         this.wss.on('connection', (ws: WebSocket, request: AuthenticatedRequest) => {
             if (!request.user?.id) {
+                this.logger.warn('WebSocket connection attempt without user ID');
                 return
             }
             const wsProvider = new WebSocketNotificationProvider(ws);
             this.notificationService.registerUser(request.user?.id, wsProvider);
+            this.logger.info('WebSocket connection established', { userId: request.user.id });
         });
 
         this.wss.on('error', (error) => {
-            console.error('WebSocket error:', error);
+            this.logger.error('WebSocket error', error);
         });
 
         this.wss.on('close', (request: AuthenticatedRequest) => {
@@ -35,7 +40,7 @@ export class WebSocketManager {
             }
 
             this.notificationService.unregisterUser(request.user?.id);
-            console.log('WebSocket closed');
+            this.logger.info('WebSocket connection closed', { userId: request.user.id });
         });
     }
 
@@ -58,7 +63,7 @@ export class WebSocketManager {
             (info.req as AuthenticatedRequest).user = await firebaseVerification(token);
             callback(true);
         } catch (error) {
-            console.error('WebSocket auth error:', error);
+            this.logger.warn('WebSocket authentication failed', { error: error instanceof Error ? error.message : 'Unknown error' });
             callback(false, 401, 'Invalid token');
         }
     }

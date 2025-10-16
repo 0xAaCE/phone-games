@@ -23,10 +23,12 @@
     "@phone-games/db": "workspace:*",
     "@phone-games/errors": "workspace:*",
     "@phone-games/games": "workspace:*",
+    "@phone-games/logger": "workspace:*",
     "@phone-games/notifications": "workspace:*",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "typescript": "^5.9.2"
-  }
+  },
+  "type": "module"
 }

@@ -2,6 +2,7 @@ import { PrismaClient, Party, PartyPlayer, PartyStatus, PlayerRole, Prisma } fro
 import { GamePlayer, GameState, ValidGameNames, Game, NextRoundParams, FinishRoundParams, FinishRoundResult, NextRoundResult, MiddleRoundActionResult, MiddleRoundActionParams } from '@phone-games/games';
 import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
 import { NotificationService } from '@phone-games/notifications';
+import { ILogger } from '@phone-games/logger';
 
 type PartyPlayerWithUser = Prisma.PartyPlayerGetPayload<{
   include: { user: true };
@@ -9,14 +10,22 @@ type PartyPlayerWithUser = Prisma.PartyPlayerGetPayload<{
 
 export class PartyManagerService {
   private gameStates: Map<string, Game<ValidGameNames>> = new Map();
+  private logger: ILogger;
 
-  constructor(private db: PrismaClient, private notificationService: NotificationService) {}
+  constructor(
+    private db: PrismaClient,
+    private notificationService: NotificationService,
+    logger: ILogger
+  ) {
+    this.logger = logger.child({ service: 'PartyManagerService' });
+  }
 
   async createParty<T extends ValidGameNames>(
     userId: string,
     partyName: string,
     game: Game<T>
   ): Promise<Party> {
+    this.logger.info('Creating party', { userId, partyName, gameName: game.getName() });
     const existingParty = await this.getActivePartyPlayerForUser(userId);
 
     // Clean up existing active party
@@ -55,15 +64,18 @@ export class PartyManagerService {
 
     await this.notificationService.notifyCreateParty(party.partyName, party.gameName as ValidGameNames, party.id, userId);
 
+    this.logger.info('Party created successfully', { partyId: party.id, userId, partyName });
     return party;
   }
 
   async startMatch(
     userId: string,
   ): Promise<{ party: Party; gameState: GameState<ValidGameNames> }> {
+    this.logger.info('Starting match', { userId });
     const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
 
     if (!partyId) {
+      this.logger.warn('Cannot start match: party not found', { userId });
       throw new NotFoundError('Party not found');
     }
 
@@ -82,6 +94,7 @@ export class PartyManagerService {
       await this.notificationService.notifyStartMatch(game.getName(), gamePlayer.user.id, newState);
     }
 
+    this.logger.info('Match started successfully', { partyId, playerCount: gamePlayers.length });
     return { party, gameState: result };
   }
 
