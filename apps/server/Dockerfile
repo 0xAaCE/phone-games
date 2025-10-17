@@ -12,7 +12,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Copy all package.json files to install dependencies
 COPY apps/server/package.json ./apps/server/package.json
 COPY packages/db/package.json ./packages/db/package.json
+COPY packages/errors/package.json ./packages/errors/package.json
 COPY packages/games/package.json ./packages/games/package.json
+COPY packages/logger/package.json ./packages/logger/package.json
 COPY packages/party/package.json ./packages/party/package.json
 COPY packages/user/package.json ./packages/user/package.json
 COPY packages/notifications/package.json ./packages/notifications/package.json
@@ -47,7 +49,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Copy package.json files for production install
 COPY apps/server/package.json ./apps/server/package.json
 COPY packages/db/package.json ./packages/db/package.json
+COPY packages/errors/package.json ./packages/errors/package.json
 COPY packages/games/package.json ./packages/games/package.json
+COPY packages/logger/package.json ./packages/logger/package.json
 COPY packages/party/package.json ./packages/party/package.json
 COPY packages/user/package.json ./packages/user/package.json
 COPY packages/notifications/package.json ./packages/notifications/package.json
@@ -61,7 +65,9 @@ COPY --from=builder /app/packages/db/prisma ./packages/db/prisma
 
 # Copy built packages from builder
 COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/packages/errors/dist ./packages/errors/dist
 COPY --from=builder /app/packages/games/dist ./packages/games/dist
+COPY --from=builder /app/packages/logger/dist ./packages/logger/dist
 COPY --from=builder /app/packages/party/dist ./packages/party/dist
 COPY --from=builder /app/packages/user/dist ./packages/user/dist
 COPY --from=builder /app/packages/notifications/dist ./packages/notifications/dist

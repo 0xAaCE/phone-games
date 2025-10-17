@@ -43,7 +43,7 @@ export abstract class BaseError extends Error {
     };
     const ErrorCtor = Error as ErrorWithCapture;
     if (typeof ErrorCtor.captureStackTrace === 'function') {
-      ErrorCtor.captureStackTrace(this, this.constructor);
+      ErrorCtor.captureStackTrace(this, this.constructor as new (...args: unknown[]) => unknown);
     }
   }
 
