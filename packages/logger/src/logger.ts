@@ -1,18 +1,42 @@
+import pino from 'pino';
+import type { Logger as PinoLogger } from 'pino';
 import { ILogger, LogContext, LoggerConfig, LogLevel } from './types.js';
 
 export class Logger implements ILogger {
+  private pinoLogger: PinoLogger;
   private level: LogLevel;
-  private environment: string;
-  private serviceName: string;
-  private prettyPrint: boolean;
   private defaultContext: LogContext;
 
   constructor(config: LoggerConfig = {}, defaultContext: LogContext = {}) {
     this.level = config.level ?? this.getDefaultLogLevel();
-    this.environment = config.environment ?? process.env.NODE_ENV ?? 'development';
-    this.serviceName = config.serviceName ?? 'phone-games';
-    this.prettyPrint = config.prettyPrint ?? this.environment === 'development';
+    const environment = config.environment ?? process.env.NODE_ENV ?? 'development';
+    const serviceName = config.serviceName ?? 'phone-games';
+    const prettyPrint = config.prettyPrint ?? environment === 'development';
     this.defaultContext = defaultContext;
+
+    // Create Pino logger with appropriate configuration
+    this.pinoLogger = pino({
+      level: this.logLevelToPinoLevel(this.level),
+      base: {
+        service: serviceName,
+        environment,
+      },
+      ...(prettyPrint && {
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname',
+          },
+        },
+      }),
+    });
+
+    // Add default context as bindings
+    if (Object.keys(this.defaultContext).length > 0) {
+      this.pinoLogger = this.pinoLogger.child(this.defaultContext);
+    }
   }
 
   private getDefaultLogLevel(): LogLevel {
@@ -29,101 +53,63 @@ export class Logger implements ILogger {
       case 'NONE':
         return LogLevel.NONE;
       default:
-        return this.environment === 'production' ? LogLevel.INFO : LogLevel.DEBUG;
+        return process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG;
+    }
+  }
+
+  private logLevelToPinoLevel(level: LogLevel): string {
+    switch (level) {
+      case LogLevel.DEBUG:
+        return 'debug';
+      case LogLevel.INFO:
+        return 'info';
+      case LogLevel.WARN:
+        return 'warn';
+      case LogLevel.ERROR:
+        return 'error';
+      case LogLevel.NONE:
+        return 'silent';
+      default:
+        return 'info';
     }
   }
 
   setLevel(level: LogLevel): void {
     this.level = level;
+    this.pinoLogger.level = this.logLevelToPinoLevel(level);
   }
 
   child(childContext: LogContext): ILogger {
-    return new Logger(
-      {
-        level: this.level,
-        environment: this.environment,
-        serviceName: this.serviceName,
-        prettyPrint: this.prettyPrint,
-      },
-      { ...this.defaultContext, ...childContext }
-    );
+    const childLogger = new Logger();
+    childLogger.pinoLogger = this.pinoLogger.child(childContext);
+    childLogger.level = this.level;
+    childLogger.defaultContext = { ...this.defaultContext, ...childContext };
+    return childLogger;
   }
 
   debug(message: string, context?: LogContext): void {
-    if (this.level <= LogLevel.DEBUG) {
-      this.log('DEBUG', message, context);
-    }
+    this.pinoLogger.debug(context ?? {}, message);
   }
 
   info(message: string, context?: LogContext): void {
-    if (this.level <= LogLevel.INFO) {
-      this.log('INFO', message, context);
-    }
+    this.pinoLogger.info(context ?? {}, message);
   }
 
   warn(message: string, context?: LogContext): void {
-    if (this.level <= LogLevel.WARN) {
-      this.log('WARN', message, context);
-    }
+    this.pinoLogger.warn(context ?? {}, message);
   }
 
   error(message: string, error?: Error, context?: LogContext): void {
-    if (this.level <= LogLevel.ERROR) {
-      const errorContext = error
-        ? {
-            error: {
-              name: error.name,
-              message: error.message,
-              stack: error.stack,
-            },
-          }
-        : {};
-      this.log('ERROR', message, { ...errorContext, ...context });
-    }
-  }
-
-  private log(level: string, message: string, context?: LogContext): void {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      level,
-      service: this.serviceName,
-      environment: this.environment,
-      message,
-      ...this.defaultContext,
-      ...context,
-    };
-
-    if (this.prettyPrint) {
-      this.prettyLog(level, message, logEntry);
+    if (error) {
+      this.pinoLogger.error(
+        {
+          err: error,
+          ...context,
+        },
+        message
+      );
     } else {
-      this.jsonLog(logEntry);
+      this.pinoLogger.error(context ?? {}, message);
     }
-  }
-
-  private prettyLog(level: string, message: string, logEntry: Record<string, unknown>): void {
-    const colors = {
-      DEBUG: '\x1b[36m', // Cyan
-      INFO: '\x1b[32m',  // Green
-      WARN: '\x1b[33m',  // Yellow
-      ERROR: '\x1b[31m', // Red
-    };
-    const reset = '\x1b[0m';
-    const color = colors[level as keyof typeof colors] ?? '';
-
-    const timestamp = logEntry.timestamp as string;
-    const contextStr = Object.keys(logEntry)
-      .filter(key => !['timestamp', 'level', 'service', 'environment', 'message'].includes(key))
-      .map(key => `${key}=${JSON.stringify(logEntry[key])}`)
-      .join(' ');
-
-    const contextOutput = contextStr ? ` ${contextStr}` : '';
-    console.log(
-      `${color}[${timestamp}] [${level}] [${this.serviceName}]${reset} ${message}${contextOutput}`
-    );
-  }
-
-  private jsonLog(logEntry: Record<string, unknown>): void {
-    console.log(JSON.stringify(logEntry));
   }
 }
