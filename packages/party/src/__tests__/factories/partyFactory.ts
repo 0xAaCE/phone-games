@@ -1,7 +1,19 @@
-import { Party, PartyPlayer, PartyStatus, PlayerRole } from '@phone-games/db';
+import { Party, PartyPlayer, PartyStatus, PlayerRole, User } from '@phone-games/db';
 import { GamePlayer } from '@phone-games/games';
 
 export class PartyTestFactory {
+  static createUser(overrides?: Partial<User>): User {
+    return {
+      id: 'test-user-id',
+      username: 'testuser',
+      email: 'test@example.com',
+      phoneNumber: '1234567890',
+      firebaseUid: null,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+      ...overrides,
+    } as User;
+  }
   static createParty(overrides?: Partial<Party>): Party {
     return {
       id: 'test-party-id',

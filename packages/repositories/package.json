@@ -1,0 +1,28 @@
+{
+  "name": "@phone-games/repositories",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./src/__tests__/mocks/*.js": "./src/__tests__/mocks/*.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo 'No tests in repositories package - tested via consumers'"
+  },
+  "dependencies": {
+    "@phone-games/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.4"
+  }
+}

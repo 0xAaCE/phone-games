@@ -19,6 +19,7 @@ COPY packages/party/package.json ./packages/party/package.json
 COPY packages/user/package.json ./packages/user/package.json
 COPY packages/notifications/package.json ./packages/notifications/package.json
 COPY packages/messaging/package.json ./packages/messaging/package.json
+COPY packages/repositories/package.json ./packages/repositories/package.json
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -56,6 +57,7 @@ COPY packages/party/package.json ./packages/party/package.json
 COPY packages/user/package.json ./packages/user/package.json
 COPY packages/notifications/package.json ./packages/notifications/package.json
 COPY packages/messaging/package.json ./packages/messaging/package.json
+COPY packages/repositories/package.json ./packages/repositories/package.json
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
@@ -72,6 +74,7 @@ COPY --from=builder /app/packages/party/dist ./packages/party/dist
 COPY --from=builder /app/packages/user/dist ./packages/user/dist
 COPY --from=builder /app/packages/notifications/dist ./packages/notifications/dist
 COPY --from=builder /app/packages/messaging/dist ./packages/messaging/dist
+COPY --from=builder /app/packages/repositories/dist ./packages/repositories/dist
 
 # Copy built server
 COPY --from=builder /app/apps/server/dist ./apps/server/dist

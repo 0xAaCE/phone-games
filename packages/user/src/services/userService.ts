@@ -1,22 +1,16 @@
-import { PrismaClient, User } from '@phone-games/db';
+import { User } from '@phone-games/db';
 import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
+import { IUserRepository, CreateUserData } from '@phone-games/repositories';
 
-export interface CreateUserData {
-  id: string;
-  username: string;
-  email?: string;
-  phoneNumber?: string;
-}
+export { CreateUserData };
 
 export class UserService {
-  constructor(private db: PrismaClient) {}
+  constructor(private userRepository: IUserRepository) {}
 
   async createUser(userData: CreateUserData): Promise<User> {
     await this.validateUserData(userData);
 
-    return this.db.user.create({
-      data: userData,
-    });
+    return this.userRepository.create(userData);
   }
 
   async validateUserData(userData: CreateUserData): Promise<void> {
@@ -43,35 +37,23 @@ export class UserService {
   }
 
   async emailExists(email: string): Promise<boolean> {
-    const user = await this.db.user.findUnique({
-      where: { email },
-    });
-    return !!user;
+    return this.userRepository.existsByEmail(email);
   }
 
   async phoneExists(phoneNumber: string): Promise<boolean> {
-    const user = await this.db.user.findUnique({
-      where: { phoneNumber },
-    });
-    return !!user;
+    return this.userRepository.existsByPhone(phoneNumber);
   }
 
   async getUserById(id: string): Promise<User | null> {
-    return this.db.user.findUnique({
-      where: { id },
-    });
+    return this.userRepository.findById(id);
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    return this.db.user.findUnique({
-      where: { email },
-    });
+    return this.userRepository.findByEmail(email);
   }
 
   async getUserByPhone(phoneNumber: string): Promise<User | null> {
-    return this.db.user.findUnique({
-      where: { phoneNumber },
-    });
+    return this.userRepository.findByPhone(phoneNumber);
   }
 
   async getUserByEmailOrPhone(emailOrPhone: string): Promise<User | null> {
@@ -84,9 +66,7 @@ export class UserService {
   }
 
   async getUserByUsername(username: string): Promise<User | null> {
-    return this.db.user.findFirst({
-      where: { username },
-    });
+    return this.userRepository.findByUsername(username);
   }
 
   async updateUser(id: string, userData: Partial<CreateUserData>): Promise<User> {
@@ -119,21 +99,14 @@ export class UserService {
       }
     }
 
-    return this.db.user.update({
-      where: { id },
-      data: userData,
-    });
+    return this.userRepository.update(id, userData);
   }
 
   async deleteUser(id: string): Promise<void> {
-    await this.db.user.delete({
-      where: { id },
-    });
+    await this.userRepository.delete(id);
   }
 
   async getAllUsers(): Promise<User[]> {
-    return this.db.user.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.userRepository.findAll();
   }
 }

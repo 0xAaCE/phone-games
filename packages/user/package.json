@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "@phone-games/db": "workspace:*",
-    "@phone-games/errors": "workspace:*"
+    "@phone-games/errors": "workspace:*",
+    "@phone-games/repositories": "workspace:^"
   },
   "devDependencies": {
     "typescript": "^5.9.2"

@@ -1,19 +1,16 @@
-import { PrismaClient, Party, PartyPlayer, PartyStatus, PlayerRole, Prisma } from '@phone-games/db';
+import { Party, PartyPlayer, PartyStatus, PlayerRole } from '@phone-games/db';
 import { GamePlayer, GameState, ValidGameNames, Game, NextRoundParams, FinishRoundParams, FinishRoundResult, NextRoundResult, MiddleRoundActionResult, MiddleRoundActionParams } from '@phone-games/games';
 import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
 import { NotificationService } from '@phone-games/notifications';
 import { ILogger } from '@phone-games/logger';
-
-type PartyPlayerWithUser = Prisma.PartyPlayerGetPayload<{
-  include: { user: true };
-}>;
+import { IPartyRepository, PartyPlayerWithUser } from '@phone-games/repositories';
 
 export class PartyManagerService {
   private gameStates: Map<string, Game<ValidGameNames>> = new Map();
   private logger: ILogger;
 
   constructor(
-    private db: PrismaClient,
+    private partyRepository: IPartyRepository,
     private notificationService: NotificationService,
     logger: ILogger
   ) {
@@ -40,24 +37,16 @@ export class PartyManagerService {
     }
 
     // Create new party
-    const party = await this.db.$transaction(async (tx) => {
-      const party = await tx.party.create({
-        data: {
-          partyName,
-          gameName: game.getName(),
-          status: PartyStatus.WAITING,
-        },
-      });
-
-      await tx.partyPlayer.create({
-        data: {
-          partyId: party.id,
-          userId,
-          role: PlayerRole.MANAGER,
-        },
-      });
-
-      return party;
+    const party = await this.partyRepository.createWithPlayer({
+      party: {
+        partyName,
+        gameName: game.getName(),
+        status: PartyStatus.WAITING,
+      },
+      player: {
+        userId,
+        role: PlayerRole.MANAGER,
+      },
     });
 
     this.gameStates.set(party.id, game);
@@ -208,16 +197,7 @@ export class PartyManagerService {
   }
 
   async getParty(partyId: string): Promise<Party | null> {
-    return this.db.party.findUnique({
-      where: { id: partyId },
-      include: {
-        players: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
+    return this.partyRepository.findByIdWithPlayers(partyId);
   }
 
   async getMyParty(userId: string): Promise<Party | null> {
@@ -231,23 +211,16 @@ export class PartyManagerService {
   }
 
   async updatePartyStatus(partyId: string, status: PartyStatus): Promise<Party> {
-    return this.db.party.update({
-      where: { id: partyId },
-      data: { status },
-    });
+    return this.partyRepository.updateStatus(partyId, status);
   }
 
   async deleteParty(partyId: string): Promise<void> {
     this.gameStates.delete(partyId);
-    await this.db.party.delete({
-      where: { id: partyId },
-    });
+    await this.partyRepository.delete(partyId);
   }
 
   async joinParty(userId: string, partyId: string): Promise<PartyPlayer> {
-    const party = await this.db.party.findUnique({
-      where: { id: partyId },
-    });
+    const party = await this.partyRepository.findById(partyId);
 
     if (!party) {
       throw new NotFoundError('Party not found');
@@ -258,16 +231,7 @@ export class PartyManagerService {
     }
 
     // Check if user is already in any active party
-    const existingActiveParty = await this.db.partyPlayer.findFirst({
-      where: {
-        userId,
-        party: {
-          status: {
-            in: [PartyStatus.WAITING, PartyStatus.ACTIVE],
-          },
-        },
-      },
-    });
+    const existingActiveParty = await this.partyRepository.findActivePlayerForUser(userId);
 
     if (existingActiveParty) {
       throw new ConflictError('User is already in an active party');
@@ -275,7 +239,7 @@ export class PartyManagerService {
 
     const existingPlayer = await this.isUserInParty(userId, partyId);
     if (existingPlayer) {
-     
+
       throw new ConflictError('User is already in this party');
     }
 
@@ -286,12 +250,10 @@ export class PartyManagerService {
       await this.notificationService.notifyPlayerJoined(party.partyName, party.gameName as ValidGameNames, partyId, gamePlayer.user.id);
     }
 
-    return this.db.partyPlayer.create({
-      data: {
-        partyId,
-        userId,
-        role: PlayerRole.PLAYER,
-      },
+    return this.partyRepository.createPlayer({
+      partyId,
+      userId,
+      role: PlayerRole.PLAYER,
     });
   }
 
@@ -302,18 +264,9 @@ export class PartyManagerService {
       throw new NotFoundError('Party not found');
     }
 
-    await this.db.partyPlayer.delete({
-      where: {
-        partyId_userId: {
-          partyId,
-          userId,
-        },
-      },
-    });
+    await this.partyRepository.deletePlayer(partyId, userId);
 
-    const remainingPlayers = await this.db.partyPlayer.count({
-      where: { partyId },
-    });
+    const remainingPlayers = await this.partyRepository.countPlayersByPartyId(partyId);
 
     const party = await this.getParty(partyId);
     if (!party) {
@@ -339,24 +292,11 @@ export class PartyManagerService {
       throw new NotFoundError('Party not found');
     }
 
-    return this.db.partyPlayer.update({
-      where: {
-        partyId_userId: {
-          partyId,
-          userId: targetUserId,
-        },
-      },
-      data: { role: PlayerRole.MANAGER },
-    });
+    return this.partyRepository.updatePlayerRole(partyId, targetUserId, PlayerRole.MANAGER);
   }
 
   async getPartyPlayers(partyId: string): Promise<PartyPlayerWithUser[]> {
-    return this.db.partyPlayer.findMany({
-      where: { partyId },
-      include: {
-        user: true,
-      },
-    });
+    return this.partyRepository.findPlayersByPartyId(partyId);
   }
 
   async getGamePlayers(partyId: string): Promise<GamePlayer[]> {
@@ -369,30 +309,11 @@ export class PartyManagerService {
   }
 
   async getAvailableParties(gameName?: string): Promise<Party[]> {
-    return this.db.party.findMany({
-      where: {
-        status: PartyStatus.WAITING,
-        ...(gameName && { gameName }),
-      },
-      include: {
-        players: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
+    return this.partyRepository.findAvailableParties(gameName);
   }
 
   async isUserInParty(userId: string, partyId: string): Promise<PartyPlayer | null> {
-    return this.db.partyPlayer.findUnique({
-      where: {
-        partyId_userId: {
-          partyId,
-          userId,
-        },
-      },
-    });
+    return this.partyRepository.findPlayer(partyId, userId);
   }
 
   async getGameState(userId: string): Promise<GameState<ValidGameNames>> {
@@ -413,18 +334,6 @@ export class PartyManagerService {
   }
 
   private async getActivePartyPlayerForUser(userId: string): Promise<PartyPlayer | null> {
-    const partyPlayer = await this.db.partyPlayer.findFirst({
-      where: {
-        userId,
-        party: {
-          status: {
-            in: [PartyStatus.WAITING, PartyStatus.ACTIVE],
-          },
-        },
-      },
-    });
-
-
-    return partyPlayer;
+    return this.partyRepository.findActivePlayerForUser(userId);
   }
 }

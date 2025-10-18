@@ -25,6 +25,7 @@
     "@phone-games/games": "workspace:*",
     "@phone-games/logger": "workspace:*",
     "@phone-games/notifications": "workspace:*",
+    "@phone-games/repositories": "workspace:*",
     "zod": "^4.1.12"
   },
   "devDependencies": {

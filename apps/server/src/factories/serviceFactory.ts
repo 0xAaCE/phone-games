@@ -4,6 +4,7 @@ import { NotificationService } from '@phone-games/notifications';
 import { PartyManagerService } from '@phone-games/party';
 import { MessageHandlerService, WhatsAppParser, TwilioParser } from '@phone-games/messaging';
 import { UserService } from '@phone-games/user';
+import { PrismaUserRepository, PrismaPartyRepository } from '@phone-games/repositories';
 
 export interface ServiceFactoryDependencies {
   db: PrismaClient;
@@ -25,11 +26,15 @@ export interface Services {
 export function createServices(deps: ServiceFactoryDependencies): Services {
   const { db, logger, notificationService } = deps;
 
+  // Create repositories
+  const userRepository = new PrismaUserRepository(db);
+  const partyRepository = new PrismaPartyRepository(db);
+
   // Create core services
-  const userService = new UserService(db);
+  const userService = new UserService(userRepository);
 
   const partyManagerService = new PartyManagerService(
-    db,
+    partyRepository,
     notificationService,
     logger
   );
