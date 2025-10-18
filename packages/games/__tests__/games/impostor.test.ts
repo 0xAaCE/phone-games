@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ImpostorGame } from '../../internal.js';
+import { ImpostorGame } from '../../src/internal.js';
 import { ImpostorTestFactory } from '../factories/impostorFactory.js';
 
 describe('ImpostorGame', () => {

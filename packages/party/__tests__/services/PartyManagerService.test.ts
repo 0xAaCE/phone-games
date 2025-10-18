@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PartyManagerService } from '../../services/partyManagerService.js';
+import { PartyManagerService } from '../../src/services/partyManagerService.js';
 import { NotFoundError, ConflictError, ValidationError } from '@phone-games/errors';
 import { PartyTestFactory } from '../factories/partyFactory.js';
 import { MockNotificationService, MockGame, MockLogger } from '../mocks/dependencies.js';
@@ -7,7 +7,7 @@ import { PartyStatus, PlayerRole } from '@phone-games/db';
 import { NotificationService } from '@phone-games/notifications';
 import { GAME_NAMES } from '@phone-games/games';
 import { ILogger } from '@phone-games/logger';
-import { MockPartyRepository } from '@phone-games/repositories/src/__tests__/mocks/mockPartyRepository.js';
+import { MockPartyRepository } from '@phone-games/repositories/__tests__/mocks/mockPartyRepository.js';
 
 describe('PartyManagerService', () => {
   let partyManagerService: PartyManagerService;

@@ -22,7 +22,7 @@ import {
   getErrorStatusCode,
   formatErrorForLogging,
   formatErrorForClient,
-} from '../internal.js';
+} from '../src/internal.js';
 
 describe('BaseError', () => {
   it('should capture error properties', () => {

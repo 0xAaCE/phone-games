@@ -11,7 +11,7 @@
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./src/__tests__/mocks/*.js": "./src/__tests__/mocks/*.js"
+    "./__tests__/mocks/*.js": "./__tests__/mocks/*.js"
   },
   "scripts": {
     "build": "tsc",

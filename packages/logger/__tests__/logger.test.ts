@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Logger } from '../logger.js';
-import { LogLevel } from '../types.js';
+import { Logger } from '../src/logger.js';
+import { LogLevel } from '../src/types.js';
 import pino from 'pino';
 
 describe('Logger', () => {

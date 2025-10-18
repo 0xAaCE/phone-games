@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { UserService } from '../../services/userService.js';
+import { UserService } from '../../src/services/userService.js';
 import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
 import { UserTestFactory } from '../factories/userFactory.js';
-import { MockUserRepository } from '@phone-games/repositories/src/__tests__/mocks/mockUserRepository.js';
+import { MockUserRepository } from '@phone-games/repositories/__tests__/mocks/mockUserRepository.js';
 
 describe('UserService', () => {
   let userService: UserService;

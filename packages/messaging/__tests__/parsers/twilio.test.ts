@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TwilioParser } from '../../parsers/twilio.js';
-import { ValidActions } from '../../interfaces/parsers/index.js';
+import { TwilioParser } from '../../src/parsers/twilio.js';
+import { ValidActions } from '../../src/interfaces/parsers/index.js';
 import { TestDataBuilder } from '../utils/factories.js';
 import { MockUserService } from '../utils/mocks.js';
 

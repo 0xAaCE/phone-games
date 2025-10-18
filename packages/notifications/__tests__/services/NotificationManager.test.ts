@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { NotificationManager, ValidGameActions, ValidPartyActions } from '../../internal.js';
+import { NotificationManager, ValidGameActions, ValidPartyActions } from '../../src/internal.js';
 import { MockNotificationProvider, MockParser } from '../mocks/providers.js';
 import { GAME_NAMES } from '@phone-games/games';
 
