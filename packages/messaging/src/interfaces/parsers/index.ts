@@ -42,7 +42,26 @@ export type DataOutput = {
   [ValidActions.FINISH_MATCH]: Record<string, never>,
 }
 
-export type Output<T extends ValidActions> = {
+/**
+ * Simplified parser output
+ * Parsers only extract platform-specific data (text and user info)
+ * Commands handle action matching and param parsing
+ */
+export type Output = {
+  text: string;
+  user: {
+    id: string;
+    username: string;
+    phoneNumber: string;
+  }
+}
+
+/**
+ * Legacy Output type with action and dataOutput
+ * Kept for backward compatibility during migration
+ * @deprecated Use simplified Output type instead
+ */
+export type LegacyOutput<T extends ValidActions> = {
   action: T;
   user: {
     id: string;
@@ -53,6 +72,6 @@ export type Output<T extends ValidActions> = {
 }
 
 export abstract class IncomingMessageParser<T extends MessagePlatform = MessagePlatform> {
-  abstract parse(message: IncomingMessage<T>): Promise<Output<ValidActions>>;
+  abstract parse(message: IncomingMessage<T>): Promise<Output>;
   abstract getMessagePlatform(): MessagePlatform;
 }

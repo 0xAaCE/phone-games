@@ -75,7 +75,7 @@ export function createServices(deps: ServiceFactoryDependencies): Services {
     notificationService,
     partyManagerService,
     userService,
-    [new WhatsAppParser(userService), new TwilioParser(userService)],
+    [new WhatsAppParser(), new TwilioParser()],
     logger
   );
 

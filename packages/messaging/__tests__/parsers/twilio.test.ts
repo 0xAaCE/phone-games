@@ -1,26 +1,23 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TwilioParser } from '../../src/parsers/twilio.js';
-import { ValidActions } from '../../src/interfaces/parsers/index.js';
-import { TestDataBuilder } from '../utils/factories.js';
-import { MockUserService } from '../utils/mocks.js';
+import { TwilioParser } from '../../src/parsers/twilio';
+import { MessagePlatform } from '../../src/interfaces/parsers';
+import { TestDataBuilder } from '../utils/factories';
 
 describe('TwilioParser', () => {
   let parser: TwilioParser;
-  let mockUserService: ReturnType<typeof MockUserService.create>;
 
   beforeEach(() => {
-    mockUserService = MockUserService.create();
-    parser = new TwilioParser(mockUserService);
+    parser = new TwilioParser();
   });
 
   describe('getMessagePlatform', () => {
     it('should return TWILIO platform', () => {
-      expect(parser.getMessagePlatform()).toBe('twilio');
+      expect(parser.getMessagePlatform()).toBe(MessagePlatform.TWILIO);
     });
   });
 
   describe('parse', () => {
-    it('should parse create_party message correctly', async () => {
+    it('should extract text and user from Twilio message', async () => {
       const message = TestDataBuilder.createTwilioMessage({
         Body: '/create_party impostor MyParty',
         From: 'whatsapp:+5491158485048',
@@ -30,18 +27,16 @@ describe('TwilioParser', () => {
 
       const result = await parser.parse(message);
 
-      expect(result.action).toBe(ValidActions.CREATE_PARTY);
+      // Parser only extracts text and user - commands handle action matching
+      expect(result.text).toBe('/create_party impostor MyParty');
       expect(result.user).toMatchObject({
         username: 'Ale',
         phoneNumber: '5491158485048',
       });
-      expect(result.dataOutput).toMatchObject({
-        gameName: 'impostor',
-        partyName: 'MyParty',
-      });
+      expect(result.user.id).toBeDefined();
     });
 
-    it('should parse join_party message correctly', async () => {
+    it('should extract text from different message types', async () => {
       const message = TestDataBuilder.createTwilioMessage({
         Body: '/join_party party-id-123',
         From: 'whatsapp:+1234567890',
@@ -50,99 +45,32 @@ describe('TwilioParser', () => {
 
       const result = await parser.parse(message);
 
-      expect(result.action).toBe(ValidActions.JOIN_PARTY);
-      expect(result.dataOutput).toMatchObject({
-        partyId: 'party-id-123',
-      });
+      expect(result.text).toBe('/join_party party-id-123');
+      expect(result.user.phoneNumber).toBe('1234567890');
     });
 
-    it('should parse leave_party message correctly', async () => {
+    it('should handle messages without ProfileName', async () => {
       const message = TestDataBuilder.createTwilioMessage({
         Body: '/leave_party',
+        From: 'whatsapp:+1234567890',
+        WaId: '1234567890',
+        ProfileName: undefined,
       });
 
       const result = await parser.parse(message);
 
-      expect(result.action).toBe(ValidActions.LEAVE_PARTY);
-      expect(result.dataOutput).toEqual({});
-    });
-
-    it('should parse start_match message correctly', async () => {
-      const message = TestDataBuilder.createTwilioMessage({
-        Body: '/start_match',
-      });
-
-      const result = await parser.parse(message);
-
-      expect(result.action).toBe(ValidActions.START_MATCH);
-      expect(result.dataOutput).toEqual({});
-    });
-
-    it('should parse next_round message correctly', async () => {
-      const message = TestDataBuilder.createTwilioMessage({
-        Body: '/next_round',
-        From: 'whatsapp:+5491158485048',
-        WaId: '5491158485048',
-      });
-
-      const result = await parser.parse(message);
-
-      expect(result.action).toBe(ValidActions.NEXT_ROUND);
-      expect(result.dataOutput).toHaveProperty('userId');
-    });
-
-    it('should parse vote/middle_round_action message correctly', async () => {
-      const message = TestDataBuilder.createTwilioMessage({
-        Body: '/vote targetuser',
-        From: 'whatsapp:+5491158485048',
-        WaId: '5491158485048',
-      });
-
-      const result = await parser.parse(message);
-
-      expect(result.action).toBe(ValidActions.MIDDLE_ROUND_ACTION);
-      expect(result.dataOutput).toHaveProperty('votes');
-      expect(mockUserService.getUserByUsername).toHaveBeenCalledWith('targetuser');
-    });
-
-    it('should parse finish_round message correctly', async () => {
-      const message = TestDataBuilder.createTwilioMessage({
-        Body: '/finish_round',
-      });
-
-      const result = await parser.parse(message);
-
-      expect(result.action).toBe(ValidActions.FINISH_ROUND);
-      expect(result.dataOutput).toEqual({});
-    });
-
-    it('should parse finish_match message correctly', async () => {
-      const message = TestDataBuilder.createTwilioMessage({
-        Body: '/finish_match',
-      });
-
-      const result = await parser.parse(message);
-
-      expect(result.action).toBe(ValidActions.FINISH_MATCH);
-      expect(result.dataOutput).toEqual({});
-    });
-
-    it('should throw error for unknown action', async () => {
-      const message = TestDataBuilder.createTwilioMessage({
-        Body: '/unknown_action',
-      });
-
-      await expect(parser.parse(message)).rejects.toThrow('Unknown action in message');
+      expect(result.text).toBe('/leave_party');
+      // Should use phone number as username when ProfileName is missing
+      expect(result.user.username).toBe('1234567890');
     });
   });
 
   describe('phone number extraction', () => {
     it('should correctly extract phone number from whatsapp: prefix', async () => {
       const message = TestDataBuilder.createTwilioMessage({
-        Body: '/leave_party',
+        Body: '/test',
         From: 'whatsapp:+5491158485048',
         WaId: '5491158485048',
-        ProfileName: 'TestUser',
       });
 
       const result = await parser.parse(message);
@@ -152,15 +80,27 @@ describe('TwilioParser', () => {
 
     it('should use WaId when available', async () => {
       const message = TestDataBuilder.createTwilioMessage({
-        Body: '/leave_party',
+        Body: '/test',
         From: 'whatsapp:+1111111111',
         WaId: '5491158485048',
       });
 
       const result = await parser.parse(message);
 
-      // waIdToUserId uses WaId, so the user should be based on WaId
-      expect(result.user.phoneNumber).toBe('1111111111');
+      // Should prefer WaId over extracted From
+      expect(result.user.phoneNumber).toBe('5491158485048');
+    });
+
+    it('should handle missing WaId', async () => {
+      const message = TestDataBuilder.createTwilioMessage({
+        Body: '/test',
+        From: 'whatsapp:+5491158485048',
+        WaId: undefined,
+      });
+
+      const result = await parser.parse(message);
+
+      expect(result.user.phoneNumber).toBe('5491158485048');
     });
   });
 });

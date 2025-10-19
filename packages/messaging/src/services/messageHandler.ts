@@ -3,19 +3,19 @@ import { MessageHandler } from "../interfaces/messageHandler";
 import { NotificationProvider, NotificationService, WhatsappNotificationProvider, TwilioWhatsAppNotificationProvider } from "@phone-games/notifications";
 import { PartyManagerService } from "@phone-games/party";
 import { UserService } from "@phone-games/user";
-import { FinishRoundParams, GameFactory, MiddleRoundActionParams, NextRoundParams, ValidGameNames } from "@phone-games/games";
 import { ILogger } from "@phone-games/logger";
 
-import { CreatePartyParams, IncomingMessage, IncomingMessageParser, JoinPartyParams, MessagePlatform, Output, ValidActions } from "../interfaces/parsers/index.js";
+import { IncomingMessage, IncomingMessageParser, MessagePlatform, Output } from "../interfaces/parsers/index.js";
 import { WhatsAppIncomingMessage } from "../interfaces/parsers/whatsapp.js";
 import { MessageParsingError, ExternalServiceError } from "@phone-games/errors";
+import { GameCommandFactory } from "../commands/index.js";
 
 
 export class MessageHandlerService implements MessageHandler {
-  private partyManagerService: PartyManagerService;
   private userService: UserService;
   private parsers: Map<MessagePlatform, IncomingMessageParser>;
   private notificationService: NotificationService;
+  private commandFactory: GameCommandFactory;
   private logger: ILogger;
 
   constructor(
@@ -26,9 +26,9 @@ export class MessageHandlerService implements MessageHandler {
     logger: ILogger
   ) {
     this.notificationService = notificationService;
-    this.partyManagerService = partyManagerService;
     this.userService = userService;
     this.parsers = new Map(parsers.map(parser => [parser.getMessagePlatform(), parser]));
+    this.commandFactory = new GameCommandFactory(partyManagerService, userService);
     this.logger = logger.child({ service: 'MessageHandlerService' });
   }
 
@@ -55,52 +55,28 @@ export class MessageHandlerService implements MessageHandler {
       throw new MessageParsingError(`Parser not found for message platform: ${messagePlatform}`);
     }
 
+    // Parse message - extract text and user info
     const output = await parser.parse(message);
-    this.logger.info('Message parsed successfully', { action: output.action, userId: output.user.id });
+    this.logger.info('Message parsed successfully', { text: output.text, userId: output.user.id });
 
+    // Handle user registration/notification setup
     await this.handleUser(messagePlatform, output);
 
-    switch (output.action) {
-      case ValidActions.CREATE_PARTY: {
-        const createPartyParams = output.dataOutput as CreatePartyParams;
-        await this.partyManagerService.createParty(output.user.id, createPartyParams.partyName, GameFactory.createGame(createPartyParams.gameName));
-        break;
-      }
-      case ValidActions.JOIN_PARTY: {
-        const joinPartyParams = output.dataOutput as JoinPartyParams;
-        await this.partyManagerService.joinParty(output.user.id, joinPartyParams.partyId);
-        break;
-      }
-      case ValidActions.LEAVE_PARTY:
-        await this.partyManagerService.leaveParty(output.user.id);
-        break;
-      case ValidActions.START_MATCH:
-        await this.partyManagerService.startMatch(output.user.id);
-        break;
-      case ValidActions.NEXT_ROUND: {
-        const nextRoundParams = output.dataOutput as NextRoundParams<ValidGameNames>;
-        await this.partyManagerService.nextRound(output.user.id, nextRoundParams);
-        break;
-      }
-      case ValidActions.MIDDLE_ROUND_ACTION: {
-        const middleRoundActionParams = output.dataOutput as MiddleRoundActionParams<ValidGameNames>;
-        await this.partyManagerService.middleRoundAction(output.user.id, middleRoundActionParams);
-        break;
-      }
-      case ValidActions.FINISH_ROUND: {
-        const finishRoundParams = output.dataOutput as FinishRoundParams<ValidGameNames>;
-        await this.partyManagerService.finishRound(output.user.id, finishRoundParams);
-        break;
-      }
-      case ValidActions.FINISH_MATCH:
-        await this.partyManagerService.finishMatch(output.user.id);
-        break;
+    // Command Pattern + Chain of Responsibility
+    // Factory iterates through commands to find one that matches the text
+    const command = await this.commandFactory.createCommand(output.text, output.user.id);
+
+    // Optional validation before execution
+    if (command.validate) {
+      await command.validate();
     }
 
-    return;
+    // Execute the command
+    await command.execute();
+    this.logger.info('Command executed successfully', { text: output.text, userId: output.user.id });
   }
 
-  private async handleUser(messagePlatform: MessagePlatform, output: Output<ValidActions>) {
+  private async handleUser(messagePlatform: MessagePlatform, output: Output) {
     let user = await this.userService.getUserById(output.user.id);
     if (!user) {
         user = await this.userService.createUser(output.user);
