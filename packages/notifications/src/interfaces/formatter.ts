@@ -7,12 +7,12 @@ export type PartyParams = {
     gameName: ValidGameNames;
 }
 
-export abstract class Parser {
-    abstract parse<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<ValidGameNames> : PartyParams): Promise<Notification>;
+export abstract class Formatter {
+    abstract format<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<ValidGameNames> : PartyParams): Promise<Notification>;
     abstract getGameName(): ValidGameNames;
     abstract getNotificationMethod(): ValidNotificationMethods;
 
-    protected parseCreateParty(params: PartyParams): Notification {
+    protected formatCreateParty(params: PartyParams): Notification {
         const body = `A new party has been created with \nId: ${params.partyId} \nName: ${params.partyName} for game ${params.gameName}`;
 
         return {
@@ -22,7 +22,7 @@ export abstract class Parser {
         };
     }
 
-    protected parsePlayerJoined(params: PartyParams): Notification {
+    protected formatPlayerJoined(params: PartyParams): Notification {
         return {
             title: "Player Joined",
             body: "A new player has joined the game \n\n" + params.partyName,
@@ -30,7 +30,7 @@ export abstract class Parser {
         };
     }
 
-    protected parsePlayerLeft(params: PartyParams): Notification {
+    protected formatPlayerLeft(params: PartyParams): Notification {
         return {
             title: "Player Left",
             body: "A player has left the game \n\n" + params.partyName,

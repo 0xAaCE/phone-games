@@ -1,4 +1,4 @@
-import { ImpostorWebSocketParser, ImpostorWhatsAppParser, NotificationManager } from '@phone-games/notifications';
+import { ImpostorWebSocketFormatter, ImpostorWhatsAppFormatter, NotificationManager } from '@phone-games/notifications';
 import { initializeApp } from './app.js';
 import { createServices } from './factories/serviceFactory.js';
 import dotenv from 'dotenv';
@@ -22,7 +22,7 @@ logger.info('Initializing server', { port: PORT });
 
 // Initialize notification service (manages WebSocket connections)
 const notificationService = new NotificationManager(
-  [new ImpostorWebSocketParser(), new ImpostorWhatsAppParser()],
+  [new ImpostorWebSocketFormatter(), new ImpostorWhatsAppFormatter()],
   logger
 );
 

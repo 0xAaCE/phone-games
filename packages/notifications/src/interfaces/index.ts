@@ -1,3 +1,4 @@
 export * from "./notification.js";
 export * from "./notificationProvider.js";
-export * from "./parser.js";
+export * from "./formatter.js";
+export * from "./notificationService.js";
