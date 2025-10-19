@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PartyManagerService } from '../../src/services/partyManagerService.js';
+import { PartyService } from '../../src/services/partyService.js';
+import { GameSessionManager } from '../../src/services/gameSessionManager.js';
+import { PartyNotificationCoordinator } from '../../src/services/partyNotificationCoordinator.js';
+import { InMemoryGameStateStorage } from '../../src/storage/inMemoryGameStateStorage.js';
 import { NotFoundError, ConflictError, ValidationError } from '@phone-games/errors';
 import { PartyTestFactory } from '../factories/partyFactory.js';
 import { MockNotificationService, MockGame, MockLogger } from '../mocks/dependencies.js';
@@ -11,6 +15,10 @@ import { MockPartyRepository } from '@phone-games/repositories/__tests__/mocks/m
 
 describe('PartyManagerService', () => {
   let partyManagerService: PartyManagerService;
+  let partyService: PartyService;
+  let gameSessionManager: GameSessionManager;
+  let partyNotificationCoordinator: PartyNotificationCoordinator;
+  let gameStateStorage: InMemoryGameStateStorage;
   let mockPartyRepository: MockPartyRepository;
   let mockNotificationService: NotificationService;
   let mockLogger: ILogger;
@@ -20,7 +28,24 @@ describe('PartyManagerService', () => {
     mockPartyRepository.clear();
     mockNotificationService = MockNotificationService.create();
     mockLogger = MockLogger.create();
-    partyManagerService = new PartyManagerService(mockPartyRepository, mockNotificationService, mockLogger);
+
+    // Create sub-services (new architecture)
+    gameStateStorage = new InMemoryGameStateStorage();
+    partyService = new PartyService(mockPartyRepository, mockLogger);
+    gameSessionManager = new GameSessionManager(gameStateStorage, mockLogger);
+    partyNotificationCoordinator = new PartyNotificationCoordinator(
+      mockNotificationService,
+      mockPartyRepository,
+      mockLogger
+    );
+
+    // Create the mediator service
+    partyManagerService = new PartyManagerService(
+      partyService,
+      gameSessionManager,
+      partyNotificationCoordinator,
+      mockLogger
+    );
   });
 
   describe('createParty', () => {

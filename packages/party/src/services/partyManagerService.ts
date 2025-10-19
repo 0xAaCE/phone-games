@@ -1,339 +1,283 @@
-import { Party, PartyPlayer, PartyStatus, PlayerRole } from '@phone-games/db';
-import { GamePlayer, GameState, ValidGameNames, Game, NextRoundParams, FinishRoundParams, FinishRoundResult, NextRoundResult, MiddleRoundActionResult, MiddleRoundActionParams } from '@phone-games/games';
-import { ValidationError, ConflictError, NotFoundError } from '@phone-games/errors';
-import { NotificationService } from '@phone-games/notifications';
+import { Party, PartyPlayer, PartyStatus } from '@phone-games/db';
+import {
+  GameState,
+  ValidGameNames,
+  Game,
+  NextRoundParams,
+  FinishRoundParams,
+  FinishRoundResult,
+  NextRoundResult,
+  MiddleRoundActionResult,
+  MiddleRoundActionParams,
+} from '@phone-games/games';
 import { ILogger } from '@phone-games/logger';
-import { IPartyRepository, PartyPlayerWithUser } from '@phone-games/repositories';
+import { PartyService } from './partyService.js';
+import { GameSessionManager } from './gameSessionManager.js';
+import { PartyNotificationCoordinator } from './partyNotificationCoordinator.js';
 
+/**
+ * PartyManagerService - Mediator Pattern
+ *
+ * Coordinates interactions between:
+ * - PartyService (party lifecycle)
+ * - GameSessionManager (game orchestration)
+ * - PartyNotificationCoordinator (player notifications)
+ *
+ * This service is now a pure coordinator/facade that delegates
+ * to specialized components instead of handling everything itself.
+ *
+ * Reduced from 339 lines to ~150 lines by separating concerns.
+ */
 export class PartyManagerService {
-  private gameStates: Map<string, Game<ValidGameNames>> = new Map();
   private logger: ILogger;
 
   constructor(
-    private partyRepository: IPartyRepository,
-    private notificationService: NotificationService,
+    private partyService: PartyService,
+    private gameSessionManager: GameSessionManager,
+    private notificationCoordinator: PartyNotificationCoordinator,
     logger: ILogger
   ) {
     this.logger = logger.child({ service: 'PartyManagerService' });
   }
 
+  /**
+   * Create a new party and initialize its game.
+   */
   async createParty<T extends ValidGameNames>(
     userId: string,
     partyName: string,
     game: Game<T>
   ): Promise<Party> {
-    this.logger.info('Creating party', { userId, partyName, gameName: game.getName() });
-    const existingParty = await this.getActivePartyPlayerForUser(userId);
+    this.logger.info('Mediating party creation', { userId, partyName, gameName: game.getName() });
 
-    // Clean up existing active party
-    if (existingParty) {
-      if (existingParty.role === PlayerRole.MANAGER) {
-        // If manager, finish the party (updates status to FINISHED)
-        await this.updatePartyStatus(existingParty.partyId, PartyStatus.FINISHED);
-      } else {
-        // If player, just leave the party (removes party_player record)
-        await this.leaveParty(userId);
-      }
-    }
+    // 1. PARTY SERVICE - Create party
+    const party = await this.partyService.createParty(userId, partyName, game.getName());
 
-    // Create new party
-    const party = await this.partyRepository.createWithPlayer({
-      party: {
-        partyName,
-        gameName: game.getName(),
-        status: PartyStatus.WAITING,
-      },
-      player: {
-        userId,
-        role: PlayerRole.MANAGER,
-      },
-    });
+    // 2. GAME SESSION MANAGER - Initialize game
+    await this.gameSessionManager.initializeGame(party.id, game);
 
-    this.gameStates.set(party.id, game);
+    // 3. NOTIFICATION COORDINATOR - Notify creator
+    await this.notificationCoordinator.notifyPartyCreated(party, userId);
 
-    await this.notificationService.notifyCreateParty(party.partyName, party.gameName as ValidGameNames, party.id, userId);
-
-    this.logger.info('Party created successfully', { partyId: party.id, userId, partyName });
     return party;
   }
 
-  async startMatch(
-    userId: string,
-  ): Promise<{ party: Party; gameState: GameState<ValidGameNames> }> {
-    this.logger.info('Starting match', { userId });
-    const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
+  /**
+   * Start a match in the party.
+   */
+  async startMatch(userId: string): Promise<{ party: Party; gameState: GameState<ValidGameNames> }> {
+    this.logger.info('Mediating match start', { userId });
 
-    if (!partyId) {
-      this.logger.warn('Cannot start match: party not found', { userId });
-      throw new NotFoundError('Party not found');
-    }
+    // 1. PARTY SERVICE - Get party and players
+    const partyId = await this.partyService.getPartyIdForUser(userId);
+    const gamePlayers = await this.partyService.getGamePlayers(partyId);
 
-    const gamePlayers = await this.getGamePlayers(partyId);
-    const game = this.gameStates.get(partyId);
-    if (!game) {
-      throw new NotFoundError('Game state not found for party');
-    }
+    // 2. GAME SESSION MANAGER - Start game
+    const gameState = await this.gameSessionManager.startGame(partyId, gamePlayers);
 
-    const result = await game.start(gamePlayers);
+    // 3. PARTY SERVICE - Update party status
+    const party = await this.partyService.updatePartyStatus(partyId, PartyStatus.ACTIVE);
 
-    const party = await this.updatePartyStatus(partyId, PartyStatus.ACTIVE);
+    // 4. NOTIFICATION COORDINATOR - Notify all players
+    const game = await this.gameSessionManager.getGame(partyId);
+    await this.notificationCoordinator.notifyStartMatch(partyId, game);
 
-    for (const gamePlayer of gamePlayers) {
-      const newState = game.getGameState(gamePlayer.user.id);
-      await this.notificationService.notifyStartMatch(game.getName(), gamePlayer.user.id, newState);
-    }
-
-    this.logger.info('Match started successfully', { partyId, playerCount: gamePlayers.length });
-    return { party, gameState: result };
+    return { party, gameState };
   }
 
+  /**
+   * Advance to next round.
+   */
   async nextRound(
     userId: string,
     nextRoundParams: NextRoundParams<ValidGameNames>
   ): Promise<NextRoundResult<ValidGameNames>> {
-    const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
+    this.logger.info('Mediating next round', { userId });
 
-    if (!partyId) {
-      throw new NotFoundError('Party not found');
-    }
+    // 1. PARTY SERVICE - Get party
+    const partyId = await this.partyService.getPartyIdForUser(userId);
 
-    const game = this.gameStates.get(partyId);
-    if (!game) {
-      throw new NotFoundError('Game state not found for party');
-    }
+    // 2. GAME SESSION MANAGER - Process round
+    const result = await this.gameSessionManager.nextRound(partyId, nextRoundParams);
 
-    const gamePlayers = await this.getGamePlayers(partyId);
-
-    const result = await game.nextRound(nextRoundParams);
-
-    for (const gamePlayer of gamePlayers) {
-      const newState = game.getGameState(gamePlayer.user.id);
-      await this.notificationService.notifyNextRound(game.getName(), gamePlayer.user.id, newState);
-    }
+    // 3. NOTIFICATION COORDINATOR - Notify all players
+    const game = await this.gameSessionManager.getGame(partyId);
+    await this.notificationCoordinator.notifyNextRound(partyId, game);
 
     return result;
   }
 
+  /**
+   * Process middle-round action (e.g., voting).
+   */
   async middleRoundAction(
     userId: string,
     middleRoundActionParams: MiddleRoundActionParams<ValidGameNames>
   ): Promise<MiddleRoundActionResult<ValidGameNames>> {
-    const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
+    this.logger.info('Mediating middle round action', { userId });
 
-    if (!partyId) {
-      throw new NotFoundError('Party not found');
-    }
+    // 1. PARTY SERVICE - Get party
+    const partyId = await this.partyService.getPartyIdForUser(userId);
 
-    const game = this.gameStates.get(partyId);
+    // 2. GAME SESSION MANAGER - Process action
+    const result = await this.gameSessionManager.middleRoundAction(partyId, middleRoundActionParams);
 
-    if (!game) {
-      throw new NotFoundError('Game state not found for party');
-    }
-
-
-    const result = await game.middleRoundAction(middleRoundActionParams);
-    const newState = game.getGameState(userId);
-
-    await this.notificationService.notifyMiddleRoundAction(game.getName(), userId, newState);
+    // 3. NOTIFICATION COORDINATOR - Notify user
+    const game = await this.gameSessionManager.getGame(partyId);
+    await this.notificationCoordinator.notifyMiddleRoundAction(userId, game);
 
     return result;
   }
 
+  /**
+   * Finish the current round.
+   */
   async finishRound(
     userId: string,
     finishRoundParams: FinishRoundParams<ValidGameNames>
   ): Promise<FinishRoundResult<ValidGameNames>> {
-    const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
+    this.logger.info('Mediating finish round', { userId });
 
-    if (!partyId) {
-      throw new NotFoundError('Party not found');
-    }
+    // 1. PARTY SERVICE - Get party
+    const partyId = await this.partyService.getPartyIdForUser(userId);
 
-    const game = this.gameStates.get(partyId);
-    if (!game) {
-      throw new NotFoundError('Game state not found for party');
-    }
+    // 2. GAME SESSION MANAGER - Finish round
+    const result = await this.gameSessionManager.finishRound(partyId, finishRoundParams);
 
-    const result = await game.finishRound(finishRoundParams);
-
-
-    const gamePlayers = await this.getGamePlayers(partyId);
-
-    for (const gamePlayer of gamePlayers) {
-      const newState = game.getGameState(gamePlayer.user.id);
-
-      await this.notificationService.notifyFinishRound(game.getName(), gamePlayer.user.id, newState);
-    }
+    // 3. NOTIFICATION COORDINATOR - Notify all players
+    const game = await this.gameSessionManager.getGame(partyId);
+    await this.notificationCoordinator.notifyFinishRound(partyId, game);
 
     return result;
   }
 
-  async finishMatch(
-    userId: string,
-  ): Promise<GameState<ValidGameNames>> {
-    const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
+  /**
+   * Finish the entire match.
+   */
+  async finishMatch(userId: string): Promise<GameState<ValidGameNames>> {
+    this.logger.info('Mediating finish match', { userId });
 
-    if (!partyId) {
-      throw new NotFoundError('Party not found');
-    }
+    // 1. PARTY SERVICE - Get party
+    const partyId = await this.partyService.getPartyIdForUser(userId);
 
-    const game = this.gameStates.get(partyId);
-    if (!game) {
-      throw new NotFoundError('Game state not found for party');
-    }
+    // 2. GAME SESSION MANAGER - Finish game
+    const finalState = await this.gameSessionManager.finishGame(partyId);
 
-    const result = await game.finishMatch();
+    // 3. PARTY SERVICE - Update status
+    await this.partyService.updatePartyStatus(partyId, PartyStatus.FINISHED);
 
-    const gamePlayers = await this.getGamePlayers(partyId);
+    // 4. NOTIFICATION COORDINATOR - Notify all players
+    const game = await this.gameSessionManager.getGame(partyId);
+    await this.notificationCoordinator.notifyFinishMatch(partyId, game);
 
-    await this.updatePartyStatus(partyId, PartyStatus.FINISHED);
-
-    for (const gamePlayer of gamePlayers) {
-      const newState = game.getGameState(gamePlayer.user.id);
-      await this.notificationService.notifyFinishMatch(game.getName(), gamePlayer.user.id, newState);
-    }
-
-    return result;
+    return finalState;
   }
+
+  /**
+   * Join a party.
+   */
+  async joinParty(userId: string, partyId: string): Promise<PartyPlayer> {
+    this.logger.info('Mediating join party', { userId, partyId });
+
+    // 1. PARTY SERVICE - Add player
+    const player = await this.partyService.joinParty(userId, partyId);
+
+    // 2. NOTIFICATION COORDINATOR - Notify existing players
+    const party = await this.partyService.getParty(partyId);
+    if (party) {
+      await this.notificationCoordinator.notifyPlayerJoined(partyId, party, userId);
+    }
+
+    return player;
+  }
+
+  /**
+   * Leave a party.
+   */
+  async leaveParty(userId: string): Promise<void> {
+    this.logger.info('Mediating leave party', { userId });
+
+    // Get party info before leaving
+    const partyId = await this.partyService.getPartyIdForUser(userId);
+    const party = await this.partyService.getParty(partyId);
+
+    // 1. PARTY SERVICE - Remove player
+    const { remainingPlayers } = await this.partyService.leaveParty(userId);
+
+    // 2. NOTIFICATION COORDINATOR - Notify remaining players (if any)
+    if (remainingPlayers > 0 && party) {
+      await this.notificationCoordinator.notifyPlayerLeft(partyId, party, userId);
+    }
+
+    // 3. GAME SESSION MANAGER - Clean up game if party was deleted
+    if (remainingPlayers === 0) {
+      const hasGame = await this.gameSessionManager.hasGame(partyId);
+      if (hasGame) {
+        await this.gameSessionManager.deleteGame(partyId);
+      }
+    }
+  }
+
+  /**
+   * Delete a party.
+   */
+  async deleteParty(partyId: string): Promise<void> {
+    this.logger.info('Mediating delete party', { partyId });
+
+    // 1. GAME SESSION MANAGER - Delete game
+    const hasGame = await this.gameSessionManager.hasGame(partyId);
+    if (hasGame) {
+      await this.gameSessionManager.deleteGame(partyId);
+    }
+
+    // 2. PARTY SERVICE - Delete party
+    await this.partyService.deleteParty(partyId);
+  }
+
+  /**
+   * Promote a player to manager.
+   */
+  async promoteToManager(userId: string, targetUserId: string): Promise<PartyPlayer> {
+    return this.partyService.promoteToManager(userId, targetUserId);
+  }
+
+  /**
+   * Get game state for a user.
+   */
+  async getGameState(userId: string): Promise<GameState<ValidGameNames>> {
+    const partyId = await this.partyService.getPartyIdForUser(userId);
+    return this.gameSessionManager.getGameState(partyId, userId);
+  }
+
+  // ========== Simple Delegation Methods ==========
+  // These are read-only queries that just delegate to services
 
   async getParty(partyId: string): Promise<Party | null> {
-    return this.partyRepository.findByIdWithPlayers(partyId);
+    return this.partyService.getParty(partyId);
   }
 
   async getMyParty(userId: string): Promise<Party | null> {
-    const partyId = await this.getActivePartyPlayerForUser(userId);
-
-    if (!partyId) {
-      return null;
-    }
-
-    return this.getParty(partyId.partyId);
-  }
-
-  async updatePartyStatus(partyId: string, status: PartyStatus): Promise<Party> {
-    return this.partyRepository.updateStatus(partyId, status);
-  }
-
-  async deleteParty(partyId: string): Promise<void> {
-    this.gameStates.delete(partyId);
-    await this.partyRepository.delete(partyId);
-  }
-
-  async joinParty(userId: string, partyId: string): Promise<PartyPlayer> {
-    const party = await this.partyRepository.findById(partyId);
-
-    if (!party) {
-      throw new NotFoundError('Party not found');
-    }
-
-    if (party.status === PartyStatus.FINISHED) {
-      throw new ValidationError('Cannot join a finished party');
-    }
-
-    // Check if user is already in any active party
-    const existingActiveParty = await this.partyRepository.findActivePlayerForUser(userId);
-
-    if (existingActiveParty) {
-      throw new ConflictError('User is already in an active party');
-    }
-
-    const existingPlayer = await this.isUserInParty(userId, partyId);
-    if (existingPlayer) {
-
-      throw new ConflictError('User is already in this party');
-    }
-
-    for (const gamePlayer of await this.getGamePlayers(partyId)) {
-      if (gamePlayer.user.id === userId) {
-        continue;
-      }
-      await this.notificationService.notifyPlayerJoined(party.partyName, party.gameName as ValidGameNames, partyId, gamePlayer.user.id);
-    }
-
-    return this.partyRepository.createPlayer({
-      partyId,
-      userId,
-      role: PlayerRole.PLAYER,
-    });
-  }
-
-  async leaveParty(userId: string): Promise<void> {
-    const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
-
-    if (!partyId) {
-      throw new NotFoundError('Party not found');
-    }
-
-    await this.partyRepository.deletePlayer(partyId, userId);
-
-    const remainingPlayers = await this.partyRepository.countPlayersByPartyId(partyId);
-
-    const party = await this.getParty(partyId);
-    if (!party) {
-      throw new NotFoundError('Party not found');
-    }
-
-    if (remainingPlayers === 0) {
-      await this.deleteParty(partyId);
-    }
-
-    for (const gamePlayer of await this.getGamePlayers(partyId)) {
-      if (gamePlayer.user.id === userId) {
-        continue;
-      }
-      await this.notificationService.notifyPlayerLeft(party.partyName, party.gameName as ValidGameNames, partyId, gamePlayer.user.id);
-    }
-  }
-
-  async promoteToManager(userId: string, targetUserId: string): Promise<PartyPlayer> {
-    const { partyId } = await this.getActivePartyPlayerForUser(userId) || { };
-
-    if (!partyId) {
-      throw new NotFoundError('Party not found');
-    }
-
-    return this.partyRepository.updatePlayerRole(partyId, targetUserId, PlayerRole.MANAGER);
-  }
-
-  async getPartyPlayers(partyId: string): Promise<PartyPlayerWithUser[]> {
-    return this.partyRepository.findPlayersByPartyId(partyId);
-  }
-
-  async getGamePlayers(partyId: string): Promise<GamePlayer[]> {
-    const partyPlayers = await this.getPartyPlayers(partyId);
-
-    return partyPlayers.map(pp => ({
-      user: pp.user,
-      isManager: pp.role === PlayerRole.MANAGER,
-    }));
+    return this.partyService.getMyParty(userId);
   }
 
   async getAvailableParties(gameName?: string): Promise<Party[]> {
-    return this.partyRepository.findAvailableParties(gameName);
+    return this.partyService.getAvailableParties(gameName);
+  }
+
+  async getPartyPlayers(partyId: string) {
+    return this.partyService.getPartyPlayers(partyId);
   }
 
   async isUserInParty(userId: string, partyId: string): Promise<PartyPlayer | null> {
-    return this.partyRepository.findPlayer(partyId, userId);
+    return this.partyService.isUserInParty(userId, partyId);
   }
 
-  async getGameState(userId: string): Promise<GameState<ValidGameNames>> {
-    const partyPlayer = await this.getActivePartyPlayerForUser(userId);
-
-    if (!partyPlayer) {
-      throw new NotFoundError('Party not found');
-    }
-
-    const partyId = partyPlayer.partyId;
-
-    const game = this.gameStates.get(partyId);
-    if (!game) {
-      throw new NotFoundError('Game state not found for party');
-    }
-
-    return game.getGameState(partyPlayer.userId);
+  // For backward compatibility (if needed by tests or external code)
+  async updatePartyStatus(partyId: string, status: PartyStatus): Promise<Party> {
+    return this.partyService.updatePartyStatus(partyId, status);
   }
 
-  private async getActivePartyPlayerForUser(userId: string): Promise<PartyPlayer | null> {
-    return this.partyRepository.findActivePlayerForUser(userId);
+  async getGamePlayers(partyId: string) {
+    return this.partyService.getGamePlayers(partyId);
   }
 }
