@@ -1,5 +1,5 @@
-import { IncomingMessage, IncomingMessageParser, MessagePlatform, Output } from "../interfaces/parsers";
-import { WhatsAppIncomingMessage } from "../interfaces/parsers/whatsapp";
+import { IncomingMessage, IncomingMessageParser, MessagePlatform, Output } from "../interfaces/parsers/index.js";
+import { WhatsAppIncomingMessage } from "../interfaces/parsers/whatsapp.js";
 import { waIdToUserId } from "../utils/uuid.js";
 
 /**
