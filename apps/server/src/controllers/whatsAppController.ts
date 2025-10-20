@@ -1,12 +1,12 @@
-import { MessageHandlerService, MessagePlatform } from '@phone-games/messaging';
+import { MessageHandlerService } from '@phone-games/messaging';
 import { Request, Response } from 'express';
 
 export class WhatsAppController {
-  private messageHandlerService: MessageHandlerService;
+  // private messageHandlerService: MessageHandlerService;
 
-  constructor(messageHandlerService: MessageHandlerService) {
+  constructor(_messageHandlerService: MessageHandlerService) {
     // this.whatsAppService = new WhatsAppService();
-    this.messageHandlerService = messageHandlerService;
+    // this.messageHandlerService = messageHandlerService;
   }
 
   verifyWebhook = async (req: Request, res: Response) => {
@@ -20,11 +20,11 @@ export class WhatsAppController {
 
   }
 
-  handleWebhook = async (req: Request, res: Response) => {
-    const { body } = req;
+  handleWebhook = async (_req: Request, res: Response) => {
+    // const { body } = req;
     console.log("WhatsApp Webhook Received\n");
 
-    await this.messageHandlerService.handle(MessagePlatform.WHATSAPP, body);
+    // await this.messageHandlerService.handle(MessagePlatform.WHATSAPP, body);
 
     return res.status(200).send('OK');
   }
