@@ -52,11 +52,10 @@ export class MiddleRoundActionCommand implements GameCommand {
     private params: MiddleRoundActionParams<ValidGameNames>
   ) {}
 
-  async validate(): Promise<boolean> {
+  async validate(): Promise<void> {
     if (!this.params.votes) {
       throw new Error('Vote data is required');
     }
-    return true;
   }
 
   async execute(): Promise<void> {

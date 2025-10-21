@@ -14,9 +14,9 @@ export interface GameCommand {
 
   /**
    * Optional: Validate the command before execution
-   * @returns true if valid, throws error if invalid
+   * Throws error if invalid
    */
-  validate?(): Promise<boolean>;
+  validate?(): Promise<void>;
 
   /**
    * Optional: Undo the command (for future implementation)

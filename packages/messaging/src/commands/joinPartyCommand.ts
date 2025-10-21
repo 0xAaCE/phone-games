@@ -30,11 +30,10 @@ export class JoinPartyCommand implements GameCommand {
     private params: JoinPartyParams
   ) {}
 
-  async validate(): Promise<boolean> {
+  async validate(): Promise<void> {
     if (!this.params.partyId) {
       throw new Error('Party ID is required');
     }
-    return true;
   }
 
   async execute(): Promise<void> {

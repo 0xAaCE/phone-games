@@ -34,11 +34,10 @@ export class CreatePartyCommand implements GameCommand {
     private params: CreatePartyParams
   ) {}
 
-  async validate(): Promise<boolean> {
+  async validate(): Promise<void> {
     if (!this.params.gameName || !this.params.partyName) {
       throw new Error('Game name and party name are required');
     }
-    return true;
   }
 
   async execute(): Promise<void> {
