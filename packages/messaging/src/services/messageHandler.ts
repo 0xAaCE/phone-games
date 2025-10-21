@@ -80,8 +80,8 @@ export class MessageHandlerService implements MessageHandler {
       await command.execute();
       this.logger.info('Command executed successfully', { text: output.text, userId: output.user.id });
     } catch (error) {
-      // Convert error to user-friendly message using formatter
-      const errorMessage = this.notificationService.convertErrorToMessage(GAME_NAMES.IMPOSTOR, error);
+      // Convert error to user-friendly message
+      const errorMessage = this.notificationService.convertErrorToMessage(error);
       this.logger.error('Error handling message', error as Error, { userId });
 
       // Send error notification if we have a userId

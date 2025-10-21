@@ -24,18 +24,34 @@ export abstract class BaseError extends Error {
    */
   public readonly context?: Record<string, unknown>;
 
+  /**
+   * User-friendly message safe to display to end users
+   * Falls back to technical message if not provided
+   */
+  private readonly _displayMessage?: string;
+
+  /**
+   * Get the user-friendly display message
+   * Returns displayMessage if provided, otherwise falls back to the technical message
+   */
+  public get displayMessage(): string {
+    return this._displayMessage || this.message;
+  }
+
   constructor(
     message: string,
     public readonly cause?: Error,
     options?: {
       code?: string;
       context?: Record<string, unknown>;
+      displayMessage?: string;
     }
   ) {
     super(message);
     this.name = this.constructor.name;
     this.code = options?.code;
     this.context = options?.context;
+    this._displayMessage = options?.displayMessage;
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     type ErrorWithCapture = typeof Error & {

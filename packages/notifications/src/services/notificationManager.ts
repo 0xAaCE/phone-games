@@ -1,5 +1,5 @@
 import { GameState, ValidGameNames } from "@phone-games/games";
-import { NotificationError } from "@phone-games/errors";
+import { NotificationError, BaseError } from "@phone-games/errors";
 import { ILogger } from "@phone-games/logger";
 import {
     NotificationService,
@@ -320,25 +320,27 @@ export class NotificationManager implements NotificationService {
 
     /**
      * Convert a domain error to a user-friendly error message
-     * Delegates to the formatter's error conversion logic
+     * Accesses the error's displayMessage property with fallback
      *
-     * @param gameName - The name of the game
      * @param error - The error to convert (can be any domain error type)
      * @returns A user-friendly error message string
      *
      * @example
-     * const message = manager.convertErrorToMessage("impostor", new PartyError("Not found"));
+     * const message = manager.convertErrorToMessage(new PartyError("Not found"));
      * // Returns: "Party not found. Create one with /create_party"
      */
-    convertErrorToMessage(gameName: ValidGameNames, error: unknown): string {
-        const formatter = this.formatters.get(`${gameName}-whatsapp` as FormatterKey) ||
-                         this.formatters.get(`${gameName}-web_socket` as FormatterKey);
-
-        if (!formatter) {
-            // Fallback to generic error message if no formatter found
-            return 'Something went wrong. Please try again';
+    convertErrorToMessage(error: unknown): string {
+        // If it's a BaseError, use its displayMessage
+        if (error instanceof BaseError) {
+            return error.displayMessage;
         }
 
-        return formatter.convertErrorToMessage(error);
+        // If it's a standard Error, use its message
+        if (error instanceof Error) {
+            return error.message;
+        }
+
+        // Fallback to generic error message
+        return 'Something went wrong. Please try again';
     }
 }

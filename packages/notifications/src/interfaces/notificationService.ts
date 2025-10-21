@@ -14,5 +14,5 @@ export abstract class NotificationService {
     abstract notifyPlayerJoined(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void>;
     abstract notifyPlayerLeft(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void>;
     abstract notifyError(gameName: ValidGameNames, userId: string, errorMessage: string): Promise<void>;
-    abstract convertErrorToMessage(gameName: ValidGameNames, error: unknown): string;
+    abstract convertErrorToMessage(error: unknown): string;
 }

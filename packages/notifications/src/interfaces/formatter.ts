@@ -1,13 +1,5 @@
 import { GameState, ValidGameNames } from "@phone-games/games";
 import { Notification, ValidPartyActions, ValidNotificationMethods, ValidActions, ValidGameActions, ErrorParams } from "./notification.js";
-import {
-    MessageParsingError,
-    PartyError,
-    UserError,
-    GameError,
-    ValidationError,
-    NotFoundError
-} from "@phone-games/errors";
 
 export type PartyParams = {
     partyName: string;
@@ -52,42 +44,5 @@ export abstract class Formatter {
             body: params.message,
             action: ValidPartyActions.ERROR,
         };
-    }
-
-    /**
-     * Converts domain errors to user-friendly error messages
-     * Can be overridden by subclasses for game-specific error messages
-     */
-    public convertErrorToMessage(error: unknown): string {
-        if (error instanceof PartyError) {
-            return 'Party not found. Create one with /create_party';
-        }
-
-        if (error instanceof UserError) {
-            return 'User not found';
-        }
-
-        if (error instanceof GameError) {
-            return 'Game error. Please try again';
-        }
-
-        if (error instanceof ValidationError) {
-            return (error as Error).message || 'Invalid input';
-        }
-
-        if (error instanceof NotFoundError) {
-            return (error as Error).message || 'Resource not found';
-        }
-
-        if (error instanceof MessageParsingError) {
-            return 'Unknown command. Type /help for available commands';
-        }
-
-        if (error instanceof Error && error.message.includes('Unknown command')) {
-            return 'Unknown command. Type /help for available commands';
-        }
-
-        // Default error message
-        return 'Something went wrong. Please try again';
     }
 }
