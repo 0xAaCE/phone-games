@@ -9,6 +9,7 @@ import { NextRoundCommand } from './nextRoundCommand.js';
 import { MiddleRoundActionCommand } from './middleRoundActionCommand.js';
 import { FinishRoundCommand } from './finishRoundCommand.js';
 import { FinishMatchCommand } from './finishMatchCommand.js';
+import { VoteCommand } from './voteCommand.js';
 
 /**
  * Factory for creating game commands
@@ -33,6 +34,7 @@ export class GameCommandFactory {
     StartMatchCommand,
     NextRoundCommand,
     MiddleRoundActionCommand,
+    VoteCommand,
     FinishRoundCommand,
     FinishMatchCommand,
   ];
