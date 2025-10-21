@@ -16,14 +16,46 @@ import { ValidActions } from '../interfaces/parsers/index.js';
  * - DefendPlayerCommand
  */
 export class VoteCommand implements GameCommand {
-  // Static properties and methods for matching and parsing
-  // Pattern captures: group 1 = vote command (vote|v), group 2 = username
+  /**
+   * Regex patterns that match this command
+   * Pattern captures: group 1 = vote command (vote|v), group 2 = username
+   *
+   * @example
+   * "/vote username" - Full command
+   * "/v username" - Short alias
+   */
   static readonly patterns = [/^\/(vote|v)\s+(\S+)/];
 
+  /**
+   * Check if this command can handle the given message text
+   *
+   * @param text - The message text to check
+   * @returns true if this command matches the text
+   *
+   * @example
+   * VoteCommand.canHandle("/vote alice") // true
+   * VoteCommand.canHandle("/v bob") // true
+   * VoteCommand.canHandle("/start") // false
+   */
   static canHandle(text: string): boolean {
     return this.patterns.some(pattern => pattern.test(text));
   }
 
+  /**
+   * Parse parameters from the message text
+   * Extracts the username from the vote command and looks up the user
+   *
+   * @param text - The message text to parse (format: "/vote username")
+   * @param context - Required context containing userId and userService
+   * @returns The parsed vote parameters with user ID mapping
+   * @throws {Error} If context is not provided
+   * @throws {Error} If vote format is invalid
+   * @throws {Error} If user is not found
+   *
+   * @example
+   * await VoteCommand.parseParams("/vote alice", { userId: "123", userService })
+   * // Returns: { votes: { "123": "alice-user-id" } }
+   */
   static async parseParams(
     text: string,
     context?: { userId: string; userService: UserService }
@@ -48,23 +80,46 @@ export class VoteCommand implements GameCommand {
     return { votes: { [context.userId]: user.id } };
   }
 
+  /**
+   * Get the ValidActions enum value for this command
+   *
+   * @returns The MIDDLE_ROUND_ACTION action enum value
+   */
   static getAction(): ValidActions {
     return ValidActions.MIDDLE_ROUND_ACTION;
   }
 
-  // Instance methods
+  /**
+   * Creates a new VoteCommand instance
+   *
+   * @param partyManager - Service for managing party operations
+   * @param userId - ID of the user executing the vote
+   * @param params - Vote parameters containing the vote mapping
+   */
   constructor(
     private partyManager: PartyManagerService,
     private userId: string,
     private params: MiddleRoundActionParams<ValidGameNames>
   ) {}
 
+  /**
+   * Validate the command before execution
+   * Ensures vote data is present
+   *
+   * @throws {Error} If vote data is missing
+   */
   async validate(): Promise<void> {
     if (!this.params.votes) {
       throw new Error('Vote data is required');
     }
   }
 
+  /**
+   * Execute the vote command
+   * Submits the vote to the party manager for processing
+   *
+   * @throws May throw errors from partyManager.middleRoundAction
+   */
   async execute(): Promise<void> {
     await this.partyManager.middleRoundAction(this.userId, this.params);
   }
