@@ -8,7 +8,7 @@ import {
   PlayerNotificationCoordinator,
   InMemoryGameStateStorage,
 } from '@phone-games/party';
-import { MessageHandlerService, WhatsAppParser, TwilioParser } from '@phone-games/messaging';
+import { MessageHandlerService, UserRegistrationService, WhatsAppParser, TwilioParser } from '@phone-games/messaging';
 import { UserService } from '@phone-games/user';
 import { PrismaUserRepository, PrismaPartyRepository } from '@phone-games/repositories';
 
@@ -70,11 +70,20 @@ export function createServices(deps: ServiceFactoryDependencies): Services {
     logger
   );
 
-  // ===== Messaging Service =====
+  // ===== Messaging Services =====
+  // User registration service (handles user creation + notification provider setup)
+  const userRegistrationService = new UserRegistrationService(
+    userService,
+    notificationService,
+    logger
+  );
+
+  // Message handler service (orchestrates message processing)
   const messageHandlerService = new MessageHandlerService(
     notificationService,
     sessionCoordinator,
     userService,
+    userRegistrationService,
     [new WhatsAppParser(), new TwilioParser()],
     logger
   );
