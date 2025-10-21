@@ -58,7 +58,7 @@ export abstract class Formatter {
      * Converts domain errors to user-friendly error messages
      * Can be overridden by subclasses for game-specific error messages
      */
-    protected convertErrorToMessage(error: unknown): string {
+    public convertErrorToMessage(error: unknown): string {
         if (error instanceof PartyError) {
             return 'Party not found. Create one with /create_party';
         }
