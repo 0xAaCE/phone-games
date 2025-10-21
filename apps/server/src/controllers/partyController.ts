@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 import { ValidationError } from '@phone-games/errors';
 import { GameFactory, ValidGamesSchema } from '@phone-games/games';
 
 export class PartyController {
-  private partyService: PartyManagerService;
+  private sessionCoordinator: SessionCoordinator;
 
-  constructor(partyManagerService: PartyManagerService) {
-    this.partyService = partyManagerService;
+  constructor(sessionCoordinator: SessionCoordinator) {
+    this.sessionCoordinator = sessionCoordinator;
   }
 
   // POST /api/parties
@@ -29,7 +29,7 @@ export class PartyController {
       }
 
       const game = GameFactory.createGame(gameName);
-      const party = await this.partyService.createParty(req.user.id, partyName, game);
+      const party = await this.sessionCoordinator.createParty(req.user.id, partyName, game);
 
       res.status(201).json({
         success: true,
@@ -44,7 +44,7 @@ export class PartyController {
   getParty = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const party = await this.partyService.getParty(id);
+      const party = await this.sessionCoordinator.getParty(id);
 
       if (!party) {
         res.status(404).json({
@@ -67,7 +67,7 @@ export class PartyController {
   getAvailableParties = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { gameName } = req.query;
-      const parties = await this.partyService.getAvailableParties(gameName as string);
+      const parties = await this.sessionCoordinator.getAvailableParties(gameName as string);
 
       res.json({
         success: true,
@@ -85,7 +85,7 @@ export class PartyController {
         throw new ValidationError('User ID required');
       }
 
-      const party = await this.partyService.getMyParty(req.user.id);
+      const party = await this.sessionCoordinator.getMyParty(req.user.id);
 
       if (!party) {
         res.status(404).json({
@@ -111,7 +111,7 @@ export class PartyController {
         throw new ValidationError('User ID required');
       }
 
-      const result = await this.partyService.startMatch(req.user.id);
+      const result = await this.sessionCoordinator.startMatch(req.user.id);
 
       res.json({
         success: true,
@@ -135,7 +135,7 @@ export class PartyController {
         throw new ValidationError('Party ID required');
       }
 
-      const partyPlayer = await this.partyService.joinParty(req.user.id, partyId);
+      const partyPlayer = await this.sessionCoordinator.joinParty(req.user.id, partyId);
 
       res.json({
         success: true,
@@ -153,7 +153,7 @@ export class PartyController {
         throw new ValidationError('User ID required');
       }
 
-      await this.partyService.leaveParty(req.user.id);
+      await this.sessionCoordinator.leaveParty(req.user.id);
 
       res.json({
         success: true,
@@ -177,7 +177,7 @@ export class PartyController {
         throw new ValidationError('Target user ID required');
       }
 
-      const partyPlayer = await this.partyService.promoteToManager(req.user.id, targetUserId);
+      const partyPlayer = await this.sessionCoordinator.promoteToManager(req.user.id, targetUserId);
 
       res.json({
         success: true,
@@ -201,7 +201,7 @@ export class PartyController {
         throw new ValidationError('Game instance required');
       }
 
-      const gameState = await this.partyService.nextRound(req.user.id, game);
+      const gameState = await this.sessionCoordinator.nextRound(req.user.id, game);
 
       res.json({
         success: true,
@@ -221,7 +221,7 @@ export class PartyController {
 
       const { middleRoundActionParams } = req.body;
 
-      const gameState = await this.partyService.middleRoundAction(req.user.id, middleRoundActionParams);
+      const gameState = await this.sessionCoordinator.middleRoundAction(req.user.id, middleRoundActionParams);
 
       res.json({
         success: true,
@@ -245,7 +245,7 @@ export class PartyController {
         throw new ValidationError('Game instance required');
       }
 
-      const gameState = await this.partyService.finishRound(req.user.id, game);
+      const gameState = await this.sessionCoordinator.finishRound(req.user.id, game);
 
       res.json({
         success: true,
@@ -263,7 +263,7 @@ export class PartyController {
         throw new ValidationError('User ID required');
       }
 
-      const gameState = await this.partyService.finishMatch(req.user.id);
+      const gameState = await this.sessionCoordinator.finishMatch(req.user.id);
 
       res.json({
         success: true,
@@ -281,7 +281,7 @@ export class PartyController {
         throw new ValidationError('User ID required');
       }
 
-      const gameState = await this.partyService.getGameState(req.user.id);
+      const gameState = await this.sessionCoordinator.getGameState(req.user.id);
 
       if (!gameState) {
         res.status(404).json({

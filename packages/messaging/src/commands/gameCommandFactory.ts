@@ -1,4 +1,4 @@
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { UserService } from '@phone-games/user';
 import { GameCommand, GameCommandClass } from './gameCommand.js';
 import { CreatePartyCommand } from './createPartyCommand.js';
@@ -40,7 +40,7 @@ export class GameCommandFactory {
   ];
 
   constructor(
-    private partyManager: PartyManagerService,
+    private sessionCoordinator: SessionCoordinator,
     private userService: UserService
   ) {}
 
@@ -65,7 +65,7 @@ export class GameCommandFactory {
         const params = await CommandClass.parseParams(text, context);
 
         // Instantiate and return the command
-        return new CommandClass(this.partyManager, userId, params) as GameCommand;
+        return new CommandClass(this.sessionCoordinator, userId, params) as GameCommand;
       }
     }
 

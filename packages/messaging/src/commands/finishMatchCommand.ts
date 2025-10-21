@@ -1,4 +1,4 @@
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { GameCommand } from './gameCommand.js';
 import { ValidActions } from '../interfaces/parsers/index.js';
 
@@ -24,11 +24,11 @@ export class FinishMatchCommand implements GameCommand {
 
   // Instance methods
   constructor(
-    private partyManager: PartyManagerService,
+    private sessionCoordinator: SessionCoordinator,
     private userId: string
   ) {}
 
   async execute(): Promise<void> {
-    await this.partyManager.finishMatch(this.userId);
+    await this.sessionCoordinator.finishMatch(this.userId);
   }
 }

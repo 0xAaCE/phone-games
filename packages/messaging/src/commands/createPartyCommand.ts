@@ -1,4 +1,4 @@
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { GameFactory, ValidGameNames } from '@phone-games/games';
 import { GameCommand } from './gameCommand.js';
 import { CreatePartyParams, ValidActions } from '../interfaces/parsers/index.js';
@@ -29,7 +29,7 @@ export class CreatePartyCommand implements GameCommand {
 
   // Instance methods
   constructor(
-    private partyManager: PartyManagerService,
+    private sessionCoordinator: SessionCoordinator,
     private userId: string,
     private params: CreatePartyParams
   ) {}
@@ -42,6 +42,6 @@ export class CreatePartyCommand implements GameCommand {
 
   async execute(): Promise<void> {
     const game = GameFactory.createGame(this.params.gameName);
-    await this.partyManager.createParty(this.userId, this.params.partyName, game);
+    await this.sessionCoordinator.createParty(this.userId, this.params.partyName, game);
   }
 }

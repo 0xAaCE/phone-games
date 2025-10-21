@@ -17,7 +17,7 @@ export const initializeApp = (services: Services) => {
 
   // Mount routers
   app.use('/api/users', createUserRouter(services.userService));
-  app.use('/api/parties', createPartyRouter(services.partyManagerService));
+  app.use('/api/parties', createPartyRouter(services.sessionCoordinator));
   app.use('/api/whatsapp', createWhatsAppRouter(services.messageHandlerService));
   app.use('/api/twilio', createTwilioRouter(services.messageHandlerService));
 

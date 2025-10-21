@@ -13,31 +13,31 @@ import {
 import { ILogger } from '@phone-games/logger';
 import { PartyService } from './partyService.js';
 import { GameSessionManager } from './gameSessionManager.js';
-import { PartyNotificationCoordinator } from './partyNotificationCoordinator.js';
+import { PlayerNotificationCoordinator } from './playerNotificationCoordinator.js';
 
 /**
- * PartyManagerService - Mediator Pattern
+ * SessionCoordinator - Mediator Pattern
  *
  * Coordinates interactions between:
  * - PartyService (party lifecycle)
  * - GameSessionManager (game orchestration)
- * - PartyNotificationCoordinator (player notifications)
+ * - PlayerNotificationCoordinator (player notifications)
  *
  * This service is now a pure coordinator/facade that delegates
  * to specialized components instead of handling everything itself.
  *
  * Reduced from 339 lines to ~150 lines by separating concerns.
  */
-export class PartyManagerService {
+export class SessionCoordinator {
   private logger: ILogger;
 
   constructor(
     private partyService: PartyService,
     private gameSessionManager: GameSessionManager,
-    private notificationCoordinator: PartyNotificationCoordinator,
+    private notificationCoordinator: PlayerNotificationCoordinator,
     logger: ILogger
   ) {
-    this.logger = logger.child({ service: 'PartyManagerService' });
+    this.logger = logger.child({ service: 'SessionCoordinator' });
   }
 
   /**

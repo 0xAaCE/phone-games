@@ -1,4 +1,4 @@
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { MiddleRoundActionParams, ValidGameNames } from '@phone-games/games';
 import { UserService } from '@phone-games/user';
 import { GameCommand } from './gameCommand.js';
@@ -47,7 +47,7 @@ export class MiddleRoundActionCommand implements GameCommand {
 
   // Instance methods
   constructor(
-    private partyManager: PartyManagerService,
+    private sessionCoordinator: SessionCoordinator,
     private userId: string,
     private params: MiddleRoundActionParams<ValidGameNames>
   ) {}
@@ -59,6 +59,6 @@ export class MiddleRoundActionCommand implements GameCommand {
   }
 
   async execute(): Promise<void> {
-    await this.partyManager.middleRoundAction(this.userId, this.params);
+    await this.sessionCoordinator.middleRoundAction(this.userId, this.params);
   }
 }

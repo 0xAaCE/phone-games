@@ -5,10 +5,10 @@ import { ILogger } from '@phone-games/logger';
 import { IPartyRepository, PartyPlayerWithUser } from '@phone-games/repositories';
 
 /**
- * Coordinates notifications to all players in a party.
+ * Coordinates notifications to all players in a game session.
  * Uses Template Method pattern to eliminate duplicate notification loops.
  */
-export class PartyNotificationCoordinator {
+export class PlayerNotificationCoordinator {
   private logger: ILogger;
 
   constructor(
@@ -16,7 +16,7 @@ export class PartyNotificationCoordinator {
     private partyRepository: IPartyRepository,
     logger: ILogger
   ) {
-    this.logger = logger.child({ service: 'PartyNotificationCoordinator' });
+    this.logger = logger.child({ service: 'PlayerNotificationCoordinator' });
   }
 
   /**

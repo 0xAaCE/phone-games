@@ -1,4 +1,4 @@
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { GameCommand } from './gameCommand.js';
 import { JoinPartyParams, ValidActions } from '../interfaces/parsers/index.js';
 
@@ -25,7 +25,7 @@ export class JoinPartyCommand implements GameCommand {
 
   // Instance methods
   constructor(
-    private partyManager: PartyManagerService,
+    private sessionCoordinator: SessionCoordinator,
     private userId: string,
     private params: JoinPartyParams
   ) {}
@@ -37,6 +37,6 @@ export class JoinPartyCommand implements GameCommand {
   }
 
   async execute(): Promise<void> {
-    await this.partyManager.joinParty(this.userId, this.params.partyId);
+    await this.sessionCoordinator.joinParty(this.userId, this.params.partyId);
   }
 }

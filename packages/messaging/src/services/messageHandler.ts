@@ -1,7 +1,7 @@
 import { User } from "@phone-games/db";
 import { MessageHandler } from "../interfaces/messageHandler";
 import { NotificationProvider, NotificationService, WhatsappNotificationProvider, TwilioWhatsAppNotificationProvider } from "@phone-games/notifications";
-import { PartyManagerService } from "@phone-games/party";
+import { SessionCoordinator } from "@phone-games/party";
 import { UserService } from "@phone-games/user";
 import { ILogger } from "@phone-games/logger";
 import { GAME_NAMES } from "@phone-games/games";
@@ -21,7 +21,7 @@ export class MessageHandlerService implements MessageHandler {
 
   constructor(
     notificationService: NotificationService,
-    partyManagerService: PartyManagerService,
+    sessionCoordinator: SessionCoordinator,
     userService: UserService,
     parsers: IncomingMessageParser[],
     logger: ILogger
@@ -29,7 +29,7 @@ export class MessageHandlerService implements MessageHandler {
     this.notificationService = notificationService;
     this.userService = userService;
     this.parsers = new Map(parsers.map(parser => [parser.getMessagePlatform(), parser]));
-    this.commandFactory = new GameCommandFactory(partyManagerService, userService);
+    this.commandFactory = new GameCommandFactory(sessionCoordinator, userService);
     this.logger = logger.child({ service: 'MessageHandlerService' });
   }
 

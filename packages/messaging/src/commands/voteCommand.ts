@@ -1,4 +1,4 @@
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { MiddleRoundActionParams, ValidGameNames } from '@phone-games/games';
 import { UserService } from '@phone-games/user';
 import { GameCommand } from './gameCommand.js';
@@ -92,12 +92,12 @@ export class VoteCommand implements GameCommand {
   /**
    * Creates a new VoteCommand instance
    *
-   * @param partyManager - Service for managing party operations
+   * @param sessionCoordinator - Service for coordinating game sessions and party operations
    * @param userId - ID of the user executing the vote
    * @param params - Vote parameters containing the vote mapping
    */
   constructor(
-    private partyManager: PartyManagerService,
+    private sessionCoordinator: SessionCoordinator,
     private userId: string,
     private params: MiddleRoundActionParams<ValidGameNames>
   ) {}
@@ -116,11 +116,11 @@ export class VoteCommand implements GameCommand {
 
   /**
    * Execute the vote command
-   * Submits the vote to the party manager for processing
+   * Submits the vote to the session coordinator for processing
    *
-   * @throws May throw errors from partyManager.middleRoundAction
+   * @throws May throw errors from sessionCoordinator.middleRoundAction
    */
   async execute(): Promise<void> {
-    await this.partyManager.middleRoundAction(this.userId, this.params);
+    await this.sessionCoordinator.middleRoundAction(this.userId, this.params);
   }
 }

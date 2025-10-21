@@ -1,4 +1,4 @@
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 import { FinishRoundParams, ValidGameNames } from '@phone-games/games';
 import { GameCommand } from './gameCommand.js';
 import { ValidActions } from '../interfaces/parsers/index.js';
@@ -25,12 +25,12 @@ export class FinishRoundCommand implements GameCommand {
 
   // Instance methods
   constructor(
-    private partyManager: PartyManagerService,
+    private sessionCoordinator: SessionCoordinator,
     private userId: string,
     private params: FinishRoundParams<ValidGameNames>
   ) {}
 
   async execute(): Promise<void> {
-    await this.partyManager.finishRound(this.userId, this.params);
+    await this.sessionCoordinator.finishRound(this.userId, this.params);
   }
 }

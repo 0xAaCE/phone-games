@@ -2,10 +2,10 @@ import { PrismaClient } from '@phone-games/db';
 import { ILogger } from '@phone-games/logger';
 import { NotificationService } from '@phone-games/notifications';
 import {
-  PartyManagerService,
+  SessionCoordinator,
   PartyService,
   GameSessionManager,
-  PartyNotificationCoordinator,
+  PlayerNotificationCoordinator,
   InMemoryGameStateStorage,
 } from '@phone-games/party';
 import { MessageHandlerService, WhatsAppParser, TwilioParser } from '@phone-games/messaging';
@@ -20,7 +20,7 @@ export interface ServiceFactoryDependencies {
 
 export interface Services {
   userService: UserService;
-  partyManagerService: PartyManagerService;
+  sessionCoordinator: SessionCoordinator;
   messageHandlerService: MessageHandlerService;
 }
 
@@ -30,10 +30,10 @@ export interface Services {
  * Makes the dependency graph clear and explicit.
  *
  * New architecture:
- * PartyManagerService (Mediator) delegates to:
+ * SessionCoordinator (Mediator) delegates to:
  *   - PartyService (party lifecycle)
  *   - GameSessionManager (game orchestration)
- *   - PartyNotificationCoordinator (notifications)
+ *   - PlayerNotificationCoordinator (notifications)
  */
 export function createServices(deps: ServiceFactoryDependencies): Services {
   const { db, logger, notificationService } = deps;
@@ -56,24 +56,24 @@ export function createServices(deps: ServiceFactoryDependencies): Services {
   const gameSessionManager = new GameSessionManager(gameStateStorage, logger);
 
   // 4. Notification coordinator (broadcasting to players)
-  const partyNotificationCoordinator = new PartyNotificationCoordinator(
+  const playerNotificationCoordinator = new PlayerNotificationCoordinator(
     notificationService,
     partyRepository,
     logger
   );
 
-  // 5. Party manager (mediator - coordinates all components)
-  const partyManagerService = new PartyManagerService(
+  // 5. Session coordinator (mediator - coordinates all components)
+  const sessionCoordinator = new SessionCoordinator(
     partyService,
     gameSessionManager,
-    partyNotificationCoordinator,
+    playerNotificationCoordinator,
     logger
   );
 
   // ===== Messaging Service =====
   const messageHandlerService = new MessageHandlerService(
     notificationService,
-    partyManagerService,
+    sessionCoordinator,
     userService,
     [new WhatsAppParser(), new TwilioParser()],
     logger
@@ -81,7 +81,7 @@ export function createServices(deps: ServiceFactoryDependencies): Services {
 
   return {
     userService,
-    partyManagerService,
+    sessionCoordinator,
     messageHandlerService,
   };
 }

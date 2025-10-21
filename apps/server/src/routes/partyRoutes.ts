@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { PartyController } from '../controllers/partyController.js';
 import { authenticateFirebase } from '../middleware/auth.js';
-import { PartyManagerService } from '@phone-games/party';
+import { SessionCoordinator } from '@phone-games/party';
 
-export function createPartyRouter(partyService: PartyManagerService): Router {
+export function createPartyRouter(sessionCoordinator: SessionCoordinator): Router {
     const router = Router();
-    const partyController = new PartyController(partyService);
+    const partyController = new PartyController(sessionCoordinator);
 
     // All party routes require authentication
     router.use(authenticateFirebase);

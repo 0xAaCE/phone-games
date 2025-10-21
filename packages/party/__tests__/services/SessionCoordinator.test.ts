@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PartyManagerService } from '../../src/services/partyManagerService.js';
+import { SessionCoordinator } from '../../src/services/sessionCoordinator.js';
 import { PartyService } from '../../src/services/partyService.js';
 import { GameSessionManager } from '../../src/services/gameSessionManager.js';
-import { PartyNotificationCoordinator } from '../../src/services/partyNotificationCoordinator.js';
+import { PlayerNotificationCoordinator } from '../../src/services/playerNotificationCoordinator.js';
 import { InMemoryGameStateStorage } from '../../src/storage/inMemoryGameStateStorage.js';
 import { NotFoundError, ConflictError, ValidationError } from '@phone-games/errors';
 import { PartyTestFactory } from '../factories/partyFactory.js';
@@ -13,11 +13,11 @@ import { GAME_NAMES } from '@phone-games/games';
 import { ILogger } from '@phone-games/logger';
 import { MockPartyRepository } from '@phone-games/repositories/__tests__/mocks/mockPartyRepository.js';
 
-describe('PartyManagerService', () => {
-  let partyManagerService: PartyManagerService;
+describe('SessionCoordinator', () => {
+  let sessionCoordinator: SessionCoordinator;
   let partyService: PartyService;
   let gameSessionManager: GameSessionManager;
-  let partyNotificationCoordinator: PartyNotificationCoordinator;
+  let playerNotificationCoordinator: PlayerNotificationCoordinator;
   let gameStateStorage: InMemoryGameStateStorage;
   let mockPartyRepository: MockPartyRepository;
   let mockNotificationService: NotificationService;
@@ -33,17 +33,17 @@ describe('PartyManagerService', () => {
     gameStateStorage = new InMemoryGameStateStorage();
     partyService = new PartyService(mockPartyRepository, mockLogger);
     gameSessionManager = new GameSessionManager(gameStateStorage, mockLogger);
-    partyNotificationCoordinator = new PartyNotificationCoordinator(
+    playerNotificationCoordinator = new PlayerNotificationCoordinator(
       mockNotificationService,
       mockPartyRepository,
       mockLogger
     );
 
     // Create the mediator service
-    partyManagerService = new PartyManagerService(
+    sessionCoordinator = new SessionCoordinator(
       partyService,
       gameSessionManager,
-      partyNotificationCoordinator,
+      playerNotificationCoordinator,
       mockLogger
     );
   });
@@ -57,7 +57,7 @@ describe('PartyManagerService', () => {
       // Seed user for repository
       mockPartyRepository.seedUsers([PartyTestFactory.createUser({ id: userId })]);
 
-      const result = await partyManagerService.createParty(userId, partyName, game);
+      const result = await sessionCoordinator.createParty(userId, partyName, game);
 
       expect(result.partyName).toBe(partyName);
       expect(result.gameName).toBe('impostor');
@@ -91,7 +91,7 @@ describe('PartyManagerService', () => {
         },
       });
 
-      const result = await partyManagerService.createParty(userId, partyName, game);
+      const result = await sessionCoordinator.createParty(userId, partyName, game);
 
       expect(result.partyName).toBe(partyName);
 
@@ -131,7 +131,7 @@ describe('PartyManagerService', () => {
         role: PlayerRole.PLAYER,
       });
 
-      const result = await partyManagerService.createParty(userId, partyName, game);
+      const result = await sessionCoordinator.createParty(userId, partyName, game);
 
       expect(result.partyName).toBe(partyName);
 
@@ -164,7 +164,7 @@ describe('PartyManagerService', () => {
         },
       });
 
-      const result = await partyManagerService.joinParty(userId, party.id);
+      const result = await sessionCoordinator.joinParty(userId, party.id);
 
       expect(result.userId).toBe(userId);
       expect(result.partyId).toBe(party.id);
@@ -172,7 +172,7 @@ describe('PartyManagerService', () => {
     });
 
     it('should throw NotFoundError if party does not exist', async () => {
-      await expect(partyManagerService.joinParty('user-1', 'non-existent')).rejects.toThrow(NotFoundError);
+      await expect(sessionCoordinator.joinParty('user-1', 'non-existent')).rejects.toThrow(NotFoundError);
     });
 
     it('should throw ValidationError if party is finished', async () => {
@@ -196,7 +196,7 @@ describe('PartyManagerService', () => {
         },
       });
 
-      await expect(partyManagerService.joinParty(userId, party.id)).rejects.toThrow(ValidationError);
+      await expect(sessionCoordinator.joinParty(userId, party.id)).rejects.toThrow(ValidationError);
     });
 
     it('should throw ConflictError if user is already in an active party', async () => {
@@ -222,7 +222,7 @@ describe('PartyManagerService', () => {
         status: PartyStatus.WAITING,
       });
 
-      await expect(partyManagerService.joinParty(userId, party2.id)).rejects.toThrow(ConflictError);
+      await expect(sessionCoordinator.joinParty(userId, party2.id)).rejects.toThrow(ConflictError);
     });
   });
 
@@ -254,7 +254,7 @@ describe('PartyManagerService', () => {
         role: PlayerRole.PLAYER,
       });
 
-      await partyManagerService.leaveParty(userId);
+      await sessionCoordinator.leaveParty(userId);
 
       const partyPlayer = await mockPartyRepository.findPlayer(party.id, userId);
       expect(partyPlayer).toBeNull();
@@ -277,14 +277,14 @@ describe('PartyManagerService', () => {
         },
       });
 
-      await partyManagerService.leaveParty(userId);
+      await sessionCoordinator.leaveParty(userId);
 
       const deletedParty = await mockPartyRepository.findById(party.id);
       expect(deletedParty).toBeNull();
     });
 
     it('should throw NotFoundError if user has no active party', async () => {
-      await expect(partyManagerService.leaveParty('user-1')).rejects.toThrow(NotFoundError);
+      await expect(sessionCoordinator.leaveParty('user-1')).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -306,14 +306,14 @@ describe('PartyManagerService', () => {
         },
       });
 
-      const result = await partyManagerService.getParty(party.id);
+      const result = await sessionCoordinator.getParty(party.id);
 
       expect(result).not.toBeNull();
       expect(result?.partyName).toBe('Test Party');
     });
 
     it('should return null if party does not exist', async () => {
-      const result = await partyManagerService.getParty('non-existent');
+      const result = await sessionCoordinator.getParty('non-existent');
       expect(result).toBeNull();
     });
   });
@@ -349,7 +349,7 @@ describe('PartyManagerService', () => {
         },
       });
 
-      const result = await partyManagerService.getAvailableParties();
+      const result = await sessionCoordinator.getAvailableParties();
 
       expect(result.length).toBe(1);
       expect(result[0].partyName).toBe('Waiting Party');
@@ -385,7 +385,7 @@ describe('PartyManagerService', () => {
         },
       });
 
-      const result = await partyManagerService.getAvailableParties('impostor');
+      const result = await sessionCoordinator.getAvailableParties('impostor');
 
       expect(result.length).toBe(1);
       expect(result[0].gameName).toBe('impostor');

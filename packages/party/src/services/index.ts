@@ -1,4 +1,4 @@
-export * from './partyManagerService.js';
+export * from './sessionCoordinator.js';
 export * from './partyService.js';
 export * from './gameSessionManager.js';
-export * from './partyNotificationCoordinator.js';
+export * from './playerNotificationCoordinator.js';
