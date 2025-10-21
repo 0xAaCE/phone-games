@@ -17,7 +17,8 @@ import { ValidActions } from '../interfaces/parsers/index.js';
  */
 export class VoteCommand implements GameCommand {
   // Static properties and methods for matching and parsing
-  static readonly patterns = [/\/(vote|v\s)/];
+  // Pattern captures: group 1 = vote command (vote|v), group 2 = username
+  static readonly patterns = [/^\/(vote|v)\s+(\S+)/];
 
   static canHandle(text: string): boolean {
     return this.patterns.some(pattern => pattern.test(text));
@@ -31,13 +32,13 @@ export class VoteCommand implements GameCommand {
       throw new Error('Context with userId and userService required');
     }
 
-    // Extract username before the /vote command
-    const match = text.match(/^(.+?)\s*\/(?:vote|v\s)/);
+    // Extract username after the /vote command using this.patterns
+    const match = text.match(this.patterns[0]);
     if (!match) {
-      throw new Error('Invalid vote format. Expected: username /vote');
+      throw new Error('Invalid vote format. Expected: /vote username');
     }
 
-    const vote = match[1].trim();
+    const vote = match[2].trim();
     const user = await context.userService.getUserByUsername(vote);
 
     if (!user) {
