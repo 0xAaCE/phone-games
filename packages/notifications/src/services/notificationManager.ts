@@ -1,15 +1,16 @@
 import { GameState, ValidGameNames } from "@phone-games/games";
 import { NotificationError } from "@phone-games/errors";
 import { ILogger } from "@phone-games/logger";
-import { 
-    NotificationService, 
-    NotificationProvider, 
-    Formatter, 
+import {
+    NotificationService,
+    NotificationProvider,
+    Formatter,
     PartyParams,
     ValidActions,
     ValidGameActions,
     ValidNotificationMethods,
-    ValidPartyActions
+    ValidPartyActions,
+    ErrorParams
 } from "../internal.js";
 
 type FormatterKey = `${ValidGameNames}-${ValidNotificationMethods}`;
@@ -69,7 +70,7 @@ export class NotificationManager implements NotificationService {
         userId: string,
         gameName: ValidGameNames,
         action: T,
-        data: T extends ValidGameActions ? GameState<ValidGameNames> : PartyParams
+        data: T extends ValidGameActions ? GameState<ValidGameNames> : (PartyParams | ErrorParams)
     ): Promise<void> {
         // Validation - throw if provider/formatter not found
         const { provider, formatter } = this.getProviderAndFormatter(userId, gameName);
@@ -119,5 +120,21 @@ export class NotificationManager implements NotificationService {
 
     async notifyPlayerLeft(partyName: string, gameName: ValidGameNames, partyId: string, userId: string): Promise<void> {
         await this.notify(userId, gameName, ValidPartyActions.PLAYER_LEFT, { partyName, partyId, gameName });
+    }
+
+    async notifyError(gameName: ValidGameNames, userId: string, errorMessage: string): Promise<void> {
+        await this.notify(userId, gameName, ValidPartyActions.ERROR, { message: errorMessage });
+    }
+
+    convertErrorToMessage(gameName: ValidGameNames, error: unknown): string {
+        const formatter = this.formatters.get(`${gameName}-whatsapp` as FormatterKey) ||
+                         this.formatters.get(`${gameName}-web_socket` as FormatterKey);
+
+        if (!formatter) {
+            // Fallback to generic error message if no formatter found
+            return 'Something went wrong. Please try again';
+        }
+
+        return formatter['convertErrorToMessage'](error);
     }
 }

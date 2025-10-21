@@ -12,6 +12,7 @@ export enum ValidPartyActions {
     CREATE_PARTY = "create_party",
     PLAYER_JOINED = "player_joined",
     PLAYER_LEFT = "player_left",
+    ERROR = "error",
 }
 
 export type ValidActions = ValidGameActions | ValidPartyActions;
@@ -26,6 +27,10 @@ export type Notification = {
     body: string;
     action: ValidPartyActions;
     data?: never;
+}
+
+export type ErrorParams = {
+    message: string;
 }
 
 export enum NOTIFICATION_METHODS {

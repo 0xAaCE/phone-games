@@ -5,6 +5,7 @@ import {
   ValidActions,
   ValidGameActions,
   ValidPartyActions,
+  ErrorParams,
 } from '../interfaces/notification.js';
 
 /**
@@ -15,7 +16,7 @@ import {
 export abstract class BaseImpostorFormatter extends Formatter {
   async format<T extends ValidActions>(
     action: T,
-    notification: T extends ValidGameActions ? GameState<GAME_NAMES.IMPOSTOR> : PartyParams
+    notification: T extends ValidGameActions ? GameState<GAME_NAMES.IMPOSTOR> : PartyParams | ErrorParams
   ): Promise<Notification> {
     switch (action) {
       case ValidGameActions.START_MATCH:
@@ -34,6 +35,8 @@ export abstract class BaseImpostorFormatter extends Formatter {
         return this.formatPlayerLeft(notification as PartyParams);
       case ValidPartyActions.CREATE_PARTY:
         return this.formatCreateParty(notification as PartyParams);
+      case ValidPartyActions.ERROR:
+        return this.formatError(notification as ErrorParams);
       default:
         throw new Error('Invalid action');
     }
@@ -91,5 +94,14 @@ export abstract class BaseImpostorFormatter extends Formatter {
       action: ValidGameActions.FINISH_MATCH,
       data: notification,
     };
+  }
+
+  /**
+   * Override formatError to provide game-specific error formatting
+   * Converts technical errors to user-friendly messages
+   */
+  protected formatError(params: ErrorParams): Notification {
+    // Use the base formatter's implementation
+    return super.formatError(params);
   }
 }
