@@ -76,7 +76,7 @@ export type ValidActions = ValidGameActions | ValidPartyActions;
  *   action: ValidPartyActions.CREATE_PARTY
  * };
  */
-export type Notification = {
+export type Notification<templateType = unknown> = {
     /** Notification title shown to the user */
     title: string;
     /** Notification body/message content */
@@ -85,6 +85,8 @@ export type Notification = {
     action: ValidGameActions
     /** Full game state for the current game */
     data: GameState<ValidGameNames>;
+    /** Template for the notification */
+    template?: templateType;
 } | {
     /** Notification title shown to the user */
     title: string;
@@ -94,6 +96,8 @@ export type Notification = {
     action: ValidPartyActions;
     /** Party actions don't include data field */
     data?: never;
+    /** Template for the notification */
+    template?: never;
 }
 
 /**
@@ -123,6 +127,8 @@ export enum NOTIFICATION_METHODS {
     WEB_SOCKET = "web_socket",
     /** WhatsApp messages via WhatsApp Business API */
     WHATSAPP = "whatsapp",
+    /** Twillio messages via Twillio API */
+    TWILLIO = "twillio",
 }
 
 /**

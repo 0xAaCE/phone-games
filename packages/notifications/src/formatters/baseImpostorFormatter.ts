@@ -47,7 +47,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
   }
 
   // Game action formatters
-  private formatStartMatch(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
+  protected formatStartMatch(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
     return {
       title: 'Impostor',
       body:
@@ -58,7 +58,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  private formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
+  protected formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
     return {
       title: 'Impostor',
       body: 'The next round has started and your word is: \n\n' + notification.customState.currentRoundState.word,
@@ -67,7 +67,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  private formatMiddleRoundAction(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
+  protected formatMiddleRoundAction(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
     return {
       title: 'Impostor',
       body: 'Your vote has been counted',
@@ -76,7 +76,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  private formatFinishRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
+  protected formatFinishRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
     return {
       title: 'Impostor',
       body:
@@ -87,7 +87,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  private formatFinishMatch(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
+  protected formatFinishMatch(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification {
     return {
       title: 'Impostor',
       body: 'The match has finished',
