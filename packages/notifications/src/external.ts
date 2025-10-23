@@ -11,5 +11,5 @@ export * from './interfaces/formatter.js';
 export * from './formatters/baseImpostorFormatter.js';
 export * from './formatters/impostorWebSocketFormatter.js';
 export * from './formatters/impostorWhatsAppFormatter.js';
-export * from './formatters/impostorTwillioFormatter.js';
+export * from './formatters/impostorTwilioFormatter.js';
 export * from './decorators/retryNotificationProvider.js';

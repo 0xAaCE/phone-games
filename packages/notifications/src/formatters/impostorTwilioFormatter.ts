@@ -5,13 +5,13 @@ import { Notification, NOTIFICATION_METHODS, ValidGameActions, ValidNotification
 import { BaseImpostorFormatter } from './baseImpostorFormatter.js';
 
 /**
- * Twillio formatter for Impostor game.
+ * Twilio formatter for Impostor game.
  * Inherits all formatting logic from BaseImpostorFormatter.
  * Only specifies the notification delivery method.
  */
-export class ImpostorTwillioFormatter extends BaseImpostorFormatter {
+export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
   getNotificationMethod(): ValidNotificationMethods {
-    return NOTIFICATION_METHODS.TWILLIO;
+    return NOTIFICATION_METHODS.TWILIO;
   }
 
   protected formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification<ContentCreateRequest> {

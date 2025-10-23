@@ -127,8 +127,8 @@ export enum NOTIFICATION_METHODS {
     WEB_SOCKET = "web_socket",
     /** WhatsApp messages via WhatsApp Business API */
     WHATSAPP = "whatsapp",
-    /** Twillio messages via Twillio API */
-    TWILLIO = "twillio",
+    /** Twilio messages via Twilio API */
+    TWILIO = "twilio",
 }
 
 /**

@@ -4,7 +4,7 @@ import { NotificationManager } from '@phone-games/notifications';
 import { ILogger } from '@phone-games/logger';
 import { createTestServices, TestServices } from '../helpers/testServiceFactory.js';
 import { TwilioMessageFactory, TEST_USERS } from '../helpers/twilioMessageFactory.js';
-import { ImpostorTwillioFormatter } from '@phone-games/notifications';
+import { ImpostorTwilioFormatter } from '@phone-games/notifications';
 
 // Mock logger implementation for tests
 function createMockLogger(): ILogger {
@@ -38,7 +38,7 @@ describe('Twilio Game Flow Integration Test', () => {
 
     // Create notification service with real formatters
     notificationService = new NotificationManager(
-      [new ImpostorTwillioFormatter()],
+      [new ImpostorTwilioFormatter()],
       logger
     );
 

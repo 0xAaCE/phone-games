@@ -74,6 +74,6 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
     }
 
     getNotificationMethod(): ValidNotificationMethods {
-        return NOTIFICATION_METHODS.TWILLIO;
+        return NOTIFICATION_METHODS.TWILIO;
     }
 }
