@@ -34,4 +34,10 @@ export class WebSocketNotificationProvider extends NotificationProvider {
     getNotificationMethod(): ValidNotificationMethods {
         return NOTIFICATION_METHODS.WEB_SOCKET;
     }
+
+    getPhoneNumber(): string | null {
+        // WebSocket connections don't have phone numbers
+        // Will default to English in formatters
+        return null;
+    }
 }

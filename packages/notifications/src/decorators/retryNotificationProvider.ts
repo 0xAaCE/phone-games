@@ -103,6 +103,10 @@ export class RetryNotificationProvider extends NotificationProvider {
     return this.wrapped.getNotificationMethod();
   }
 
+  getPhoneNumber(): string | null {
+    return this.wrapped.getPhoneNumber();
+  }
+
   /**
    * Sleep for specified milliseconds.
    */

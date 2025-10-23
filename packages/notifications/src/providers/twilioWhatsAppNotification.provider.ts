@@ -220,4 +220,13 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
     getNotificationMethod(): ValidNotificationMethods {
         return NOTIFICATION_METHODS.TWILIO;
     }
+
+    /**
+     * Gets the recipient's phone number for language detection
+     *
+     * @returns The recipient's phone number in international format
+     */
+    getPhoneNumber(): string | null {
+        return this.recipientPhoneNumber;
+    }
 }

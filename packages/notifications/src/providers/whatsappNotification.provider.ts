@@ -59,4 +59,8 @@ export class WhatsappNotificationProvider extends NotificationProvider {
     getNotificationMethod(): ValidNotificationMethods {
         return NOTIFICATION_METHODS.WHATSAPP;
     }
+
+    getPhoneNumber(): string | null {
+        return this.recipientPhoneNumber;
+    }
 }

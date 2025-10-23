@@ -46,17 +46,21 @@ export abstract class Formatter {
      * - Game actions (START_MATCH, NEXT_ROUND, etc.) receive GameState data
      * - Party actions (CREATE_PARTY, PLAYER_JOINED, etc.) receive PartyParams or ErrorParams
      *
+     * Supports internationalization by detecting language from phone number country code.
+     *
      * @param action - The action that triggered this notification
      * @param notification - The data for this action (GameState for game actions, PartyParams/ErrorParams for party actions)
+     * @param phoneNumber - Optional phone number to detect language (defaults to 'en' if not provided)
      * @returns A formatted notification ready to be sent to the user
      *
      * @example
      * const notification = await formatter.format(
      *   ValidGameActions.START_MATCH,
-     *   gameState
+     *   gameState,
+     *   '+525512345678' // Mexican number, will use Spanish
      * );
      */
-    abstract format<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<ValidGameNames> : (PartyParams | ErrorParams)): Promise<Notification>;
+    abstract format<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<ValidGameNames> : (PartyParams | ErrorParams), phoneNumber?: string | null): Promise<Notification>;
 
     /**
      * Get the game name this formatter handles
@@ -77,77 +81,6 @@ export abstract class Formatter {
      * const method = formatter.getNotificationMethod(); // "whatsapp"
      */
     abstract getNotificationMethod(): ValidNotificationMethods;
-
-    /**
-     * Format a party creation notification
-     * Common implementation used by all formatters
-     *
-     * @param params - The party parameters containing name, ID, and game name
-     * @returns A formatted notification announcing the party creation
-     *
-     * @protected
-     * @example
-     * const notification = this.formatCreateParty({
-     *   partyName: "Friday Night Games",
-     *   partyId: "abc123",
-     *   gameName: "impostor"
-     * });
-     */
-    protected formatCreateParty(params: PartyParams): Notification {
-        const body = `A new party has been created with \nId: ${params.partyId} \nName: ${params.partyName} for game ${params.gameName}`;
-
-        return {
-            title: "Party Created",
-            body: body,
-            action: ValidPartyActions.CREATE_PARTY,
-        };
-    }
-
-    /**
-     * Format a player joined notification
-     * Common implementation used by all formatters
-     *
-     * @param params - The party parameters containing name, ID, and game name
-     * @returns A formatted notification announcing that a player joined
-     *
-     * @protected
-     * @example
-     * const notification = this.formatPlayerJoined({
-     *   partyName: "Friday Night Games",
-     *   partyId: "abc123",
-     *   gameName: "impostor"
-     * });
-     */
-    protected formatPlayerJoined(params: PartyParams): Notification {
-        return {
-            title: "Player Joined",
-            body: "A new player has joined the game \n\n" + params.partyName,
-            action: ValidPartyActions.PLAYER_JOINED,
-        };
-    }
-
-    /**
-     * Format a player left notification
-     * Common implementation used by all formatters
-     *
-     * @param params - The party parameters containing name, ID, and game name
-     * @returns A formatted notification announcing that a player left
-     *
-     * @protected
-     * @example
-     * const notification = this.formatPlayerLeft({
-     *   partyName: "Friday Night Games",
-     *   partyId: "abc123",
-     *   gameName: "impostor"
-     * });
-     */
-    protected formatPlayerLeft(params: PartyParams): Notification {
-        return {
-            title: "Player Left",
-            body: "A player has left the game \n\n" + params.partyName,
-            action: ValidPartyActions.PLAYER_LEFT,
-        };
-    }
 
     /**
      * Format an error notification

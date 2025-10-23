@@ -164,7 +164,10 @@ export class NotificationManager implements NotificationService {
     ): Promise<void> {
         // Validation - throw if provider/formatter not found
         const { provider, formatter } = this.getProviderAndFormatter(userId, gameName);
-        const notification = await formatter.format(action, data);
+
+        // Get phone number from provider for language detection
+        const phoneNumber = provider.getPhoneNumber();
+        const notification = await formatter.format(action, data, phoneNumber);
 
         // Send - log but don't throw on failure
         try {
