@@ -5,6 +5,15 @@ import fs from 'fs';
 import path from 'path';
 import { UnauthorizedError, InternalServerError } from '@phone-games/errors';
 
+// Simple logger for initialization (before main logger is available)
+const initLogger = {
+  warn: (message: string, context?: Record<string, unknown>) => {
+    const timestamp = new Date().toISOString();
+    const contextStr = context ? ` ${JSON.stringify(context)}` : '';
+    process.stderr.write(`[${timestamp}] WARN: ${message}${contextStr}\n`);
+  }
+};
+
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   let serviceAccount = undefined;
@@ -23,7 +32,7 @@ if (!admin.apps.length) {
       }
     }
   } catch (error) {
-    console.warn('Error reading service_account.json:', (error as Error).message);
+    initLogger.warn('Error reading service_account.json', { error: (error as Error).message });
   }
 
   if (serviceAccount && serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
@@ -31,7 +40,7 @@ if (!admin.apps.length) {
       credential: admin.credential.cert(serviceAccount),
     });
   } else {
-    console.warn('Firebase service account not configured. Only JWT tokens will work.');
+    initLogger.warn('Firebase service account not configured. Only JWT tokens will work.');
   }
 }
 
@@ -82,7 +91,8 @@ export const authenticateFirebase = async (
 
       return next();
     } catch (firebaseError) {
-      console.log('Firebase token verification failed, trying JWT:', (firebaseError as Error).message);
+      // Firebase verification failed, will try JWT next
+      // Silent fallback - only log at debug level if logger available
     }
 
     // If Firebase verification fails, try JWT

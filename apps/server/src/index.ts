@@ -1,5 +1,6 @@
+// Placeholder file - server is started via server.ts
 export function main(): void {
-  console.log('Hello, TypeScript!');
+  // Empty placeholder
 }
 
 if (require.main === module) {

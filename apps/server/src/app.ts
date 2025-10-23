@@ -4,7 +4,7 @@ import { createUserRouter } from './routes/userRoutes.js';
 import { createPartyRouter } from './routes/partyRoutes.js';
 import { createWhatsAppRouter } from './routes/whatsAppRoutes.js';
 import { createTwilioRouter } from './routes/twilioRoutes.js';
-import { errorHandler } from './middleware/errorHandler.js';
+import { createErrorHandler } from './middleware/errorHandler.js';
 import { Services } from './factories/serviceFactory.js';
 
 export const initializeApp = (services: Services) => {
@@ -18,8 +18,8 @@ export const initializeApp = (services: Services) => {
   // Mount routers
   app.use('/api/users', createUserRouter(services.userService));
   app.use('/api/parties', createPartyRouter(services.sessionCoordinator));
-  app.use('/api/whatsapp', createWhatsAppRouter(services.messageHandlerService));
-  app.use('/api/twilio', createTwilioRouter(services.messageHandlerService));
+  app.use('/api/whatsapp', createWhatsAppRouter(services.messageHandlerService, services.logger));
+  app.use('/api/twilio', createTwilioRouter(services.messageHandlerService, services.logger));
 
   // Health check endpoint
   app.get('/health', (_req, res) => {
@@ -44,7 +44,7 @@ export const initializeApp = (services: Services) => {
   });
 
   // Error handling middleware (must be last)
-  app.use(errorHandler);
+  app.use(createErrorHandler(services.logger));
 
   return app;
 }

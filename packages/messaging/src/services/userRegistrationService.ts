@@ -90,7 +90,7 @@ export class UserRegistrationService {
           throw new ExternalServiceError('Missing required WhatsApp environment variables');
         }
 
-        return new WhatsappNotificationProvider(apiUrl, phoneNumberId, apiToken, user);
+        return new WhatsappNotificationProvider(apiUrl, phoneNumberId, apiToken, user, this.logger);
       }
 
       case MessagePlatform.TWILIO: {
@@ -102,7 +102,7 @@ export class UserRegistrationService {
           throw new ExternalServiceError('Missing required Twilio environment variables');
         }
 
-        return new TwilioWhatsAppNotificationProvider(accountSid, authToken, whatsappFrom, user);
+        return new TwilioWhatsAppNotificationProvider(accountSid, authToken, whatsappFrom, user, this.logger);
       }
 
       default:

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { BaseError } from '@phone-games/errors';
+import { ILogger } from '@phone-games/logger';
 
 export interface ErrorResponse {
   error: {
@@ -10,19 +11,18 @@ export interface ErrorResponse {
   };
 }
 
-export const errorHandler = (
-  error: Error,
-  req: Request,
-  res: Response,
-  _next: NextFunction
-): void => {
-  console.error('Error occurred:', {
-    message: error.message,
-    stack: error.stack,
-    path: req.path,
-    method: req.method,
-    timestamp: new Date().toISOString(),
-  });
+export const createErrorHandler = (logger: ILogger) => {
+  return (
+    error: Error,
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): void => {
+    logger.error('Error occurred', error instanceof Error ? error : new Error(String(error)), {
+      path: req.path,
+      method: req.method,
+      timestamp: new Date().toISOString(),
+    });
 
   // Handle custom application errors
   if (error instanceof BaseError) {
@@ -81,13 +81,14 @@ export const errorHandler = (
     return;
   }
 
-  // Handle unexpected errors
-  res.status(500).json({
-    error: {
-      message: 'Internal server error',
-      status: 500,
-      timestamp: new Date().toISOString(),
-      path: req.path,
-    },
-  });
+    // Handle unexpected errors
+    res.status(500).json({
+      error: {
+        message: 'Internal server error',
+        status: 500,
+        timestamp: new Date().toISOString(),
+        path: req.path,
+      },
+    });
+  };
 };

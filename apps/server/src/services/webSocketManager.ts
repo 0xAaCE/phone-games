@@ -25,7 +25,7 @@ export class WebSocketManager {
                 this.logger.warn('WebSocket connection attempt without user ID');
                 return
             }
-            const wsProvider = new WebSocketNotificationProvider(ws);
+            const wsProvider = new WebSocketNotificationProvider(ws, this.logger);
             this.notificationService.registerUser(request.user?.id, wsProvider);
             this.logger.info('WebSocket connection established', { userId: request.user.id });
         });

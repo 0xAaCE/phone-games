@@ -22,6 +22,7 @@ export interface Services {
   userService: UserService;
   sessionCoordinator: SessionCoordinator;
   messageHandlerService: MessageHandlerService;
+  logger: ILogger;
 }
 
 /**
@@ -92,5 +93,6 @@ export function createServices(deps: ServiceFactoryDependencies): Services {
     userService,
     sessionCoordinator,
     messageHandlerService,
+    logger,
   };
 }

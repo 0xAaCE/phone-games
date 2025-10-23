@@ -1,6 +1,7 @@
 import { GameState, ValidGameNames } from '@phone-games/games';
 import { auth } from '../config/firebase.js';
 import { ValidActions, ValidGameActions, ValidPartyActions } from '@phone-games/notifications';
+import { logger } from '../utils/logger.js';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:4000';
 
@@ -34,7 +35,7 @@ class WebSocketService {
 
   async connect(): Promise<void> {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      console.log('WebSocket already connected');
+      logger.debug('WebSocket already connected');
       return;
     }
 
@@ -46,14 +47,14 @@ class WebSocketService {
       this.ws = new WebSocket(`${WS_URL}/ws?token=${encodeURIComponent(token)}`);
 
       this.ws.addEventListener('open', () => {
-        console.log('WebSocket connected');
+        logger.info('WebSocket connected');
         this.reconnectAttempts = 0;
       });
 
       this.ws.addEventListener('message', (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
-          console.log('WebSocket message received:', message);
+          logger.debug('WebSocket message received:', message);
 
           if (message.type === 'notification') {
             // Convert server notification format to client notification format
@@ -63,27 +64,27 @@ class WebSocketService {
             this.listeners.forEach(listener => listener(notification));
           }
         } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
+          logger.error('Failed to parse WebSocket message:', error);
         }
       });
 
       this.ws.addEventListener('close', (event) => {
-        console.log('WebSocket closed:', event.code, event.reason);
+        logger.info('WebSocket closed:', event.code, event.reason);
         this.ws = null;
 
         // Attempt to reconnect if not intentionally closed
         if (!this.isIntentionallyClosed && this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
-          console.log(`Reconnecting... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+          logger.info(`Reconnecting... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
           setTimeout(() => this.connect(), this.reconnectDelay * this.reconnectAttempts);
         }
       });
 
       this.ws.addEventListener('error', (error) => {
-        console.error('WebSocket error:', error);
+        logger.error('WebSocket error:', error);
       });
     } catch (error) {
-      console.error('Failed to connect WebSocket:', error);
+      logger.error('Failed to connect WebSocket:', error);
       throw error;
     }
   }
@@ -168,7 +169,7 @@ class WebSocketService {
           action: payload.action,
         };
       default:
-        console.warn('Unknown notification action:', action);
+        logger.warn('Unknown notification action:', action);
         return {
           type: 'GAME_STATE_UPDATE',
           data: payload.data,

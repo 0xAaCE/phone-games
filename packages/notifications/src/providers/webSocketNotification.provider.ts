@@ -1,14 +1,17 @@
 import { WebSocket } from "ws";
 
+import { ILogger } from "@phone-games/logger";
 import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/notification.js";
 import { NotificationProvider } from "../interfaces/notificationProvider.js";
 
 export class WebSocketNotificationProvider extends NotificationProvider {
     private connection: WebSocket;
+    private logger: ILogger;
 
-    constructor(ws: WebSocket) {
+    constructor(ws: WebSocket, logger: ILogger) {
         super();
         this.connection = ws;
+        this.logger = logger.child({ provider: 'WebSocketNotificationProvider', url: ws.url });
     }
 
     async sendNotification(notification: Notification): Promise<void> {
@@ -19,9 +22,13 @@ export class WebSocketNotificationProvider extends NotificationProvider {
 
         if (this.connection.readyState === WebSocket.OPEN) {
             this.connection.send(message);
+            this.logger.debug('WebSocket notification sent', { url: this.connection.url, action: notification.action });
+        } else {
+            this.logger.warn('WebSocket not open, notification not sent', {
+                url: this.connection.url,
+                readyState: this.connection.readyState
+            });
         }
-
-        console.log(`WebSocket notification sent to ${this.connection.url}`);
     }
 
     getNotificationMethod(): ValidNotificationMethods {

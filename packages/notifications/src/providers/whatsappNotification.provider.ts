@@ -1,4 +1,5 @@
 import { User } from "@phone-games/db";
+import { ILogger } from "@phone-games/logger";
 import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/notification.js";
 import { NotificationProvider } from "../interfaces/notificationProvider.js";
 
@@ -7,8 +8,9 @@ export class WhatsappNotificationProvider extends NotificationProvider {
     private apiToken: string;
     private sourcePhoneNumberId: string;
     private recipientPhoneNumber: string;
+    private logger: ILogger;
 
-    constructor(apiUrl: string, sourcePhoneNumberId: string, apiToken: string, to: User) {
+    constructor(apiUrl: string, sourcePhoneNumberId: string, apiToken: string, to: User, logger: ILogger) {
         if (!to.phoneNumber) {
             throw new Error('User does not have a phone number');
         }
@@ -18,6 +20,7 @@ export class WhatsappNotificationProvider extends NotificationProvider {
         this.apiToken = apiToken;
         this.sourcePhoneNumberId = sourcePhoneNumberId;
         this.recipientPhoneNumber = to.phoneNumber;
+        this.logger = logger.child({ provider: 'WhatsappNotificationProvider', recipient: to.phoneNumber });
     }
 
     async sendNotification(notification: Notification): Promise<void> {
@@ -44,7 +47,7 @@ export class WhatsappNotificationProvider extends NotificationProvider {
                 throw new Error(`WhatsApp API error: ${response.statusText}`);
             }
         } catch (error) {
-            console.error('Failed to send WhatsApp notification:', error);
+            this.logger.error('Failed to send WhatsApp notification', error instanceof Error ? error : new Error(String(error)));
             throw error;
         }
     }
