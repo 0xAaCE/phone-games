@@ -1,35 +1,45 @@
 import { GamePlayer, GameState, NextRoundParams, NextRoundResult, ValidGameNames, GAME_NAMES, ImpostorFinishRoundParams, ImpostorFinishRoundResult, ImpostorMiddleRoundActionParams, ImpostorMiddleRoundActionResult } from '../internal.js';
 import { Game } from './game.js';
 import { GameError } from '@phone-games/errors';
+import { WordGenerator, type WordGeneratorConfig } from '../services/wordGenerator/index.js';
+
+/**
+ * Impostor game implementation with word generator support
+ *
+ * @example
+ * ```typescript
+ * // Create game with default English words
+ * const game = new ImpostorGame();
+ *
+ * // Create game with Spanish words
+ * const spanishGame = new ImpostorGame({ language: 'es' });
+ *
+ * // Create game with specific categories
+ * const animalGame = new ImpostorGame({
+ *   language: 'es',
+ *   categories: [WordCategory.ANIMALS]
+ * });
+ * ```
+ */
 export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
-  private words = [
-    'pizza',
-    'ocean',
-    'mountain',
-    'coffee',
-    'guitar',
-    'rainbow',
-    'castle',
-    'dragon',
-    'sunset',
-    'garden',
-    'library',
-    'bicycle',
-    'chocolate',
-    'thunder',
-    'galaxy',
-    'forest',
-    'festival',
-    'compass',
-    'lighthouse',
-    'volcano',
-  ];
+  private wordGenerator: WordGenerator;
   private gameState: GameState<GAME_NAMES.IMPOSTOR>;
   private currentImpostorId: string;
   private currentWord: string;
 
-  constructor() {
+  /**
+   * Creates a new ImpostorGame instance
+   *
+   * @param wordConfig - Optional configuration for word generation (language, categories)
+   *
+   * @example
+   * ```typescript
+   * const game = new ImpostorGame({ language: 'es' });
+   * ```
+   */
+  constructor(wordConfig?: WordGeneratorConfig) {
     super();
+    this.wordGenerator = new WordGenerator(wordConfig);
     this.gameState = {
       currentRound: 0,
       isFinished: false,
@@ -203,7 +213,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
   }
 
   private getRandomWord(): string {
-    return this.words[Math.floor(Math.random() * this.words.length)];
+    return this.wordGenerator.getRandomWord();
   }
 
   private getRandomImpostorId(): string {
