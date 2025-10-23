@@ -49,7 +49,7 @@ describe('SessionCoordinator', () => {
   });
 
   describe('createParty', () => {
-    it('should create a new party successfully', async () => {
+    it('create a new party successfully', async () => {
       const userId = 'user-1';
       const partyName = 'Test Party';
       const game = MockGame.create(GAME_NAMES.IMPOSTOR);
@@ -70,7 +70,7 @@ describe('SessionCoordinator', () => {
       );
     });
 
-    it('should clean up existing party if user is manager', async () => {
+    it('clean up existing party if user is manager', async () => {
       const userId = 'user-1';
       const partyName = 'New Party';
       const game = MockGame.create(GAME_NAMES.IMPOSTOR);
@@ -100,7 +100,7 @@ describe('SessionCoordinator', () => {
       expect(oldParty?.status).toBe(PartyStatus.FINISHED);
     });
 
-    it('should leave existing party if user is player', async () => {
+    it('leave existing party if user is player', async () => {
       const userId = 'user-1';
       const managerId = 'manager-1';
       const partyName = 'New Party';
@@ -142,7 +142,7 @@ describe('SessionCoordinator', () => {
   });
 
   describe('joinParty', () => {
-    it('should allow user to join a waiting party', async () => {
+    it('allow user to join a waiting party', async () => {
       const userId = 'user-2';
       const managerId = 'manager-1';
 
@@ -171,11 +171,11 @@ describe('SessionCoordinator', () => {
       expect(result.role).toBe(PlayerRole.PLAYER);
     });
 
-    it('should throw NotFoundError if party does not exist', async () => {
+    it('throw NotFoundError if party does not exist', async () => {
       await expect(sessionCoordinator.joinParty('user-1', 'non-existent')).rejects.toThrow(NotFoundError);
     });
 
-    it('should throw ValidationError if party is finished', async () => {
+    it('throw ValidationError if party is finished', async () => {
       const userId = 'user-2';
       const managerId = 'manager-1';
 
@@ -199,7 +199,7 @@ describe('SessionCoordinator', () => {
       await expect(sessionCoordinator.joinParty(userId, party.id)).rejects.toThrow(ValidationError);
     });
 
-    it('should throw ConflictError if user is already in an active party', async () => {
+    it('throw ConflictError if user is already in an active party', async () => {
       const userId = 'user-1';
 
       mockPartyRepository.seedUsers([PartyTestFactory.createUser({ id: userId })]);
@@ -227,7 +227,7 @@ describe('SessionCoordinator', () => {
   });
 
   describe('leaveParty', () => {
-    it('should allow user to leave a party', async () => {
+    it('allow user to leave a party', async () => {
       const userId = 'user-2';
       const managerId = 'manager-1';
 
@@ -260,7 +260,7 @@ describe('SessionCoordinator', () => {
       expect(partyPlayer).toBeNull();
     });
 
-    it('should delete party if no players remain', async () => {
+    it('delete party if no players remain', async () => {
       const userId = 'user-1';
 
       mockPartyRepository.seedUsers([PartyTestFactory.createUser({ id: userId })]);
@@ -283,13 +283,13 @@ describe('SessionCoordinator', () => {
       expect(deletedParty).toBeNull();
     });
 
-    it('should throw NotFoundError if user has no active party', async () => {
+    it('throw NotFoundError if user has no active party', async () => {
       await expect(sessionCoordinator.leaveParty('user-1')).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('getParty', () => {
-    it('should return party with players', async () => {
+    it('return party with players', async () => {
       const managerId = 'manager-1';
 
       mockPartyRepository.seedUsers([PartyTestFactory.createUser({ id: managerId })]);
@@ -312,14 +312,14 @@ describe('SessionCoordinator', () => {
       expect(result?.partyName).toBe('Test Party');
     });
 
-    it('should return null if party does not exist', async () => {
+    it('return null if party does not exist', async () => {
       const result = await sessionCoordinator.getParty('non-existent');
       expect(result).toBeNull();
     });
   });
 
   describe('getAvailableParties', () => {
-    it('should return only waiting parties', async () => {
+    it('return only waiting parties', async () => {
       mockPartyRepository.seedUsers([
         PartyTestFactory.createUser({ id: 'user-1' }),
         PartyTestFactory.createUser({ id: 'user-2' }),
@@ -355,7 +355,7 @@ describe('SessionCoordinator', () => {
       expect(result[0].partyName).toBe('Waiting Party');
     });
 
-    it('should filter by game name if provided', async () => {
+    it('filter by game name if provided', async () => {
       mockPartyRepository.seedUsers([
         PartyTestFactory.createUser({ id: 'user-1' }),
         PartyTestFactory.createUser({ id: 'user-2' }),

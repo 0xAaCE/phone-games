@@ -10,11 +10,30 @@ import { BaseImpostorFormatter } from './baseImpostorFormatter.js';
  * Only specifies the notification delivery method.
  */
 export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
+  /**
+   * Gets the notification delivery method for this formatter.
+   * 
+   * @returns The notification method, specifically NOTIFICATION_METHODS.TWILIO
+   * @public
+   */
   getNotificationMethod(): ValidNotificationMethods {
     return NOTIFICATION_METHODS.TWILIO;
   }
 
+  /**
+   * Formats a notification for the start of the next round in the Impostor game.
+   * 
+   * @param notification - The game state notification containing round information
+   * @returns A formatted notification with Twilio content template for next round
+   * 
+   * @remarks
+   * This method safely handles missing or undefined nested properties in the notification
+   * object and provides fallback values to ensure a valid notification is always returned.
+   */
   protected formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>): Notification<ContentCreateRequest> {
+    // Safely extract the word with null/undefined guards
+    const word = notification?.customState?.currentRoundState?.word ?? 'unknown';
+    
     const template: ContentCreateRequest = {
       friendlyName: 'test',
       language: 'es',
@@ -35,7 +54,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
 
     return {
       title: 'Impostor',
-      body: 'The next round has started and your word is: \n\n' + notification.customState.currentRoundState.word,
+      body: 'The next round has started and your word is: \n\n' + word,
       action: ValidGameActions.NEXT_ROUND,
       data: notification,
       template

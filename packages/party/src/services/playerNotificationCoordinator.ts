@@ -74,9 +74,17 @@ export class PlayerNotificationCoordinator {
    * Notify single player about their middle round action (e.g., vote received).
    */
   async notifyMiddleRoundAction(userId: string, game: Game<ValidGameNames>): Promise<void> {
-    this.logger.debug('Notifying middle round action', { userId, gameName: game.getName() });
-    const gameState = game.getGameState(userId);
-    await this.notificationService.notifyMiddleRoundAction(game.getName(), userId, gameState);
+    try {
+      this.logger.debug('Notifying middle round action', { userId, gameName: game.getName() });
+      const gameState = game.getGameState(userId);
+      await this.notificationService.notifyMiddleRoundAction(game.getName(), userId, gameState);
+    } catch (error: unknown) {
+      this.logger.error('Failed to notify middle round action', error instanceof Error ? error : new Error(String(error)), {
+        userId,
+        gameName: game.getName(),
+      });
+      throw error; // Re-throw since this is a single-user operation
+    }
   }
 
   /**
