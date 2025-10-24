@@ -40,4 +40,10 @@ export class WebSocketNotificationProvider extends NotificationProvider {
         // Will default to English in formatters
         return null;
     }
+
+    getFromPhoneNumber(): string | null {
+        // WebSocket connections don't have phone numbers
+        // Will default to English in formatters
+        return null;
+    }
 }

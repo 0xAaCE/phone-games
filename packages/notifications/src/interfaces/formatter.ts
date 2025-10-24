@@ -21,8 +21,6 @@ export type PartyParams = {
 export type FormatterMetadata = {
     /** The "from" phone number for the notification provider (e.g., Twilio number) */
     fromPhoneNumber?: string;
-    /** Base URL of the public server for generating resource URLs */
-    publicUrl?: string;
 }
 
 /**

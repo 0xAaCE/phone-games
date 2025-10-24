@@ -13,7 +13,6 @@ import {
     ErrorParams,
     FormatterMetadata
 } from "../internal.js";
-import { TwilioWhatsAppNotificationProvider } from "../providers/twilioWhatsAppNotification.provider.js";
 
 /**
  * Composite key for looking up formatters by game and notification method
@@ -169,17 +168,13 @@ export class NotificationManager implements NotificationService {
 
         // Get phone number from provider for language detection
         const phoneNumber = provider.getPhoneNumber();
+        const fromPhoneNumber = provider.getFromPhoneNumber();
 
         // Build metadata for formatters (used for QR codes)
         const metadata: FormatterMetadata = {};
 
-        // If Twilio provider, add fromPhoneNumber and publicUrl for QR code generation
-        if (provider instanceof TwilioWhatsAppNotificationProvider) {
-            metadata.fromPhoneNumber = provider.getFromPhoneNumber();
-            // Only set publicUrl if the env var is defined
-            if (process.env.PUBLIC_URL) {
-                metadata.publicUrl = process.env.PUBLIC_URL;
-            }
+        if (fromPhoneNumber) {
+            metadata.fromPhoneNumber = fromPhoneNumber;
         }
 
         const notification = await formatter.format(action, data, phoneNumber, metadata);

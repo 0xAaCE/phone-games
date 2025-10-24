@@ -12,4 +12,11 @@ export abstract class NotificationProvider {
      * @returns Phone number in international format or null if not available
      */
     abstract getPhoneNumber(): string | null;
+
+    /**
+     * Gets source phone number (if available)
+     *
+     * @returns Source phone number in international format or null if not available
+     */
+    abstract getFromPhoneNumber(): string | null;
 }

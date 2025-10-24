@@ -63,4 +63,10 @@ export class WhatsappNotificationProvider extends NotificationProvider {
     getPhoneNumber(): string | null {
         return this.recipientPhoneNumber;
     }
+
+    getFromPhoneNumber(): string | null {
+        // WhatsApp connections don't have phone numbers
+        // Will default to English in formatters
+        return null;
+    }
 }

@@ -10,7 +10,7 @@ import { ILogger } from '@phone-games/logger';
  *
  * @example
  * ```typescript
- * // GET /api/qr/clxy7z8k00001
+ * // GET /api/qr?partyId=clxy7z8k00001&phoneNumber=+1234567890
  * // Returns PNG image that when scanned opens WhatsApp with:
  * // "JOIN_PARTY clxy7z8k00001" message ready to send
  * ```
@@ -31,24 +31,24 @@ export class QrCodeController {
   /**
    * Generates and serves QR code for party invitation
    *
-   * GET /api/qr/:partyId
+   * GET /api/qr?partyId=<partyId>&phoneNumber=<phoneNumber>
    *
    * Validates party exists, then generates a QR code that encodes a WhatsApp
    * link with pre-filled "JOIN_PARTY <partyId>" message.
    *
-   * @param req - Express request with partyId param
+   * @param req - Express request with partyId and phoneNumber query params
    * @param res - Express response
    *
    * @returns PNG image (image/png) with 1-hour cache
    *
-   * @throws 400 if TWILIO_PHONE_NUMBER not configured
+   * @throws 400 if partyId or phoneNumber not provided or if TWILIO_PHONE_NUMBER not configured
    * @throws 404 if party not found
    * @throws 500 if QR generation fails
    *
    * @example
    * ```typescript
    * // Request
-   * GET /api/qr/clxy7z8k00001
+   * GET /api/qr?partyId=clxy7z8k00001&phoneNumber=+1234567890
    *
    * // Response
    * Content-Type: image/png
@@ -57,13 +57,21 @@ export class QrCodeController {
    * ```
    */
   async generatePartyQR(req: Request, res: Response): Promise<void> {
-    const { partyId, phoneNumber } = req.params;
+    const { partyId, phoneNumber } = req.query;
+
+    if (!partyId || !phoneNumber) {
+      res.status(400).json({
+        success: false,
+        error: 'partyId and phoneNumber query parameters are required',
+      });
+      return;
+    }
 
     try {
       this.logger.info('Generating QR code for party', { partyId, phoneNumber });
 
       // Generate QR code
-      const qrBuffer = await generateWhatsAppJoinQR(phoneNumber, partyId);
+      const qrBuffer = await generateWhatsAppJoinQR(phoneNumber as string, partyId as string);
 
       this.logger.info('QR code generated successfully', { partyId });
 

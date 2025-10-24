@@ -7,13 +7,12 @@ import { ILogger } from '@phone-games/logger';
  *
  * Registers routes for generating and serving party invitation QR codes.
  *
- * @param db - Database client
  * @param logger - Logger instance
  * @returns Express router with QR code routes
  *
  * @example
  * ```typescript
- * const qrRoutes = createQrCodeRoutes(db, logger);
+ * const qrRoutes = createQrCodeRoutes(logger);
  * app.use('/api/qr', qrRoutes);
  * ```
  */
@@ -22,19 +21,20 @@ export function createQrCodeRoutes(logger: ILogger): Router {
   const controller = new QrCodeController(logger);
 
   /**
-   * GET /api/qr/:partyId
+   * GET /api/qr?partyId=<partyId>&phoneNumber=<phoneNumber>
    *
    * Generates and serves QR code PNG for party invitation
    *
-   * @param partyId - Party unique identifier
+   * @query partyId - Party unique identifier
+   * @query phoneNumber - Phone number to use for WhatsApp link
    * @returns PNG image (image/png)
    *
    * @example
    * ```bash
-   * curl https://api.example.com/api/qr/clxy7z8k00001 -o qr.png
+   * curl "https://api.example.com/api/qr?partyId=clxy7z8k00001&phoneNumber=%2B1234567890" -o qr.png
    * ```
    */
-  router.get('/:partyId', (req, res) => controller.generatePartyQR(req, res));
+  router.get('/', (req, res) => controller.generatePartyQR(req, res));
 
   return router;
 }
