@@ -10,8 +10,10 @@ import {
     ValidGameActions,
     ValidNotificationMethods,
     ValidPartyActions,
-    ErrorParams
+    ErrorParams,
+    FormatterMetadata
 } from "../internal.js";
+import { TwilioWhatsAppNotificationProvider } from "../providers/twilioWhatsAppNotification.provider.js";
 
 /**
  * Composite key for looking up formatters by game and notification method
@@ -150,7 +152,7 @@ export class NotificationManager implements NotificationService {
      *
      * Algorithm:
      * 1. Get provider and formatter for user/game (throws on validation errors)
-     * 2. Format notification content
+     * 2. Format notification content (with metadata for QR codes if Twilio)
      * 3. Send notification via provider (logs but doesn't throw on send errors)
      *
      * Note: Validation errors (no provider, no formatter) are thrown.
@@ -167,7 +169,20 @@ export class NotificationManager implements NotificationService {
 
         // Get phone number from provider for language detection
         const phoneNumber = provider.getPhoneNumber();
-        const notification = await formatter.format(action, data, phoneNumber);
+
+        // Build metadata for formatters (used for QR codes)
+        const metadata: FormatterMetadata = {};
+
+        // If Twilio provider, add fromPhoneNumber and publicUrl for QR code generation
+        if (provider instanceof TwilioWhatsAppNotificationProvider) {
+            metadata.fromPhoneNumber = provider.getFromPhoneNumber();
+            // Only set publicUrl if the env var is defined
+            if (process.env.PUBLIC_URL) {
+                metadata.publicUrl = process.env.PUBLIC_URL;
+            }
+        }
+
+        const notification = await formatter.format(action, data, phoneNumber, metadata);
 
         // Send - log but don't throw on failure
         try {

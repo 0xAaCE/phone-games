@@ -87,6 +87,8 @@ export type Notification<templateType = unknown> = {
     data: GameState<ValidGameNames>;
     /** Template for the notification */
     template?: templateType;
+    /** Optional media URL for images/attachments (e.g., QR codes) */
+    mediaUrl?: string;
 } | {
     /** Notification title shown to the user */
     title: string;
@@ -98,6 +100,8 @@ export type Notification<templateType = unknown> = {
     data?: never;
     /** Template for the notification */
     template?: never;
+    /** Optional media URL for images/attachments (e.g., QR codes) */
+    mediaUrl?: string;
 }
 
 /**

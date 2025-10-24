@@ -4,16 +4,27 @@ import { GAME_NAMES, GameState } from '@phone-games/games';
 import { Notification, NOTIFICATION_METHODS, ValidGameActions, ValidNotificationMethods } from '../interfaces/notification.js';
 import { BaseImpostorFormatter } from './baseImpostorFormatter.js';
 import { createTranslator } from '../services/i18n/translator.js';
+import { FormatterMetadata, PartyParams } from '../interfaces/formatter.js';
+import { ILogger } from '@phone-games/logger';
 
 /**
  * Twilio formatter for Impostor game.
- * Inherits all formatting logic from BaseImpostorFormatter.
- * Only specifies the notification delivery method.
+ * Extends BaseImpostorFormatter with Twilio-specific features:
+ * - Interactive list pickers via Twilio Content API
+ * - QR code generation for party invitations
  */
 export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
+  private logger: ILogger;
+  private publicUrl: string;
+
+  constructor(logger: ILogger, publicUrl: string) {
+    super();
+    this.logger = logger.child({ formatter: 'ImpostorTwilioFormatter' });
+    this.publicUrl = publicUrl;
+  }
   /**
    * Gets the notification delivery method for this formatter.
-   * 
+   *
    * @returns The notification method, specifically NOTIFICATION_METHODS.TWILIO
    * @public
    */
@@ -39,7 +50,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
   protected formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification<ContentCreateRequest> {
     // Safely extract the word with null/undefined guards
     const word = notification?.customState?.currentRoundState?.word ?? 'unknown';
-
+    
     const template: ContentCreateRequest = {
       friendlyName: 'test',
       language: translator.getLanguage(),
@@ -58,6 +69,8 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
       }
     }
 
+    this.logger.info('Formatting next round with template');
+
     return {
       title: 'Impostor',
       body: translator.t('impostor.nextRound', { word }),
@@ -65,5 +78,46 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
       data: notification,
       template
     };
+  }
+
+  /**
+   * Formats party creation notification with QR code
+   *
+   * Overrides the base implementation to include a QR code image URL
+   * that users can scan to join the party via WhatsApp.
+   *
+   * @param params - Party creation parameters
+   * @param translator - Translator instance for localized messages
+   * @param metadata - Contains fromPhoneNumber and publicUrl for QR generation
+   * @returns Notification with QR code mediaUrl
+   *
+   * @example
+   * ```typescript
+   * const notification = await formatter.formatCreateParty(
+   *   { partyId: 'abc123', partyName: 'My Party', gameName: 'impostor' },
+   *   translator,
+   *   { fromPhoneNumber: '+14155238886', publicUrl: 'https://api.example.com' }
+   * );
+   * // Returns notification with mediaUrl: 'https://api.example.com/api/qr/abc123'
+   * ```
+   */
+  protected formatCreateParty(params: PartyParams, translator: ReturnType<typeof createTranslator>, metadata?: FormatterMetadata): Notification {
+    const notification = super.formatCreateParty(params, translator, metadata);
+
+    // Add QR code URL if metadata is provided
+    if (metadata?.fromPhoneNumber) {
+      const qrUrl = `${this.publicUrl}/api/qr/${params.partyId}`;
+
+      this.logger.info('Adding QR code URL to notification', { qrUrl });
+
+      return {
+        ...notification,
+        body: `${notification.body}\n\n${translator.t('party.qrCodeAttached')}`,
+        mediaUrl: qrUrl,
+      };
+    }
+    
+
+    return notification;
   }
 }

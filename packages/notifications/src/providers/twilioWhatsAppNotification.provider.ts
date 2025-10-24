@@ -138,6 +138,7 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
      *
      * Automatically determines whether to send a simple text message or a
      * rich template-based message based on the presence of template data.
+     * Supports media attachments (images, QR codes) via mediaUrl.
      *
      * @param notification - The notification to send
      * @throws {Error} If Twilio API call fails
@@ -160,6 +161,14 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
      *   data: gameState,
      *   template: contentCreateRequest
      * });
+     *
+     * // Notification with media attachment (QR code)
+     * await provider.sendNotification({
+     *   title: 'Party Created',
+     *   body: 'Scan QR to share',
+     *   action: ValidPartyActions.CREATE_PARTY,
+     *   mediaUrl: 'https://api.example.com/qr/party123'
+     * });
      * ```
      */
     async sendNotification(notification: Notification): Promise<void> {
@@ -171,13 +180,28 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
         const message = this.formatMessage(notification);
 
         try {
-            const result = await this.client.messages.create({
+            const messageOptions: {
+                body: string;
+                from: string;
+                to: string;
+                mediaUrl?: string[];
+            } = {
                 body: message,
                 from: `whatsapp:${this.fromPhoneNumber}`,
                 to: `whatsapp:+${this.recipientPhoneNumber}`
-            });
+            };
 
-            this.logger.info('Twilio WhatsApp message sent', { messageSid: result.sid });
+            // Add media URL if present (for QR codes, images, etc.)
+            if (notification.mediaUrl) {
+                messageOptions.mediaUrl = [notification.mediaUrl];
+            }
+
+            const result = await this.client.messages.create(messageOptions);
+
+            this.logger.info('Twilio WhatsApp message sent', {
+                messageSid: result.sid,
+                hasMedia: !!notification.mediaUrl
+            });
         } catch (error) {
             this.logger.error('Failed to send Twilio WhatsApp notification', error instanceof Error ? error : new Error(String(error)));
             throw error;
@@ -228,5 +252,23 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
      */
     getPhoneNumber(): string | null {
         return this.recipientPhoneNumber;
+    }
+
+    /**
+     * Gets the Twilio "from" phone number for QR code generation
+     *
+     * This is the bot's WhatsApp number that users will send messages to.
+     * Used by formatters to generate QR codes with WhatsApp links.
+     *
+     * @returns The Twilio WhatsApp phone number
+     *
+     * @example
+     * ```typescript
+     * const botNumber = provider.getFromPhoneNumber();
+     * // "+14155238886"
+     * ```
+     */
+    getFromPhoneNumber(): string {
+        return this.fromPhoneNumber;
     }
 }

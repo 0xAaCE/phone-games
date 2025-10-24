@@ -24,10 +24,12 @@
     "@phone-games/errors": "workspace:*",
     "@phone-games/games": "workspace:*",
     "@phone-games/logger": "workspace:*",
+    "qrcode": "^1.5.4",
     "twilio": "^5.10.3",
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "@types/ws": "^8.18.1",
     "typescript": "^5.9.2"
   },

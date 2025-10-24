@@ -23,6 +23,7 @@ export interface Services {
   sessionCoordinator: SessionCoordinator;
   messageHandlerService: MessageHandlerService;
   logger: ILogger;
+  db: PrismaClient;
 }
 
 /**
@@ -94,5 +95,6 @@ export function createServices(deps: ServiceFactoryDependencies): Services {
     sessionCoordinator,
     messageHandlerService,
     logger,
+    db,
   };
 }

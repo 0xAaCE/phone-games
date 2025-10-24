@@ -13,3 +13,4 @@ export * from './formatters/impostorWebSocketFormatter.js';
 export * from './formatters/impostorWhatsAppFormatter.js';
 export * from './formatters/impostorTwilioFormatter.js';
 export * from './decorators/retryNotificationProvider.js';
+export * from './services/qrCode/qrCodeGenerator.js';

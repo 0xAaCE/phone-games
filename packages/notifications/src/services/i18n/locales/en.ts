@@ -6,6 +6,7 @@ export type TranslationStructure = {
     created: string;
     playerJoined: string;
     playerLeft: string;
+    qrCodeAttached: string;
   };
   impostor: {
     matchStarted: string;
@@ -33,6 +34,7 @@ export const en: TranslationStructure = {
     created: 'Party "{{partyName}}" created successfully! Party ID: {{partyId}}',
     playerJoined: 'A new player has joined the party "{{partyName}}"!',
     playerLeft: 'A player has left the party "{{partyName}}".',
+    qrCodeAttached: 'Scan the QR code to share this party invitation!',
   },
 
   // Game: Impostor

@@ -9,6 +9,7 @@ export const es: TranslationStructure = {
     created: 'Partida "{{partyName}}" creada exitosamente! ID de partida: {{partyId}}',
     playerJoined: '¡Un nuevo jugador se ha unido a la partida "{{partyName}}"!',
     playerLeft: 'Un jugador ha salido de la partida "{{partyName}}".',
+    qrCodeAttached: '¡Escanea el código QR para compartir esta invitación!',
   },
 
   // Game: Impostor

@@ -15,6 +15,17 @@ export type PartyParams = {
 }
 
 /**
+ * Optional metadata that can be passed to formatters
+ * Used for additional context needed for specific formatting requirements
+ */
+export type FormatterMetadata = {
+    /** The "from" phone number for the notification provider (e.g., Twilio number) */
+    fromPhoneNumber?: string;
+    /** Base URL of the public server for generating resource URLs */
+    publicUrl?: string;
+}
+
+/**
  * Abstract base class for notification formatters
  *
  * Implements the Strategy Pattern to encapsulate notification formatting logic
@@ -51,16 +62,18 @@ export abstract class Formatter {
      * @param action - The action that triggered this notification
      * @param notification - The data for this action (GameState for game actions, PartyParams/ErrorParams for party actions)
      * @param phoneNumber - Optional phone number to detect language (defaults to 'en' if not provided)
+     * @param metadata - Optional metadata for additional formatting context (e.g., fromPhoneNumber for QR codes)
      * @returns A formatted notification ready to be sent to the user
      *
      * @example
      * const notification = await formatter.format(
      *   ValidGameActions.START_MATCH,
      *   gameState,
-     *   '+525512345678' // Mexican number, will use Spanish
+     *   '+525512345678', // Mexican number, will use Spanish
+     *   { fromPhoneNumber: '+14155238886' } // For QR code generation
      * );
      */
-    abstract format<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<ValidGameNames> : (PartyParams | ErrorParams), phoneNumber?: string | null): Promise<Notification>;
+    abstract format<T extends ValidActions>(action: T, notification: T extends ValidGameActions ? GameState<ValidGameNames> : (PartyParams | ErrorParams), phoneNumber?: string | null, metadata?: FormatterMetadata): Promise<Notification>;
 
     /**
      * Get the game name this formatter handles

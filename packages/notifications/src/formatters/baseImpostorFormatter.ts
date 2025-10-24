@@ -1,5 +1,5 @@
 import { GAME_NAMES, GameState, ValidGameNames } from '@phone-games/games';
-import { Formatter, PartyParams } from '../interfaces/formatter.js';
+import { Formatter, PartyParams, FormatterMetadata } from '../interfaces/formatter.js';
 import {
   Notification,
   ValidActions,
@@ -20,13 +20,14 @@ export abstract class BaseImpostorFormatter extends Formatter {
   async format<T extends ValidActions>(
     action: T,
     notification: T extends ValidGameActions ? GameState<GAME_NAMES.IMPOSTOR> : PartyParams | ErrorParams,
-    phoneNumber?: string | null
+    phoneNumber?: string | null,
+    metadata?: FormatterMetadata
   ): Promise<Notification> {
     // Detect language from phone number (defaults to 'en' if no phone number)
     const language = detectLanguageFromPhone(phoneNumber);
     const translator = createTranslator(language);
 
-    // Pass translator to format methods
+    // Pass translator and metadata to format methods
     switch (action) {
       case ValidGameActions.START_MATCH:
         return this.formatStartMatch(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
@@ -43,7 +44,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
       case ValidPartyActions.PLAYER_LEFT:
         return this.formatPlayerLeft(notification as PartyParams, translator);
       case ValidPartyActions.CREATE_PARTY:
-        return this.formatCreateParty(notification as PartyParams, translator);
+        return this.formatCreateParty(notification as PartyParams, translator, metadata);
       case ValidPartyActions.ERROR:
         return this.formatError(notification as ErrorParams);
       default:
@@ -106,7 +107,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
   }
 
   // Party action formatters
-  protected formatCreateParty(params: PartyParams, translator: ReturnType<typeof createTranslator>): Notification {
+  protected formatCreateParty(params: PartyParams, translator: ReturnType<typeof createTranslator>, _metadata?: FormatterMetadata): Notification {
     return {
       title: 'Party Created',
       body: translator.t('party.created', {
