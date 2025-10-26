@@ -55,7 +55,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          # Removed linux/arm64 to speed up builds - add back if needed for ARM deployments
 
       - name: Image digest
         run: echo ${{ steps.build.outputs.digest }}
