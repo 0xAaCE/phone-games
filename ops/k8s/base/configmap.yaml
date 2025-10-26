@@ -11,3 +11,4 @@ data:
   WHATSAPP_PHONE_NUMBER_ID: "745990838608160"
   # Add other non-sensitive config here
   TWILIO_WHATSAPP_FROM: "14155238886"
+  PUBLIC_URL: "https://api-phone-games.0xaace.xyz/"
