@@ -1,52 +1,58 @@
-project: default
-source:
-  repoURL: 'https://helmcharts.gruntwork.io'
-  targetRevision: v0.2.12
-  helm:
-    values: |
-      applicationName: cloudflared-argocd-admin
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflared
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://helmcharts.gruntwork.io'
+    targetRevision: v0.2.12
+    helm:
+      values: |
+        applicationName: cloudflared-argocd-admin
 
-      replicaCount: 1
+        replicaCount: 1
 
-      containerResources:
-        requests:
-          memory: "1024Mi"
-          cpu: "1"
-        limits:
-          memory: "1024Mi"
-          cpu: "1"
+        containerResources:
+          requests:
+            memory: "1024Mi"
+            cpu: "1"
+          limits:
+            memory: "1024Mi"
+            cpu: "1"
 
-      service:
-        enabled: false
-      ingress:
-        enabled: false
+        service:
+          enabled: false
+        ingress:
+          enabled: false
 
-      containerImage:
-        repository: cloudflare/cloudflared
-        tag: 2024.8.3
-        pullPolicy: Always
-      containerCommand:
-        - "cloudflared"
-        - "--no-autoupdate"
-        - "tunnel"
-        - "--loglevel"
-        - "debug"
-        - "run"
-        - "--token"
-        - "$(TOKEN)"
-      secrets:
-        cloudflare:
-          as: environment
-          items:
-            token:
-              envVarName: TOKEN
-  chart: k8s-service
-destination:
-  server: 'https://kubernetes.default.svc'
-  namespace: cloudflared
-syncPolicy:
-  automated:
-    prune: true
-    selfHeal: true
-  syncOptions:
-    - CreateNamespace=true
+        containerImage:
+          repository: cloudflare/cloudflared
+          tag: 2024.8.3
+          pullPolicy: Always
+        containerCommand:
+          - "cloudflared"
+          - "--no-autoupdate"
+          - "tunnel"
+          - "--loglevel"
+          - "debug"
+          - "run"
+          - "--token"
+          - "$(TOKEN)"
+        secrets:
+          cloudflare:
+            as: environment
+            items:
+              token:
+                envVarName: TOKEN
+    chart: k8s-service
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: cloudflared
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
