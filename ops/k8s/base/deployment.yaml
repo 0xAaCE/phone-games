@@ -4,6 +4,8 @@ metadata:
   name: phone-games-server
   labels:
     app: phone-games-server
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"  # Run after migrations (wave 1)
 spec:
   replicas: 1
   selector:

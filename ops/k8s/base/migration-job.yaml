@@ -6,6 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "1"  # Run before everything else (wave 0 is default)
 spec:
   ttlSecondsAfterFinished: 100
   template:
