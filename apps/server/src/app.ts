@@ -8,6 +8,12 @@ import { createQrCodeRoutes } from './routes/qrCodeRoutes.js';
 import { createErrorHandler } from './middleware/errorHandler.js';
 import { Services } from './factories/serviceFactory.js';
 
+/**
+ * Initializes the Express application with routes and middleware.
+ * @param services - Application services including logger, database, etc.
+ * @param twilioPhoneNumber - Twilio phone number for QR code generation
+ * @returns Configured Express application instance
+ */
 export const initializeApp = (services: Services, twilioPhoneNumber: string) => {
   const app: Express = express();
 

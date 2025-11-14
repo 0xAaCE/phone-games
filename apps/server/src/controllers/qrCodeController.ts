@@ -61,11 +61,21 @@ export class QrCodeController {
   async generatePartyQR(req: Request, res: Response): Promise<void> {
     const { partyId } = req.params;
 
+    // Validate partyId exists and is a non-empty string
+    if (!partyId || typeof partyId !== 'string' || partyId.trim() === '') {
+      this.logger.warn('Invalid or missing partyId', { params: req.params });
+      res.status(400).json({
+        success: false,
+        error: 'partyId is required and must be a non-empty string',
+      });
+      return;
+    }
+
     try {
       this.logger.info('Generating QR code for party', { partyId, phoneNumber: this.twilioPhoneNumber });
 
       // Generate QR code
-      const qrBuffer = await generateWhatsAppJoinQR(this.twilioPhoneNumber, partyId as string);
+      const qrBuffer = await generateWhatsAppJoinQR(this.twilioPhoneNumber, partyId);
 
       this.logger.info('QR code generated successfully', { partyId });
 
