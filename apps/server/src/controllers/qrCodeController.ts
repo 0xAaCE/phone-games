@@ -17,6 +17,7 @@ import { ILogger } from '@phone-games/logger';
  */
 export class QrCodeController {
   private logger: ILogger;
+  private twilioPhoneNumber: string;
 
   /**
    * Creates a new QR code controller
@@ -24,8 +25,9 @@ export class QrCodeController {
    * @param db - Database client for party validation
    * @param logger - Logger instance for structured logging
    */
-  constructor(logger: ILogger) {
+  constructor(logger: ILogger, twilioPhoneNumber: string) {
     this.logger = logger.child({ controller: 'QrCodeController' });
+    this.twilioPhoneNumber = twilioPhoneNumber;
   }
 
   /**
@@ -57,21 +59,13 @@ export class QrCodeController {
    * ```
    */
   async generatePartyQR(req: Request, res: Response): Promise<void> {
-    const { partyId, phoneNumber } = req.query;
-
-    if (!partyId || !phoneNumber) {
-      res.status(400).json({
-        success: false,
-        error: 'partyId and phoneNumber query parameters are required',
-      });
-      return;
-    }
+    const { partyId } = req.params;
 
     try {
-      this.logger.info('Generating QR code for party', { partyId, phoneNumber });
+      this.logger.info('Generating QR code for party', { partyId, phoneNumber: this.twilioPhoneNumber });
 
       // Generate QR code
-      const qrBuffer = await generateWhatsAppJoinQR(phoneNumber as string, partyId as string);
+      const qrBuffer = await generateWhatsAppJoinQR(this.twilioPhoneNumber, partyId as string);
 
       this.logger.info('QR code generated successfully', { partyId });
 

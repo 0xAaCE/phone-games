@@ -8,7 +8,7 @@ import { createQrCodeRoutes } from './routes/qrCodeRoutes.js';
 import { createErrorHandler } from './middleware/errorHandler.js';
 import { Services } from './factories/serviceFactory.js';
 
-export const initializeApp = (services: Services) => {
+export const initializeApp = (services: Services, twilioPhoneNumber: string) => {
   const app: Express = express();
 
   // Middleware
@@ -21,7 +21,7 @@ export const initializeApp = (services: Services) => {
   app.use('/api/parties', createPartyRouter(services.sessionCoordinator));
   app.use('/api/whatsapp', createWhatsAppRouter(services.messageHandlerService, services.logger));
   app.use('/api/twilio', createTwilioRouter(services.messageHandlerService, services.logger));
-  app.use('/api/qr', createQrCodeRoutes(services.logger));
+  app.use('/api/qr', createQrCodeRoutes(services.logger, twilioPhoneNumber));
 
   // Health check endpoint
   app.get('/health', (_req, res) => {

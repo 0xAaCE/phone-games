@@ -51,7 +51,7 @@ export async function generateWhatsAppJoinQR(
   const cleanNumber = phoneNumber.replace(/^\+/, '');
 
   // Construct WhatsApp link with pre-filled JOIN_PARTY message
-  const message = `JOIN_PARTY ${partyId}`;
+  const message = `/join_party ${partyId}`;
   const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
 
   try {

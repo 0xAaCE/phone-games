@@ -16,9 +16,9 @@ import { ILogger } from '@phone-games/logger';
  * app.use('/api/qr', qrRoutes);
  * ```
  */
-export function createQrCodeRoutes(logger: ILogger): Router {
+export function createQrCodeRoutes(logger: ILogger, twilioPhoneNumber: string): Router {
   const router = Router();
-  const controller = new QrCodeController(logger);
+  const controller = new QrCodeController(logger, twilioPhoneNumber);
 
   /**
    * GET /api/qr?partyId=<partyId>&phoneNumber=<phoneNumber>
@@ -34,7 +34,7 @@ export function createQrCodeRoutes(logger: ILogger): Router {
    * curl "https://api.example.com/api/qr?partyId=clxy7z8k00001&phoneNumber=%2B1234567890" -o qr.png
    * ```
    */
-  router.get('/', (req, res) => controller.generatePartyQR(req, res));
+  router.get('/:partyId', (req, res) => controller.generatePartyQR(req, res));
 
   return router;
 }
