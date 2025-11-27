@@ -51,7 +51,7 @@ export type SupportedLanguage = 'en' | 'es' | 'pt' | 'fr';
 /**
  * Default language when detection fails or no phone number provided
  */
-export const DEFAULT_LANGUAGE: SupportedLanguage = 'en';
+export const DEFAULT_LANGUAGE: SupportedLanguage = 'es';
 
 /**
  * Detects language from a phone number's country code

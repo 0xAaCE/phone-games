@@ -86,7 +86,7 @@ export type Notification<templateType = unknown> = {
     /** Full game state for the current game */
     data: GameState<ValidGameNames>;
     /** Template for the notification */
-    template?: templateType;
+    template?: templateType | undefined;
     /** Optional media URL for images/attachments (e.g., QR codes) */
     mediaUrl?: string;
 } | {

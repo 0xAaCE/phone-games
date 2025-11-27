@@ -4,6 +4,7 @@ import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "..
 import { NotificationProvider } from "../interfaces/notificationProvider.js";
 import twilio from 'twilio';
 import { ContentCreateRequest } from "twilio/lib/rest/content/v1/content.js";
+import { TwilioTemplate } from "../interfaces/templates.js";
 
 /**
  * Twilio WhatsApp notification provider
@@ -77,6 +78,14 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
         this.logger = logger.child({ provider: 'TwilioWhatsAppNotificationProvider', recipient: to.phoneNumber });
     }
 
+    private async createTemplate(template: TwilioTemplate): Promise<{sid: string}> {
+        if (template.sid) {
+            return { sid: template.sid };
+        }
+
+        return await this.client.content.v1.contents.create(template as ContentCreateRequest);
+    }
+
     /**
      * Sends a rich template-based WhatsApp message
      *
@@ -109,22 +118,33 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
      * });
      * ```
      */
-    private async sendTemplate(notification: Notification<ContentCreateRequest>): Promise<void> {
+    private async sendTemplate(notification: Notification<TwilioTemplate>): Promise<void> {
         if (!notification.template) {
             throw new Error('Template is required');
         }
 
         try {
-            const templateResult = await this.client.content.v1.contents.create(notification.template);
+            const templateResult = await this.createTemplate(notification.template);
 
-            this.logger.info('Twilio WhatsApp template sent', { templateSid: templateResult.sid });
+            this.logger.info('Twilio WhatsApp template sent', { templateSid: templateResult.sid, contentVariables: notification.template.contentVariables ?? '' });
 
-            const messageResult = await this.client.messages.create({
-                body: notification.body,
+            const messageOptions: {
+                from: string;
+                to: string;
+                contentSid: string;
+                contentVariables?: string;
+            } = {
                 from: `whatsapp:${this.fromPhoneNumber}`,
                 to: `whatsapp:+${this.recipientPhoneNumber}`,
                 contentSid: templateResult.sid
-            });
+            };
+
+            // Only add contentVariables if they exist (don't send empty string)
+            if (notification.template && 'contentVariables' in notification.template && notification.template.contentVariables) {
+                messageOptions.contentVariables = notification.template.contentVariables;
+            }
+
+            const messageResult = await this.client.messages.create(messageOptions);
 
             this.logger.info('Twilio WhatsApp message sent', { messageSid: messageResult.sid });
         } catch (error) {

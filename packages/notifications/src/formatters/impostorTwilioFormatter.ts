@@ -1,11 +1,11 @@
-import { ContentCreateRequest } from 'twilio/lib/rest/content/v1/content.js';
-
 import { GAME_NAMES, GameState } from '@phone-games/games';
 import { Notification, NOTIFICATION_METHODS, ValidGameActions, ValidNotificationMethods } from '../interfaces/notification.js';
 import { BaseImpostorFormatter } from './baseImpostorFormatter.js';
 import { createTranslator } from '../services/i18n/translator.js';
 import { FormatterMetadata, PartyParams } from '../interfaces/formatter.js';
 import { ILogger } from '@phone-games/logger';
+import { getTemplate } from '../templates/index.js';
+import { TwilioTemplate } from '../interfaces/templates.js';
 
 /**
  * Twilio formatter for Impostor game.
@@ -47,36 +47,33 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
    * object and provides fallback values to ensure a valid notification is always returned.
    * Uses translator for language-aware messages based on user's phone country code.
    */
-  protected formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification<ContentCreateRequest> {
+  protected formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification<TwilioTemplate> {
     // Safely extract the word with null/undefined guards
     const word = notification?.customState?.currentRoundState?.word ?? 'unknown';
     
-    const template: ContentCreateRequest = {
-      friendlyName: 'test',
-      language: translator.getLanguage(),
-      types: {
-        twilioListPicker: {
-          body: translator.t('impostor.nextRound', { word }),
-          button: 'Lista de jugadores',
-          items: [
-            {
-              id: '1',
-              item: 'test',
-              description: 'test',
-            }
-          ]
-        }
-      }
+    const templateSid = getTemplate('twillio', translator.getLanguage(), ValidGameActions.NEXT_ROUND);
+
+    if (!templateSid) {
+      throw new Error('Template not found');
     }
 
     this.logger.info('Formatting next round with template');
+
+    const contentVariables = JSON.stringify(notification.players.reduce((acc, player, index) => {
+      acc[`name_${index + 1}`] = player.user.username;
+      acc[`id_${index + 1}`] = player.user.id;
+      return acc;
+    }, { word } as Record<string, string>));
 
     return {
       title: 'Impostor',
       body: translator.t('impostor.nextRound', { word }),
       action: ValidGameActions.NEXT_ROUND,
       data: notification,
-      template
+      template: {
+        sid: templateSid,
+        contentVariables,
+      },
     };
   }
 
