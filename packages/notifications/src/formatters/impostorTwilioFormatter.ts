@@ -51,7 +51,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     // Safely extract the word with null/undefined guards
     const word = notification?.customState?.currentRoundState?.word ?? 'unknown';
     
-    const templateSid = getTemplate('twillio', translator.getLanguage(), ValidGameActions.NEXT_ROUND);
+    const templateSid = getTemplate('twilio', translator.getLanguage(), ValidGameActions.NEXT_ROUND);
 
     if (!templateSid) {
       throw new Error('Template not found');
