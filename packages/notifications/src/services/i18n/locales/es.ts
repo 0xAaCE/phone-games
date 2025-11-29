@@ -15,7 +15,10 @@ export const es: TranslationStructure = {
   // Game: Impostor
   impostor: {
     matchStarted: '¡La partida ha comenzado! Prepárate para jugar.',
-    nextRound: 'La siguiente ronda ha comenzado y tu palabra es:\n\n{{word}}',
+    nextRound: {
+      body: 'La siguiente ronda ha comenzado y tu palabra es:\n\n{{word}}',
+      button: '¡Votar!',
+    },
     voteReceived: 'Tu voto ha sido registrado.',
     roundFinished: '¡La ronda {{round}} ha terminado!',
     matchFinished: '¡La partida ha terminado! Gracias por jugar.',

@@ -41,6 +41,7 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
     super();
     this.wordGenerator = new WordGenerator(wordConfig);
     this.gameState = {
+      partyId: '',
       currentRound: 0,
       isFinished: false,
       players: [],
@@ -61,12 +62,13 @@ export class ImpostorGame extends Game<GAME_NAMES.IMPOSTOR> {
     return GAME_NAMES.IMPOSTOR;
   }
 
-  async start(players: GamePlayer[]): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
+  async start(partyId: string, players: GamePlayer[]): Promise<GameState<GAME_NAMES.IMPOSTOR>> {
     if (players.length < 3) {
       throw new GameError('Impostor game requires at least 3 players');
     }
 
     this.updateState({
+      partyId,
       players,
     });
 

@@ -6,3 +6,4 @@ export * from './formatters/index.js';
 export * from './decorators/index.js';
 export * from './providers/index.js';
 export * from './services/index.js';
+export * from './templates/index.js';

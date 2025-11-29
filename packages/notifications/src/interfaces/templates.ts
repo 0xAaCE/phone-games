@@ -1,5 +1,23 @@
-import { ContentCreateRequest } from 'twilio/lib/rest/content/v1/content.js';
+import { GameState, ValidGameNames } from '@phone-games/games';
 
-export type TwilioTemplate =
-  | (ContentCreateRequest & { sid?: never, contentVariables?: never}) // allow optional sid on requests
-  | { sid: string, contentVariables?: string }; // allow pure sid reference
+import { Translator, ValidGameActions } from '../internal.js';
+
+export type TwilioTemplate = { sid: string, contentVariables?: string }; // allow pure sid reference
+
+export type Template = TwilioTemplate;
+
+export type GetTemplateParams = {
+  language: string;
+  action: ValidGameActions;
+  platform: string;
+  gameState: GameState<ValidGameNames>;
+}
+
+export type TemplateDependencies = {
+  translator: Translator;
+}
+export interface ITemplateRegistry {
+  getPlatform: () => string;
+  registerTemplate: (params: GetTemplateParams, sid: string) => void;
+  getTemplate: (params: GetTemplateParams, dependencies: TemplateDependencies) => Promise<Template>
+}

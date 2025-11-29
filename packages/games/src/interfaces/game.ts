@@ -43,6 +43,7 @@ export type FinishRoundParams<T extends ValidGameNames> = FinishRoundPossiblePar
 export type FinishRoundResult<T extends ValidGameNames> = FinishRoundPossibleResult[T];
 
 export interface GameState<T extends ValidGameNames> {
+  partyId: string;
   currentRound: number;
   isFinished: boolean;
   winner?: string;

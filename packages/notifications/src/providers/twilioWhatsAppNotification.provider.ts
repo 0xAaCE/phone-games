@@ -1,10 +1,8 @@
+import twilio from 'twilio';
 import { User } from "@phone-games/db";
 import { ILogger } from "@phone-games/logger";
-import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods } from "../interfaces/notification.js";
-import { NotificationProvider } from "../interfaces/notificationProvider.js";
-import twilio from 'twilio';
-import { ContentCreateRequest } from "twilio/lib/rest/content/v1/content.js";
-import { TwilioTemplate } from "../interfaces/templates.js";
+
+import { Notification, NOTIFICATION_METHODS, ValidNotificationMethods, NotificationProvider, TwilioTemplate } from "../internal.js";
 
 /**
  * Twilio WhatsApp notification provider
@@ -78,13 +76,6 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
         this.logger = logger.child({ provider: 'TwilioWhatsAppNotificationProvider', recipient: to.phoneNumber });
     }
 
-    private async createTemplate(template: TwilioTemplate): Promise<{sid: string}> {
-        if (template.sid) {
-            return { sid: template.sid };
-        }
-
-        return await this.client.content.v1.contents.create(template as ContentCreateRequest);
-    }
 
     /**
      * Sends a rich template-based WhatsApp message
@@ -124,10 +115,6 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
         }
 
         try {
-            const templateResult = await this.createTemplate(notification.template);
-
-            this.logger.info('Twilio WhatsApp template sent', { templateSid: templateResult.sid, contentVariables: notification.template.contentVariables ?? '' });
-
             const messageOptions: {
                 from: string;
                 to: string;
@@ -136,7 +123,7 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
             } = {
                 from: `whatsapp:${this.fromPhoneNumber}`,
                 to: `whatsapp:+${this.recipientPhoneNumber}`,
-                contentSid: templateResult.sid
+                contentSid: notification.template.sid
             };
 
             // Only add contentVariables if they exist (don't send empty string)
@@ -193,7 +180,7 @@ export class TwilioWhatsAppNotificationProvider extends NotificationProvider {
      */
     async sendNotification(notification: Notification): Promise<void> {
         if (notification.template) {
-            await this.sendTemplate(notification as Notification<ContentCreateRequest>);
+            await this.sendTemplate(notification as Notification<TwilioTemplate>);
             return;
         }
 

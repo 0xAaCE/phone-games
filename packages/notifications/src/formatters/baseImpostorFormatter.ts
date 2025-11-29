@@ -30,23 +30,23 @@ export abstract class BaseImpostorFormatter extends Formatter {
     // Pass translator and metadata to format methods
     switch (action) {
       case ValidGameActions.START_MATCH:
-        return this.formatStartMatch(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
+        return await this.formatStartMatch(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
       case ValidGameActions.NEXT_ROUND:
-        return this.formatNextRound(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
+        return await this.formatNextRound(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
       case ValidGameActions.MIDDLE_ROUND_ACTION:
-        return this.formatMiddleRoundAction(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
+        return await this.formatMiddleRoundAction(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
       case ValidGameActions.FINISH_ROUND:
-        return this.formatFinishRound(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
+        return await this.formatFinishRound(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
       case ValidGameActions.FINISH_MATCH:
-        return this.formatFinishMatch(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
+        return await this.formatFinishMatch(notification as GameState<GAME_NAMES.IMPOSTOR>, translator);
       case ValidPartyActions.PLAYER_JOINED:
-        return this.formatPlayerJoined(notification as PartyParams, translator);
+        return await this.formatPlayerJoined(notification as PartyParams, translator);
       case ValidPartyActions.PLAYER_LEFT:
-        return this.formatPlayerLeft(notification as PartyParams, translator);
+        return await this.formatPlayerLeft(notification as PartyParams, translator);
       case ValidPartyActions.CREATE_PARTY:
-        return this.formatCreateParty(notification as PartyParams, translator, metadata);
+        return await this.formatCreateParty(notification as PartyParams, translator, metadata);
       case ValidPartyActions.ERROR:
-        return this.formatError(notification as ErrorParams);
+        return await this.formatError(notification as ErrorParams);
       default:
         throw new Error('Invalid action');
     }
@@ -57,7 +57,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
   }
 
   // Game action formatters
-  protected formatStartMatch(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification {
+  protected async formatStartMatch(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Impostor',
       body: translator.t('impostor.matchStarted'),
@@ -66,7 +66,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  protected formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification {
+  protected async formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     const word = notification?.customState?.currentRoundState?.word ?? 'unknown';
 
     return {
@@ -77,7 +77,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  protected formatMiddleRoundAction(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification {
+  protected async formatMiddleRoundAction(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Impostor',
       body: translator.t('impostor.voteReceived'),
@@ -86,7 +86,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  protected formatFinishRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification {
+  protected async formatFinishRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     const round = notification.currentRound || 1;
 
     return {
@@ -97,7 +97,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  protected formatFinishMatch(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Notification {
+  protected async formatFinishMatch(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Impostor',
       body: translator.t('impostor.matchFinished'),
@@ -107,7 +107,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
   }
 
   // Party action formatters
-  protected formatCreateParty(params: PartyParams, translator: ReturnType<typeof createTranslator>, _metadata?: FormatterMetadata): Notification {
+  protected async formatCreateParty(params: PartyParams, translator: ReturnType<typeof createTranslator>, _metadata?: FormatterMetadata): Promise<Notification> {
     return {
       title: 'Party Created',
       body: translator.t('party.created', {
@@ -118,7 +118,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  protected formatPlayerJoined(params: PartyParams, translator: ReturnType<typeof createTranslator>): Notification {
+  protected async formatPlayerJoined(params: PartyParams, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Player Joined',
       body: translator.t('party.playerJoined', {
@@ -128,7 +128,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
     };
   }
 
-  protected formatPlayerLeft(params: PartyParams, translator: ReturnType<typeof createTranslator>): Notification {
+  protected async formatPlayerLeft(params: PartyParams, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Player Left',
       body: translator.t('party.playerLeft', {
@@ -142,8 +142,8 @@ export abstract class BaseImpostorFormatter extends Formatter {
    * Override formatError to provide game-specific error formatting
    * Converts technical errors to user-friendly messages
    */
-  protected formatError(params: ErrorParams): Notification {
+  protected async formatError(params: ErrorParams): Promise<Notification> {
     // Use the base formatter's implementation
-    return super.formatError(params);
+    return await super.formatError(params);
   }
 }

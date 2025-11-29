@@ -1,18 +1,36 @@
-import { getTemplate as getTwilioTemplate } from './twilio.js';
+import { GetTemplateParams, ITemplateRegistry, Template, TemplateDependencies } from "../internal.js";
+export class TemplateRegistry implements ITemplateRegistry {
+    private TemplateRegistries: Map<string, ITemplateRegistry> = new Map();
 
-/**
- * Retrieves a notification template for the specified platform, language, and action.
- * 
- * @param platform - The platform identifier (e.g., 'twilio')
- * @param language - The language code for the template
- * @param action - The action identifier for the template
- * @returns The template string if found, otherwise undefined
- */
-export const getTemplate = (platform: string, language: string, action: string): string | undefined => {
-    switch (platform) {
-        case 'twilio':
-            return getTwilioTemplate(language, action);
-        default:
-            return undefined;
+    constructor(registries: ITemplateRegistry[]) {
+        registries.forEach(registry => {
+            this.TemplateRegistries.set(registry.getPlatform(), registry);
+        });
     }
-};
+
+    getPlatform(): string {
+        return 'templates';
+    }
+
+    addRegistry(registry: ITemplateRegistry): void {
+        this.TemplateRegistries.set(registry.getPlatform(), registry);
+    }
+
+    registerTemplate(params: GetTemplateParams, sid: string): void {
+        const templateRegistry = this.TemplateRegistries.get(params.platform);
+        if (!templateRegistry) {
+            throw new Error(`Template registry for platform ${params.platform} not found`);
+        }
+        templateRegistry.registerTemplate(params, sid);
+    }
+    
+    async getTemplate(params: GetTemplateParams, dependencies: TemplateDependencies): Promise<Template> {
+        const templateRegistry = this.TemplateRegistries.get(params.platform);
+        if (!templateRegistry) {
+            throw new Error(`Template registry for platform ${params.platform} not found`);
+        }
+        return await templateRegistry.getTemplate(params, dependencies);
+    }
+}
+
+export { TwilioImpostorTemplateRegistry } from './twilio.js';

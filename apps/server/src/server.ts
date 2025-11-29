@@ -1,4 +1,4 @@
-import { ImpostorTwilioFormatter, ImpostorWebSocketFormatter, ImpostorWhatsAppFormatter, NotificationManager } from '@phone-games/notifications';
+import { ImpostorTwilioFormatter, ImpostorWebSocketFormatter, ImpostorWhatsAppFormatter, NotificationManager, TemplateRegistry, TwilioImpostorTemplateRegistry } from '@phone-games/notifications';
 import { initializeApp } from './app.js';
 import { createServices } from './factories/serviceFactory.js';
 import dotenv from 'dotenv';
@@ -20,9 +20,10 @@ const logger = new Logger({
 
 logger.info('Initializing server', { port: PORT });
 
+const ImpostorTemplateRegistry = new TemplateRegistry([new TwilioImpostorTemplateRegistry(process.env.TWILIO_ACCOUNT_SID as string, process.env.TWILIO_AUTH_TOKEN as string, logger)]);
 // Initialize notification service (manages WebSocket connections)
 const notificationService = new NotificationManager(
-  [new ImpostorWebSocketFormatter(), new ImpostorWhatsAppFormatter(), new ImpostorTwilioFormatter(logger, process.env.PUBLIC_URL || '')],
+  [new ImpostorWebSocketFormatter(), new ImpostorWhatsAppFormatter(), new ImpostorTwilioFormatter(logger, process.env.PUBLIC_URL || '', ImpostorTemplateRegistry)],
   logger
 );
 

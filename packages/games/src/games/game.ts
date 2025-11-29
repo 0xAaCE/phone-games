@@ -2,7 +2,7 @@ import { FinishRoundParams, FinishRoundResult, GamePlayer, GameState, MiddleRoun
 
 export abstract class Game<T extends ValidGameNames> {
     abstract getName(): ValidGameNames;
-    abstract start(players: GamePlayer[]): Promise<GameState<T>>;
+    abstract start(partyId: string, players: GamePlayer[]): Promise<GameState<T>>;
     abstract nextRound(nextRoundParams: NextRoundParams<T>): Promise<NextRoundResult<T>>;
     abstract middleRoundAction(middleRoundActionParams: MiddleRoundActionParams<T>): Promise<MiddleRoundActionResult<T>>;
     abstract finishRound(finishRoundParams: FinishRoundParams<T>): Promise<FinishRoundResult<T>>;

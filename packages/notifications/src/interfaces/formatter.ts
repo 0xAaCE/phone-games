@@ -106,8 +106,8 @@ export abstract class Formatter {
      *   message: "Party not found. Create one with /create_party"
      * });
      */
-    protected formatError(params: ErrorParams): Notification {
-        return {
+    protected async formatError(params: ErrorParams): Promise<Notification> {
+        return await {
             title: "Error",
             body: params.message,
             action: ValidPartyActions.ERROR,

@@ -9,5 +9,7 @@ export * from './httpErrors.js';
 // Domain-specific errors
 export * from './domainErrors.js';
 
+export * from './twilioError.js';
+
 // Error utilities
 export * from './utils.js';

@@ -47,7 +47,7 @@ export class GameSessionManager {
   async startGame(partyId: string, players: GamePlayer[]): Promise<GameState<ValidGameNames>> {
     this.logger.info('Starting game', { partyId, playerCount: players.length });
     const game = await this.getGame(partyId);
-    const gameState = await game.start(players);
+    const gameState = await game.start(partyId, players);
     await this.gameStateStorage.save(partyId, game); // Save updated state
     return gameState;
   }

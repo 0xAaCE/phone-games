@@ -10,7 +10,10 @@ export type TranslationStructure = {
   };
   impostor: {
     matchStarted: string;
-    nextRound: string;
+    nextRound: {
+      body: string;
+      button: string;
+    };
     voteReceived: string;
     roundFinished: string;
     matchFinished: string;
@@ -40,7 +43,10 @@ export const en: TranslationStructure = {
   // Game: Impostor
   impostor: {
     matchStarted: 'The match has started! Get ready to play.',
-    nextRound: 'The next round has started and your word is:\n\n{{word}}',
+    nextRound: {
+      body: 'The next round has started and your word is:\n\n{{word}}',
+      button: 'Vote!',
+    },
     voteReceived: 'Your vote has been recorded.',
     roundFinished: 'Round {{round}} has finished!',
     matchFinished: 'The match has finished! Thanks for playing.',
