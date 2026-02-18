@@ -4,7 +4,8 @@ metadata:
   name: phone-games-migration
   namespace: phone-games
   annotations:
-    argocd.argoproj.io/sync-wave: "1"  # Run after wave 0 (services, configmaps) but before wave 2 (deployment)
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   ttlSecondsAfterFinished: 100
   template:

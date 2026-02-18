@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: phone-games-server
+  namespace: phone-games
   labels:
     app: phone-games-server
 spec:
