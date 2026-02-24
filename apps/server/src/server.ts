@@ -34,7 +34,7 @@ const services = createServices({
   notificationService,
 });
 
-const app = initializeApp(services, process.env.TWILIO_PHONE_NUMBER as string);
+const app = initializeApp(services, process.env.TWILIO_WHATSAPP_FROM as string);
 
 // Start server
 const server = app.listen(PORT, () => {
