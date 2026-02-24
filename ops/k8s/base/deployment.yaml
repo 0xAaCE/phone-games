@@ -90,6 +90,11 @@ spec:
             secretKeyRef:
               name: external-credentials
               key: TWILIO_WHATSAPP_FROM
+        - name: PUBLIC_URL
+          valueFrom:
+            configMapKeyRef:
+              name: phone-games-config
+              key: PUBLIC_URL
         resources:
           requests:
             memory: "256Mi"
