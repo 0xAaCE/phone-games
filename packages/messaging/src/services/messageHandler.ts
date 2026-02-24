@@ -30,7 +30,7 @@ export class MessageHandlerService implements MessageHandler {
     this.notificationService = notificationService;
     this.userRegistrationService = userRegistrationService;
     this.parsers = new Map(parsers.map(parser => [parser.getMessagePlatform(), parser]));
-    this.commandFactory = new GameCommandFactory(sessionCoordinator, userService);
+    this.commandFactory = new GameCommandFactory(sessionCoordinator, userService, notificationService);
     this.logger = logger.child({ service: 'MessageHandlerService' });
   }
 

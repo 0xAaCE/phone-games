@@ -8,3 +8,4 @@ export * from './nextRoundCommand.js';
 export * from './middleRoundActionCommand.js';
 export * from './finishRoundCommand.js';
 export * from './finishMatchCommand.js';
+export * from './helpCommand.js';

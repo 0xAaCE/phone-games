@@ -1,4 +1,4 @@
-import { GameState, ValidGameNames } from "@phone-games/games";
+import { GameState, ValidGameNames, GAME_NAMES } from "@phone-games/games";
 import { NotificationError, BaseError } from "@phone-games/errors";
 import { ILogger } from "@phone-games/logger";
 import {
@@ -13,6 +13,8 @@ import {
     ErrorParams,
     FormatterMetadata
 } from "../internal.js";
+import { detectLanguageFromPhone } from "./i18n/languageDetector.js";
+import { createTranslator } from "./i18n/translator.js";
 
 /**
  * Composite key for looking up formatters by game and notification method
@@ -329,6 +331,20 @@ export class NotificationManager implements NotificationService {
      */
     async notifyError(gameName: ValidGameNames, userId: string, errorMessage: string): Promise<void> {
         await this.notify(userId, gameName, ValidPartyActions.ERROR, { message: errorMessage });
+    }
+
+    /**
+     * Send the help message to a user
+     *
+     * @param userId - The user ID to notify
+     */
+    async notifyHelp(userId: string): Promise<void> {
+        const provider = this.notificationProviders.get(userId);
+        const phoneNumber = provider?.getPhoneNumber();
+        const language = detectLanguageFromPhone(phoneNumber);
+        const translator = createTranslator(language);
+        const helpText = translator.t('help.body');
+        await this.notifyError(GAME_NAMES.IMPOSTOR, userId, helpText);
     }
 
     /**

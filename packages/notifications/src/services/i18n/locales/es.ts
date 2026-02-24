@@ -63,4 +63,8 @@ export const es: TranslationStructure = {
     players: 'jugadores',
     player: 'jugador',
   },
+
+  help: {
+    body: '*Phone Games* 🎮\nJuegos sociales multijugador, jugados por WhatsApp. Sin necesidad de app.\n\n*Juegos*\n• Impostor – Un jugador es secretamente el impostor. Encuéntralo antes de que sea tarde.\n\n*Comandos*\n• /create_party impostor [nombre] – Crear una nueva partida\n• /join [id-partida] – Unirse a una partida existente\n• /leave – Salir de la partida actual\n• /start – Iniciar la partida\n• /vote [jugador] – Votar para eliminar a un jugador\n• /next – Iniciar la siguiente ronda\n• /help – Mostrar este mensaje',
+  },
 } as const;

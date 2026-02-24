@@ -166,6 +166,16 @@ export abstract class NotificationService {
     abstract notifyError(gameName: ValidGameNames, userId: string, errorMessage: string): Promise<void>;
 
     /**
+     * Send the help message to a user
+     *
+     * @param userId - The user ID to notify
+     *
+     * @example
+     * await service.notifyHelp("user123");
+     */
+    abstract notifyHelp(userId: string): Promise<void>;
+
+    /**
      * Convert a domain error to a user-friendly error message
      * Accesses the error's displayMessage property with fallback
      *

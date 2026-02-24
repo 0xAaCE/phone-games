@@ -49,6 +49,9 @@ export type TranslationStructure = {
     help: string;
     helpDesc: string;
   };
+  help: {
+    body: string;
+  };
   common: {
     round: string;
     of: string;
@@ -119,5 +122,9 @@ export const en: TranslationStructure = {
     finishRoundDesc: 'Finish Round',
     help:            '/help',
     helpDesc:        'Help',
+  },
+
+  help: {
+    body: '*Phone Games* 🎮\nMultiplayer social deduction games, played over WhatsApp. No app needed.\n\n*Games*\n• Impostor – One player is secretly the impostor. Find them before it\'s too late.\n\n*Commands*\n• /create_party impostor [name] – Create a new party\n• /join [party-id] – Join an existing party\n• /leave – Leave the current party\n• /start – Start the match\n• /vote [player] – Vote to eliminate a player\n• /next – Start the next round\n• /help – Show this message',
   },
 };

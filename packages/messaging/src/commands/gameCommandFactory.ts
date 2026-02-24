@@ -1,5 +1,6 @@
 import { SessionCoordinator } from '@phone-games/party';
 import { UserService } from '@phone-games/user';
+import { NotificationService } from '@phone-games/notifications';
 import { GameCommand, GameCommandClass } from './gameCommand.js';
 import { CreatePartyCommand } from './createPartyCommand.js';
 import { JoinPartyCommand } from './joinPartyCommand.js';
@@ -10,6 +11,7 @@ import { MiddleRoundActionCommand } from './middleRoundActionCommand.js';
 import { FinishRoundCommand } from './finishRoundCommand.js';
 import { FinishMatchCommand } from './finishMatchCommand.js';
 import { VoteCommand } from './voteCommand.js';
+import { HelpCommand } from './helpCommand.js';
 
 /**
  * Factory for creating game commands
@@ -37,11 +39,13 @@ export class GameCommandFactory {
     VoteCommand,
     FinishRoundCommand,
     FinishMatchCommand,
+    HelpCommand,
   ];
 
   constructor(
     private sessionCoordinator: SessionCoordinator,
-    private userService: UserService
+    private userService: UserService,
+    private notificationService: NotificationService
   ) {}
 
   /**
@@ -59,6 +63,11 @@ export class GameCommandFactory {
     // Find the command class that can handle this text
     for (const CommandClass of GameCommandFactory.commandClasses) {
       if (CommandClass.canHandle(text)) {
+        // HelpCommand uses NotificationService instead of SessionCoordinator
+        if (CommandClass === HelpCommand) {
+          return new HelpCommand(this.notificationService, userId);
+        }
+
         // Parse params using the command's static method
         // Some commands need context (userId, userService)
         const context = { userId, userService: this.userService };
