@@ -15,22 +15,22 @@ type Template = {
 const templates: Template = {
     'default': {
         'create_party': {
-            sid: 'HXf7af75f9e8223dc3314bce82eb598fb6',
+            sid: 'HXb78977e5be831a27b15bc23cb8cc7375',
         },
         'join_party': {
-            sid: 'HXf7af75f9e8223dc3314bce82eb598fb6',
+            sid: 'HXb78977e5be831a27b15bc23cb8cc7375',
         },
         'start_match': {
-            sid: 'HXbc9d575bfcf1184239668a192f425870',
+            sid: 'HXcf348c4f53f04037991143596920b794',
         },
         'middle_round_action': {
-            sid: 'HXc590d18e3fab6c3bb6942b7b05d7dd5a',
+            sid: 'HX06eb5d0833f6a40c9bc090bb6d166845',
         },
         'finish_round': {
-            sid: 'HXf14385ebb9e99033154f7ff6aa495782',
+            sid: 'HX37bf4173c587f52775b3d642c6849167',
         },
         'finish_match': {
-            sid: 'HX37f8102727a0e59eaf9c519ce29ab581',
+            sid: 'HX5a73da8874f717d987f2895431c2e742',
         },
     },
 };

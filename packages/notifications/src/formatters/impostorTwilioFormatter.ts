@@ -212,7 +212,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('impostor.roundFinished.body', { round: notification.currentRound }),
       list_button: translator.t('impostor.roundFinished.listButton'),
-      start_match: translator.t('commands.startMatch'),
+      next_round: translator.t('commands.nextRound'),
     });
 
     return {
@@ -237,7 +237,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('impostor.matchFinished.body'),
       list_button: translator.t('impostor.matchFinished.listButton'),
-      create_party: translator.t('commands.help'),
+      help: translator.t('commands.help'),
     });
 
     return {
