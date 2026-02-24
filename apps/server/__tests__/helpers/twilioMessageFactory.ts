@@ -59,4 +59,17 @@ export const TEST_USERS = {
     phoneNumber: '+13333333333',
     name: 'Charlie',
   },
+  // Spanish-speaking test users (Mexican phone numbers)
+  diana: {
+    phoneNumber: '+525511111111',
+    name: 'Diana',
+  },
+  elena: {
+    phoneNumber: '+525522222222',
+    name: 'Elena',
+  },
+  fernando: {
+    phoneNumber: '+525533333333',
+    name: 'Fernando',
+  },
 } as const;

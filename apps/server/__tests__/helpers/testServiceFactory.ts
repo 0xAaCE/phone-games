@@ -1,5 +1,10 @@
 import { ILogger } from '@phone-games/logger';
-import { NotificationService, TwilioWhatsAppNotificationProvider } from '@phone-games/notifications';
+import {
+  NotificationManager,
+  NotificationService,
+  TwilioWhatsAppNotificationProvider,
+  ImpostorTwilioFormatter,
+} from '@phone-games/notifications';
 import {
   SessionCoordinator,
   PartyService,
@@ -10,7 +15,10 @@ import {
 import { MessageHandlerService, UserRegistrationService, TwilioParser } from '@phone-games/messaging';
 import { UserService } from '@phone-games/user';
 import { MockUserRepository, MockPartyRepository } from './mockRepositories.js';
+import { createMockTemplateRegistry } from './mockTemplateRegistry.js';
 import { vi } from 'vitest';
+
+const TEST_PUBLIC_URL = 'https://test.example.com';
 
 export interface TestServices {
   userService: UserService;
@@ -29,15 +37,13 @@ export interface TestServices {
  * Mocks:
  * - User and Party repositories (in-memory)
  * - Twilio API calls (vi.spyOn)
+ * - Template registry (returns fake SIDs)
  *
  * Real implementations:
  * - All business logic (SessionCoordinator, commands, games)
  * - Notification formatting and delivery logic
  */
-export function createTestServices(
-  notificationService: NotificationService,
-  logger: ILogger
-): TestServices {
+export function createTestServices(logger: ILogger): TestServices {
   // ===== Mock Repositories =====
   const mockUserRepository = new MockUserRepository();
   const mockPartyRepository = new MockPartyRepository();
@@ -50,6 +56,11 @@ export function createTestServices(
     mockPartyRepository.seedUsers([user]);
     return user;
   };
+
+  // ===== Notification Service =====
+  const templateRegistry = createMockTemplateRegistry();
+  const formatter = new ImpostorTwilioFormatter(logger, TEST_PUBLIC_URL, templateRegistry);
+  const notificationService = new NotificationManager([formatter], logger);
 
   // ===== Core Services =====
   const userService = new UserService(mockUserRepository);

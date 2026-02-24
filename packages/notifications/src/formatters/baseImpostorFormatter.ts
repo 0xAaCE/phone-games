@@ -57,12 +57,11 @@ export abstract class BaseImpostorFormatter extends Formatter {
   }
 
   // Game action formatters
-  protected async formatStartMatch(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
+  protected async formatStartMatch(_notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Impostor',
       body: translator.t('impostor.matchStarted'),
       action: ValidGameActions.START_MATCH,
-      data: notification,
     };
   }
 
@@ -73,16 +72,14 @@ export abstract class BaseImpostorFormatter extends Formatter {
       title: 'Impostor',
       body: translator.t('impostor.nextRound', { word }),
       action: ValidGameActions.NEXT_ROUND,
-      data: notification,
     };
   }
 
-  protected async formatMiddleRoundAction(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
+  protected async formatMiddleRoundAction(_notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Impostor',
       body: translator.t('impostor.voteReceived'),
       action: ValidGameActions.MIDDLE_ROUND_ACTION,
-      data: notification,
     };
   }
 
@@ -93,16 +90,14 @@ export abstract class BaseImpostorFormatter extends Formatter {
       title: 'Impostor',
       body: translator.t('impostor.roundFinished', { round }),
       action: ValidGameActions.FINISH_ROUND,
-      data: notification,
     };
   }
 
-  protected async formatFinishMatch(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
+  protected async formatFinishMatch(_notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Impostor',
       body: translator.t('impostor.matchFinished'),
       action: ValidGameActions.FINISH_MATCH,
-      data: notification,
     };
   }
 

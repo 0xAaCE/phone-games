@@ -2,7 +2,7 @@ import twilio from "twilio";
 import { ContentCreateRequest } from "twilio/lib/rest/content/v1/content";
 import { ILogger } from "@phone-games/logger";
 
-import { ValidGameActions, ITemplateRegistry, TwilioTemplate, GetTemplateParams, TemplateDependencies } from "../internal.js";
+import { ValidGameActions, ITemplateRegistry, TwilioTemplate, GetTemplateParams, TemplateDependencies, ValidPartyActions, CreateTemplateParams, ShouldUseTemplateParams } from "../internal.js";
 import { TwilioTemplateFactory } from "./twilio/index.js";
 import { TwilioError } from "@phone-games/errors";
 
@@ -13,11 +13,26 @@ type Template = {
 };
 
 const templates: Template = {
-    'es': {
-        'next_round': {
-            sid: 'HXa6a275bbbfa4e3fbb00898722d56004a',
-        }
-    }
+    'default': {
+        'create_party': {
+            sid: 'HXf7af75f9e8223dc3314bce82eb598fb6',
+        },
+        'join_party': {
+            sid: 'HXf7af75f9e8223dc3314bce82eb598fb6',
+        },
+        'start_match': {
+            sid: 'HXbc9d575bfcf1184239668a192f425870',
+        },
+        'middle_round_action': {
+            sid: 'HXc590d18e3fab6c3bb6942b7b05d7dd5a',
+        },
+        'finish_round': {
+            sid: 'HXf14385ebb9e99033154f7ff6aa495782',
+        },
+        'finish_match': {
+            sid: 'HX37f8102727a0e59eaf9c519ce29ab581',
+        },
+    },
 };
 
 export class TwilioImpostorTemplateRegistry implements ITemplateRegistry {
@@ -42,8 +57,16 @@ export class TwilioImpostorTemplateRegistry implements ITemplateRegistry {
         this.templates[params.language][this.getTemplateKey(params)] = { sid };
     }
 
-    private createNextRoundTemplate(params: GetTemplateParams, dependencies: TemplateDependencies): ContentCreateRequest {
+    shouldUseTemplate(_params: ShouldUseTemplateParams): boolean {
+        return true;
+    }
+
+    private createNextRoundTemplate(params: CreateTemplateParams, dependencies: TemplateDependencies): ContentCreateRequest {
         const template = TwilioTemplateFactory.buildListPicker('next_round').language(params.language).body(dependencies.translator.t('impostor.nextRound.body')).button(dependencies.translator.t('impostor.nextRound.button'));
+        if (!params.gameState) {
+            throw new Error('Game state is required for next round template');
+        }
+        
         params.gameState.players.forEach((player, index) => {
             template.addItem({ id: `index_${index}`, item: `/vote ${player.user.username}` });
         });
@@ -60,7 +83,7 @@ export class TwilioImpostorTemplateRegistry implements ITemplateRegistry {
         }
     }
 
-    private async createTemplate(params: GetTemplateParams, dependencies: TemplateDependencies): Promise<TwilioTemplate> {
+    async createTemplate(params: CreateTemplateParams, dependencies: TemplateDependencies): Promise<TwilioTemplate> {
         const template = this.buildTemplate(params, dependencies);
 
         try {
@@ -76,14 +99,30 @@ export class TwilioImpostorTemplateRegistry implements ITemplateRegistry {
 
     private getTemplateKey(params: GetTemplateParams): string {
         switch (params.action) {
+            case ValidPartyActions.CREATE_PARTY:
+                return `create_party`;
+            case ValidPartyActions.PLAYER_JOINED:
+                return `join_party`;
+            case ValidGameActions.START_MATCH:
+                return `start_match`;
             case ValidGameActions.NEXT_ROUND:
-                return `next_round-${params.gameState.partyId}`;
+                return `next_round-${params.partyParams.partyId}`;
+            case ValidGameActions.MIDDLE_ROUND_ACTION:
+                return `middle_round_action`;
+            case ValidGameActions.FINISH_ROUND:
+                return `finish_round`;
+            case ValidGameActions.FINISH_MATCH:
+                return `finish_match`;
             default:
                 return params.action;
         }
     }
 
-    async getTemplate(params: GetTemplateParams, dependencies: TemplateDependencies): Promise<TwilioTemplate> {
-        return this.templates[params.language]?.[this.getTemplateKey(params)] ?? await this.createTemplate(params, dependencies);
+    async getTemplateByLanguage(params: GetTemplateParams): Promise<TwilioTemplate> {
+        return this.templates[params.language]?.[this.getTemplateKey(params)] ?? this.templates['default'][this.getTemplateKey(params)];
+    }
+
+    async getTemplate(params: GetTemplateParams, _dependencies: TemplateDependencies): Promise<TwilioTemplate> {
+        return await this.getTemplateByLanguage(params)
     }
 }

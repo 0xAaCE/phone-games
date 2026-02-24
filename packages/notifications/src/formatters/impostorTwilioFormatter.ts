@@ -1,5 +1,5 @@
 import { GAME_NAMES, GameState } from '@phone-games/games';
-import { Notification, NOTIFICATION_METHODS, ValidGameActions, ValidNotificationMethods } from '../interfaces/notification.js';
+import { Notification, NOTIFICATION_METHODS, ValidGameActions, ValidNotificationMethods, ValidPartyActions } from '../interfaces/notification.js';
 import { BaseImpostorFormatter } from './baseImpostorFormatter.js';
 import { createTranslator } from '../services/i18n/translator.js';
 import { ILogger } from '@phone-games/logger';
@@ -31,43 +31,6 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
    */
   getNotificationMethod(): ValidNotificationMethods {
     return NOTIFICATION_METHODS.TWILIO;
-  }
-
-  /**
-   * Formats a notification for the start of the next round in the Impostor game.
-   *
-   * Overrides the base implementation to add Twilio-specific template support
-   * for interactive list picker functionality.
-   *
-   * @param notification - The game state notification containing round information
-   * @param translator - Translator instance for localized messages
-   * @returns A formatted notification with Twilio content template for next round
-   *
-   * @remarks
-   * This method safely handles missing or undefined nested properties in the notification
-   * object and provides fallback values to ensure a valid notification is always returned.
-   * Uses translator for language-aware messages based on user's phone country code.
-   */
-  protected async formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification<TwilioTemplate>> {
-    // Safely extract the word with null/undefined guards
-    const word = notification?.customState?.currentRoundState?.word ?? 'unknown';
-    
-    const template = await this.templateRegistry.getTemplate({ language: translator.getLanguage(), action: ValidGameActions.NEXT_ROUND, platform: 'twilio', gameState: notification }, { translator });
-
-    this.logger.info('Formatting next round with template');
-
-    const contentVariables = JSON.stringify({ word });
-
-    return {
-      title: 'Impostor',
-      body: "",
-      action: ValidGameActions.NEXT_ROUND,
-      data: notification,
-      template: {
-        sid: template.sid,
-        contentVariables,
-      },
-    };
   }
 
   /**
@@ -109,5 +72,181 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     
 
     return notification;
+  }
+
+  protected async formatPlayerJoined(params: PartyParams, translator: ReturnType<typeof createTranslator>): Promise<Notification<TwilioTemplate>> {
+    const template = await this.templateRegistry.getTemplate({ language: translator.getLanguage(), action: ValidPartyActions.PLAYER_JOINED, platform: 'twilio', partyParams: params }, { translator });
+
+    const contentVariables = JSON.stringify({
+      body: translator.t('party.playerJoined.body', { partyName: params.partyName }),
+      list_button: translator.t('party.playerJoined.listButton'),
+      start_match: translator.t('party.startMatchCommand'),
+    });
+
+    return {
+      title: 'Player Joined',
+      body: "",
+      action: ValidPartyActions.PLAYER_JOINED,
+      template: {
+        sid: template.sid,
+        contentVariables,
+      },
+    };
+  }
+
+  protected async startMatchCommand(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification<TwilioTemplate>> {
+    const template = await this.templateRegistry.getTemplate({ language: translator.getLanguage(), action: ValidGameActions.START_MATCH, platform: 'twilio', partyParams: {
+      partyId: notification.partyId,
+      partyName: "",
+      gameName: GAME_NAMES.IMPOSTOR,
+    } }, { translator });
+
+    const contentVariables = JSON.stringify({
+      body: translator.t('commands.startMatch'),
+      list_button: translator.t('party.matchStarted.listButton'),
+      start_round: translator.t('commands.startRound'),
+    });
+
+    return {
+      title: 'Start Match',
+      body: "",
+      action: ValidGameActions.START_MATCH,
+      template: {
+        sid: template.sid,
+        contentVariables,
+      },
+    };
+  }
+
+  private async getOrCreateTemplate(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<TwilioTemplate> {
+    const template = await this.templateRegistry.getTemplate({ language: translator.getLanguage(), action: ValidGameActions.NEXT_ROUND, platform: 'twilio', partyParams: {
+      partyId: notification.partyId,
+      partyName: "",
+      gameName: GAME_NAMES.IMPOSTOR,
+    } }, { translator });
+
+    if (!template) {
+      const createdTemplate = await this.templateRegistry.createTemplate({ language: translator.getLanguage(), action: ValidGameActions.NEXT_ROUND, platform: 'twilio', partyParams: {
+        partyId: notification.partyId,
+        partyName: "",
+        gameName: GAME_NAMES.IMPOSTOR,
+      } }, { translator });
+
+      return createdTemplate
+    }
+
+    return template;
+  }
+
+
+  /**
+   * Formats a notification for the start of the next round in the Impostor game.
+   *
+   * Overrides the base implementation to add Twilio-specific template support
+   * for interactive list picker functionality.
+   *
+   * @param notification - The game state notification containing round information
+   * @param translator - Translator instance for localized messages
+   * @returns A formatted notification with Twilio content template for next round
+   *
+   * @remarks
+   * This method safely handles missing or undefined nested properties in the notification
+   * object and provides fallback values to ensure a valid notification is always returned.
+   * Uses translator for language-aware messages based on user's phone country code.
+   */
+  protected async formatNextRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification<TwilioTemplate>> {
+    // Safely extract the word with null/undefined guards
+    const word = notification?.customState?.currentRoundState?.word ?? 'unknown';
+    
+    const template = await this.getOrCreateTemplate(notification, translator);
+
+    this.logger.info('Formatting next round with template');
+
+    const contentVariables = JSON.stringify({ word });
+
+    return {
+      title: 'Impostor',
+      body: "",
+      action: ValidGameActions.NEXT_ROUND,
+      template: {
+        sid: template.sid,
+        contentVariables,
+      },
+    };
+  }
+  
+
+  protected async formatMiddleRoundAction(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification<TwilioTemplate>> {
+    const template = await this.templateRegistry.getTemplate({ language: translator.getLanguage(), action: ValidGameActions.MIDDLE_ROUND_ACTION, platform: 'twilio', partyParams: {
+      partyId: notification.partyId,
+      partyName: "",
+      gameName: GAME_NAMES.IMPOSTOR,
+    } }, { translator });
+    
+    const contentVariables = JSON.stringify({
+      body: translator.t('impostor.middleRoundAction.body'),
+      list_button: translator.t('party.middleRoundAction.listButton'),
+      finish_round: translator.t('commands.finishRound'),
+    });
+
+    return {
+      title: 'Middle Round Action',
+      body: "",
+      action: ValidGameActions.MIDDLE_ROUND_ACTION,
+      template: {
+        sid: template.sid,
+        contentVariables,
+      },
+    };
+  }
+
+  protected async formatFinishRound(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification<TwilioTemplate>> {
+    const template = await this.templateRegistry.getTemplate({ language: translator.getLanguage(), action: ValidGameActions.FINISH_ROUND, platform: 'twilio', partyParams: {
+      partyId: notification.partyId,
+      partyName: "",
+      gameName: GAME_NAMES.IMPOSTOR,
+    } }, { translator });
+    
+    
+    const contentVariables = JSON.stringify({
+      body: translator.t('impostor.roundFinished', { round: notification.currentRound }),
+      list_button: translator.t('party.roundFinished.listButton'),
+      start_match: translator.t('commands.startMatch'),
+    });
+
+    return {
+      title: 'Finish Round',
+      action: ValidGameActions.FINISH_ROUND,
+      body: "",
+      template: {
+        sid: template.sid,
+        contentVariables,
+      },
+    };
+  }
+
+  protected async formatFinishMatch(notification: GameState<GAME_NAMES.IMPOSTOR>, translator: ReturnType<typeof createTranslator>): Promise<Notification<TwilioTemplate>> {
+    const template = await this.templateRegistry.getTemplate({ language: translator.getLanguage(), action: ValidGameActions.FINISH_MATCH, platform: 'twilio', partyParams: {
+      partyId: notification.partyId,
+      partyName: "",
+      gameName: GAME_NAMES.IMPOSTOR,
+    } }, { translator });
+    
+    
+    const contentVariables = JSON.stringify({
+      body: translator.t('impostor.matchFinished.body'),
+      list_button: translator.t('party.matchFinished.listButton'),
+      create_party: translator.t('commands.help'),
+    });
+
+    return {
+      title: 'Finish Match',
+      body: "",
+      action: ValidGameActions.FINISH_MATCH,
+      template: {
+        sid: template.sid,
+        contentVariables,
+      },
+    };
   }
 }

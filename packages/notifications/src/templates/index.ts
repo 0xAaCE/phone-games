@@ -1,4 +1,4 @@
-import { GetTemplateParams, ITemplateRegistry, Template, TemplateDependencies } from "../internal.js";
+import { CreateTemplateParams, GetTemplateParams, ITemplateRegistry, ShouldUseTemplateParams, Template, TemplateDependencies } from "../internal.js";
 export class TemplateRegistry implements ITemplateRegistry {
     private TemplateRegistries: Map<string, ITemplateRegistry> = new Map();
 
@@ -30,6 +30,22 @@ export class TemplateRegistry implements ITemplateRegistry {
             throw new Error(`Template registry for platform ${params.platform} not found`);
         }
         return await templateRegistry.getTemplate(params, dependencies);
+    }
+
+    async createTemplate(params: CreateTemplateParams, dependencies: TemplateDependencies): Promise<Template> {
+        const templateRegistry = this.TemplateRegistries.get(params.platform);
+        if (!templateRegistry) {
+            throw new Error(`Template registry for platform ${params.platform} not found`);
+        }
+        return await templateRegistry.createTemplate(params, dependencies);
+    }
+
+    shouldUseTemplate(params: ShouldUseTemplateParams): boolean {
+        const templateRegistry = this.TemplateRegistries.get(params.platform);
+        if (!templateRegistry) {
+            return false;
+        }
+        return templateRegistry.shouldUseTemplate(params);
     }
 }
 

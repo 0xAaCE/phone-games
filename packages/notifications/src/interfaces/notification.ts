@@ -1,5 +1,3 @@
-import { GameState, ValidGameNames } from "@phone-games/games";
-
 /**
  * Valid actions that can occur during game play
  * These actions trigger notifications to players about game state changes
@@ -82,11 +80,9 @@ export type Notification<templateType = unknown> = {
     /** Notification body/message content */
     body: string;
     /** The game action that triggered this notification */
-    action: ValidGameActions
-    /** Full game state for the current game */
-    data: GameState<ValidGameNames>;
+    action: ValidGameActions | ValidPartyActions;
     /** Template for the notification */
-    template?: templateType | undefined;
+    template?: templateType;
     /** Optional media URL for images/attachments (e.g., QR codes) */
     mediaUrl?: string;
 } | {
@@ -96,8 +92,6 @@ export type Notification<templateType = unknown> = {
     body: string;
     /** The party action that triggered this notification */
     action: ValidPartyActions;
-    /** Party actions don't include data field */
-    data?: never;
     /** Template for the notification */
     template?: never;
     /** Optional media URL for images/attachments (e.g., QR codes) */

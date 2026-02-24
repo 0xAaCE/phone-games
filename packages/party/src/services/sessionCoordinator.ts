@@ -326,14 +326,16 @@ export class SessionCoordinator {
     // 1. PARTY SERVICE - Get party
     const partyId = await this.partyService.getPartyIdForUser(userId);
 
-    // 2. GAME SESSION MANAGER - Finish game
+    // 2. GAME SESSION MANAGER - Get game reference before finishing (finishGame deletes state)
+    const game = await this.gameSessionManager.getGame(partyId);
+
+    // 3. GAME SESSION MANAGER - Finish game
     const finalState = await this.gameSessionManager.finishGame(partyId);
 
-    // 3. PARTY SERVICE - Update status
+    // 4. PARTY SERVICE - Update status
     await this.partyService.updatePartyStatus(partyId, PartyStatus.FINISHED);
 
-    // 4. NOTIFICATION COORDINATOR - Notify all players
-    const game = await this.gameSessionManager.getGame(partyId);
+    // 5. NOTIFICATION COORDINATOR - Notify all players
     await this.notificationCoordinator.notifyFinishMatch(partyId, game);
 
     return finalState;
