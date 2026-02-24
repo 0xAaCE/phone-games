@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Games</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f11;
+      --surface: #1a1a1f;
+      --border: #2a2a32;
+      --accent: #25d366;
+      --accent-dim: #1a9e4a;
+      --text: #e8e8ec;
+      --muted: #888896;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Layout */
+    header, main, footer {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      padding-top: 80px;
+      padding-bottom: 64px;
+      text-align: center;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--accent);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .tagline {
+      margin-top: 16px;
+      font-size: 1.2rem;
+      color: var(--muted);
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta {
+      display: inline-block;
+      margin-top: 32px;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: background 0.15s;
+    }
+
+    .cta:hover { background: var(--accent-dim); text-decoration: none; color: #fff; }
+
+    /* Sections */
+    section {
+      margin-bottom: 56px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    p:last-child { margin-bottom: 0; }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .card-icon {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .card p {
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    /* Steps */
+    .steps {
+      list-style: none;
+      counter-reset: steps;
+    }
+
+    .steps li {
+      counter-increment: steps;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .steps li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .steps li .step-content strong {
+      display: block;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    .steps li .step-content span {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    /* Contact */
+    .contact-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    /* Footer */
+    footer {
+      padding-top: 32px;
+      padding-bottom: 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎮</div>
+    <h1>Phone Games</h1>
+  </div>
+  <p class="tagline">Multiplayer social deduction games, played entirely over WhatsApp.</p>
+  <a class="cta" href="https://wa.me/14155238886" target="_blank" rel="noopener">Play on WhatsApp</a>
+</header>
+
+<main>
+
+  <section id="about">
+    <h2>What is Phone Games?</h2>
+    <p>
+      Phone Games brings group party games to your WhatsApp conversations — no app to install,
+      no account to create. Just add the number and start playing with friends.
+    </p>
+    <p>
+      The first game is <strong>Impostor</strong>: a social deduction game where one player is secretly
+      the impostor. Players get secret roles, complete tasks, discuss suspicions, and vote to eliminate
+      the impostor — all through WhatsApp messages.
+    </p>
+
+    <div class="card-grid" style="margin-top: 24px;">
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <h3>No app required</h3>
+        <p>Runs entirely over WhatsApp — works on any phone.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">👥</div>
+        <h3>Play with friends</h3>
+        <p>Gather 4–10 players in a group and start a game instantly.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🕵️</div>
+        <h3>Social deduction</h3>
+        <p>Blend in, find the impostor, or deceive your way to victory.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-to-play">
+    <h2>How to play</h2>
+    <ol class="steps">
+      <li>
+        <div class="step-content">
+          <strong>Add the bot to a WhatsApp group</strong>
+          <span>Save the number and add it to a group with your friends (4–10 players recommended).</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <strong>Start a game</strong>
+          <span>Send <code>/start</code> in the group chat to begin a new game session.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <strong>Get your secret role</strong>
+          <span>Each player receives a private WhatsApp message with their role — crewmate or impostor.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <strong>Discuss and vote</strong>
+          <span>Use <code>/vote @player</code> to nominate someone. The player with the most votes is eliminated.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-content">
+          <strong>Win the game</strong>
+          <span>Crewmates win by eliminating the impostor. The impostor wins by avoiding elimination until only two players remain.</span>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <div class="contact-box">
+      <p>
+        Phone Games is an independent project. For questions, feedback, or data requests,
+        reach out by email.
+      </p>
+      <p style="margin-top: 12px;">
+        <strong style="color: var(--text);">Email:</strong>
+        <a href="mailto:contact@0xaace.xyz">contact@0xaace.xyz</a>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>© 2025 Phone Games</span>
+  <a href="/privacy.html">Privacy Policy</a>
+</footer>
+
+</body>
+</html>
