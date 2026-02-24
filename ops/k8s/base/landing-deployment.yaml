@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: landing
-        image: xaace/phone-games-landing:main-0000000
+        image: xaace/phone-games-landing:main-a2561a5
         imagePullPolicy: Always
         ports:
         - containerPort: 80
