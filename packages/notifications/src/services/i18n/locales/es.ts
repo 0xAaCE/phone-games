@@ -42,12 +42,18 @@ export const es: TranslationStructure = {
   },
 
   commands: {
-    createParty: '/create_party - Crear partida',
-    startMatch: '/start_match - Comenzar partida',
-    startRound: '/start_round - Comenzar ronda',
-    nextRound: '/next_round - Siguiente ronda',
-    finishRound: '/finish_round - Finalizar ronda',
-    help: '/help - Ayuda!',
+    createParty:     '/create_party',
+    createPartyDesc: 'Crear partida',
+    startMatch:      '/start_match',
+    startMatchDesc:  'Comenzar partida',
+    startRound:      '/start_round',
+    startRoundDesc:  'Comenzar ronda',
+    nextRound:       '/next_round',
+    nextRoundDesc:   'Siguiente ronda',
+    finishRound:     '/finish_round',
+    finishRoundDesc: 'Finalizar ronda',
+    help:            '/help',
+    helpDesc:        'Ayuda',
   },
 
   // Common
