@@ -80,7 +80,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('party.playerJoined.body', { partyName: params.partyName }),
       list_button: translator.t('party.playerJoined.listButton'),
-      start_match: translator.t('party.startMatchCommand'),
+      start_match: translator.t('commands.startMatch'),
     });
 
     return {
@@ -103,7 +103,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
 
     const contentVariables = JSON.stringify({
       body: translator.t('commands.startMatch'),
-      list_button: translator.t('party.matchStarted.listButton'),
+      list_button: translator.t('impostor.matchStarted.listButton'),
       start_round: translator.t('commands.startRound'),
     });
 
@@ -185,7 +185,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     
     const contentVariables = JSON.stringify({
       body: translator.t('impostor.middleRoundAction.body'),
-      list_button: translator.t('party.middleRoundAction.listButton'),
+      list_button: translator.t('impostor.middleRoundAction.listButton'),
       finish_round: translator.t('commands.finishRound'),
     });
 
@@ -209,8 +209,8 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     
     
     const contentVariables = JSON.stringify({
-      body: translator.t('impostor.roundFinished', { round: notification.currentRound }),
-      list_button: translator.t('party.roundFinished.listButton'),
+      body: translator.t('impostor.roundFinished.body', { round: notification.currentRound }),
+      list_button: translator.t('impostor.roundFinished.listButton'),
       start_match: translator.t('commands.startMatch'),
     });
 
@@ -235,7 +235,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     
     const contentVariables = JSON.stringify({
       body: translator.t('impostor.matchFinished.body'),
-      list_button: translator.t('party.matchFinished.listButton'),
+      list_button: translator.t('impostor.matchFinished.listButton'),
       create_party: translator.t('commands.help'),
     });
 
