@@ -81,6 +81,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
       body: translator.t('party.playerJoined.body', { partyName: params.partyName }),
       list_button: translator.t('party.playerJoined.listButton'),
       start_match: translator.t('commands.startMatch'),
+      help: translator.t('commands.help'),
     });
 
     return {

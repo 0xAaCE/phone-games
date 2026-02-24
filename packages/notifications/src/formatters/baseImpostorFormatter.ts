@@ -116,7 +116,7 @@ export abstract class BaseImpostorFormatter extends Formatter {
   protected async formatPlayerJoined(params: PartyParams, translator: ReturnType<typeof createTranslator>): Promise<Notification> {
     return {
       title: 'Player Joined',
-      body: translator.t('party.playerJoined', {
+      body: translator.t('party.playerJoined.body', {
         partyName: params.partyName,
       }),
       action: ValidPartyActions.PLAYER_JOINED,
