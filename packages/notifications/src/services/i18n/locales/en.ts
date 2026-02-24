@@ -37,17 +37,11 @@ export type TranslationStructure = {
   };
   commands: {
     createParty: string;
-    createPartyDesc: string;
     startMatch: string;
-    startMatchDesc: string;
     startRound: string;
-    startRoundDesc: string;
     nextRound: string;
-    nextRoundDesc: string;
     finishRound: string;
-    finishRoundDesc: string;
     help: string;
-    helpDesc: string;
   };
   help: {
     body: string;
@@ -110,18 +104,12 @@ export const en: TranslationStructure = {
   },
 
   commands: {
-    createParty:     '/create_party',
-    createPartyDesc: 'Create Party',
-    startMatch:      '/start_match',
-    startMatchDesc:  'Start Match',
-    startRound:      '/start_round',
-    startRoundDesc:  'Start Round',
-    nextRound:       '/next_round',
-    nextRoundDesc:   'Next Round',
-    finishRound:     '/finish_round',
-    finishRoundDesc: 'Finish Round',
-    help:            '/help',
-    helpDesc:        'Help',
+    createParty: 'Create Party',
+    startMatch:  'Start Match',
+    startRound:  'Start Round',
+    nextRound:   'Next Round',
+    finishRound: 'Finish Round',
+    help:        'Help',
   },
 
   help: {

@@ -80,10 +80,8 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('party.playerJoined.body', { partyName: params.partyName }),
       list_button: translator.t('party.playerJoined.listButton'),
-      start_match:      translator.t('commands.startMatch'),
-      start_match_desc: translator.t('commands.startMatchDesc'),
-      help:      translator.t('commands.help'),
-      help_desc: translator.t('commands.helpDesc'),
+      start_match: translator.t('commands.startMatch'),
+      help: translator.t('commands.help'),
     });
 
     return {
@@ -107,8 +105,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('commands.startMatch'),
       list_button: translator.t('impostor.matchStarted.listButton'),
-      start_round:      translator.t('commands.startRound'),
-      start_round_desc: translator.t('commands.startRoundDesc'),
+      start_round: translator.t('commands.startRound'),
     });
 
     return {
@@ -190,8 +187,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('impostor.middleRoundAction.body'),
       list_button: translator.t('impostor.middleRoundAction.listButton'),
-      finish_round:      translator.t('commands.finishRound'),
-      finish_round_desc: translator.t('commands.finishRoundDesc'),
+      finish_round: translator.t('commands.finishRound'),
     });
 
     return {
@@ -216,8 +212,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('impostor.roundFinished.body', { round: notification.currentRound }),
       list_button: translator.t('impostor.roundFinished.listButton'),
-      next_round:      translator.t('commands.nextRound'),
-      next_round_desc: translator.t('commands.nextRoundDesc'),
+      next_round: translator.t('commands.nextRound'),
     });
 
     return {
@@ -242,8 +237,7 @@ export class ImpostorTwilioFormatter extends BaseImpostorFormatter {
     const contentVariables = JSON.stringify({
       body: translator.t('impostor.matchFinished.body'),
       list_button: translator.t('impostor.matchFinished.listButton'),
-      help:      translator.t('commands.help'),
-      help_desc: translator.t('commands.helpDesc'),
+      help: translator.t('commands.help'),
     });
 
     return {
