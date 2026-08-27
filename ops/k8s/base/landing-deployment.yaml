@@ -5,7 +5,7 @@ metadata:
   labels:
     app: phone-games-landing
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: phone-games-landing
